@@ -65,7 +65,6 @@ class AIGBV(NamedTuple):
         latch_outs = _unblast(latch_vals, self.latch_map)
         return outputs, latch_outs
 
-    
     # def __getitem__ <- TODO: implement renaming.
     # def unroll <- TODO
     # def feedback <- TODO
