@@ -13,7 +13,7 @@ setup(
     install_requires=[
         'funcy',
         'lenses',
-        'aiger',
+        'py-aiger',
     ],
     packages=find_packages(),
 )
