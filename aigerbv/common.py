@@ -11,14 +11,14 @@ def _fresh():
     return str(uuid1())
 
 
-def _named_indexes(wordlen, root):
+def named_indexes(wordlen, root):
     return tuple(f"{root}[{i}]" for i in range(wordlen))
 
 
 def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
-    lefts = _named_indexes(wordlen, left)
-    rights = _named_indexes(wordlen, right)
-    outputs = _named_indexes(wordlen, output)
+    lefts = named_indexes(wordlen, left)
+    rights = named_indexes(wordlen, right)
+    outputs = named_indexes(wordlen, output)
 
     aig = reduce(op.or_, (binop([l, r], o)
                           for l, r, o in zip(lefts, rights, outputs)))
@@ -43,8 +43,8 @@ def bitwise_xor(wordlen, left='x', right='y', output='x&y'):
 
 
 def bitwise_negate(wordlen, input='x', output='not x'):
-    inputs = _named_indexes(wordlen, input)
-    outputs = _named_indexes(wordlen, output)
+    inputs = named_indexes(wordlen, input)
+    outputs = named_indexes(wordlen, output)
     return aigbv.AIGBV(
         aig=aiger.bit_flipper(inputs=inputs, outputs=outputs),
         input_map=frozenset([(input, inputs)]),
@@ -54,8 +54,8 @@ def bitwise_negate(wordlen, input='x', output='not x'):
 
 
 def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
-    inputs = _named_indexes(wordlen, input)
-    outputs = _named_indexes(1, output)
+    inputs = named_indexes(wordlen, input)
+    outputs = named_indexes(1, output)
     return aigbv.AIGBV(
         aig=aiger.or_gate(inputs, outputs[0]),
         input_map=frozenset([(input, inputs)]),
@@ -82,7 +82,7 @@ def eq_gate(wordlen, left='x', right='y', output='x=y'):
 def source(wordlen, value, name='x', signed=True, byteorder='little'):
     assert 2**wordlen > value
     bits = value.to_bytes(wordlen, byteorder, signed=signed)
-    names = _named_indexes(wordlen, name)
+    names = named_indexes(wordlen, name)
     return aigbv.AIGBV(
         aig=aiger.source({name: bit
                           for name, bit in zip(names, bits)}),
@@ -95,8 +95,8 @@ def source(wordlen, value, name='x', signed=True, byteorder='little'):
 def identity_gate(wordlen, input='x', output='x'):
     return aigbv.aig2aigbv(
         aiger.identity(
-            inputs=_named_indexes(wordlen, input),
-            outputs=_named_indexes(output)))
+            inputs=named_indexes(wordlen, input),
+            outputs=named_indexes(output)))
 
 
 def reverse_gate(wordlen, input='x', output='rev(x)'):
@@ -106,9 +106,9 @@ def reverse_gate(wordlen, input='x', output='rev(x)'):
 
 
 def combine_gate(left_wordlen, left, right_wordlen, right, output):
-    lefts = _named_indexes(left_wordlen, left)
-    rights = _named_indexes(right_wordlen, right)
-    outputs = _named_indexes(left_wordlen + right_wordlen, output)
+    lefts = named_indexes(left_wordlen, left)
+    rights = named_indexes(right_wordlen, right)
+    outputs = named_indexes(left_wordlen + right_wordlen, output)
 
     aig = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
@@ -117,9 +117,9 @@ def combine_gate(left_wordlen, left, right_wordlen, right, output):
 
 
 def split_gate(left_wordlen, left, right_wordlen, right, input):
-    inputs = _named_indexes(left_wordlen + right_wordlen, input)
-    lefts = _named_indexes(left_wordlen, left)
-    rights = _named_indexes(right_wordlen, right)
+    inputs = named_indexes(left_wordlen + right_wordlen, input)
+    lefts = named_indexes(left_wordlen, left)
+    rights = named_indexes(right_wordlen, right)
 
     aig = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
@@ -133,8 +133,8 @@ def unsigned_right_shift_gate(wordlen, shift, input='x', output='x'):
     if shift == 0:
         return identity_gate(wordlen, input, output)
 
-    inputs = _named_indexes(wordlen, input)
-    outputs = _named_indexes(wordlen, output)
+    inputs = named_indexes(wordlen, input)
+    outputs = named_indexes(wordlen, output)
     _, shifted_i = inputs[:shift], inputs[shift:]
     const_o, shifted_o = outputs[:shift], outputs[shift:]
 
@@ -168,9 +168,9 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
 
     adder_aig = aiger.source({carry_name: False})
 
-    lefts = _named_indexes(wordlen, 'left')
-    rights = _named_indexes(wordlen, 'right')
-    outputs = _named_indexes(wordlen, 'output')
+    lefts = named_indexes(wordlen, 'left')
+    rights = named_indexes(wordlen, 'right')
+    outputs = named_indexes(wordlen, 'output')
 
     for lname, rname, oname in zip(lefts, rights, outputs):
         adder_aig >>= _full_adder(

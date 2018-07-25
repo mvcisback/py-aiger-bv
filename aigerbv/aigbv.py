@@ -3,6 +3,9 @@ from typing import Tuple, FrozenSet, NamedTuple
 import aiger
 import funcy as fn
 
+from aigerbv import common
+
+
 BV_MAP = FrozenSet[Tuple[str, Tuple[str]]]
 
 
@@ -100,11 +103,54 @@ class AIGBV(NamedTuple):
     def write(self, path):
         self.aig.write(path)
 
-    def feedback(self):
-        raise NotImplementedError
+    def feedback(self, inputs, outputs, initials=None, latches=None, 
+                 keep_outputs=False):
+        if latches is None:
+            latches = inputs
 
-    def unroll(self):
-        raise NotImplementedError
+        idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.input_map)
+        odrop, omap = fn.lsplit(lambda x: x[0] in output, self.output_map)
+        new_latches = [(n, common.named_indexes(n)) for n in latches]
+
+        def get_names(key_vals):
+            return fn.lcat(fn.pluck(1, key_vals))
+        
+        aig = self.aig.feedback(
+            inputs=get_names(idrop),
+            outputs=get_names(odrop),
+            latches=new_latches,
+            initials=initials,
+            keep_outputs=keep_outputs,
+        )
+
+        imap, odrop, omap = map(frozenset, [imap, odrop, omap])
+        return AIGBV(
+            aig=aig,
+            input_map=imap,
+            output_map=omap | (odrop if keep_outputs else {}),
+            latch_map=self.latch_map | set(new_latches),
+        )
+
+
+    def unroll(self, horizon, *, init=True, omit_latches=True):
+        aig = self.aig.unroll(horizon, init=init, omit_latches=omit_latches)
+        # TODO: generalize and apply to all maps.
+
+        def extract_map(name_map, names):
+            lookup_root = fn.merge(*(
+                {v: k for v in vals} for k, vals in name_map)
+            )
+            return frozenset(fn.group_by(
+                lambda x: lookup_root[x.split('##time_')[0]],
+                names
+            ).items())
+
+        return AIGBV(
+            aig=aig,
+            input_map=extract_map(self.input_map, aig.inputs),
+            output_map=extract_map(self.output_map, aig.outputs),
+            latch_map=extract_map(self.latch_map, aig.latches),
+        )
 
 
 def _diagonal_map(keys):
