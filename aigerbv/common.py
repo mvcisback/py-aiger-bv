@@ -15,6 +15,27 @@ def named_indexes(wordlen, root):
     return tuple(f"{root}[{i}]" for i in range(wordlen))
 
 
+def encode_int(wordlen, value, signed=True):
+    N = 1 << wordlen
+    if signed:
+        N2 = 1 << (wordlen - 1)
+        assert N2 > value >= -N2
+    else:
+        assert N - 1 > value >= 0
+
+    if value < 0:
+        value = N + value
+
+    return [bool((value >> i) & 1) for i in range(wordlen)]    
+
+
+def decode_int(bits, signed=True):
+    # Interpret result
+    last = bits[-1]*(1 << (len(bits) - 1))
+    last *= -1 if signed else 1
+    return sum(val << idx for idx, val in enumerate(bits[:-1])) + last
+
+
 def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
     lefts = named_indexes(wordlen, left)
     rights = named_indexes(wordlen, right)
@@ -79,13 +100,12 @@ def eq_gate(wordlen, left='x', right='y', output='x=y'):
         bitwise_negate(1, left+right, output)
 
 
-def source(wordlen, value, name='x', signed=True, byteorder='little'):
-    assert 2**wordlen > value
-    bits = value.to_bytes(wordlen, byteorder, signed=signed)
+def source(wordlen, value, name='x', signed=True):
     names = named_indexes(wordlen, name)
+    bits = encode_int(wordlen, value, signed)
+    aig = aiger.source({name: bit for name, bit in zip(names, bits)})
     return aigbv.AIGBV(
-        aig=aiger.source({name: bit
-                          for name, bit in zip(names, bits)}),
+        aig=aig,
         input_map=frozenset(),
         output_map=frozenset([(name, names)]),
         latch_map=frozenset(),
@@ -93,10 +113,14 @@ def source(wordlen, value, name='x', signed=True, byteorder='little'):
 
 
 def identity_gate(wordlen, input='x', output='x'):
-    return aigbv.aig2aigbv(
-        aiger.identity(
-            inputs=named_indexes(wordlen, input),
-            outputs=named_indexes(output)))
+    inputs = named_indexes(wordlen, input)
+    outputs = named_indexes(wordlen, output)
+    return aigbv.AIGBV(
+        aig=aiger.identity(inputs=inputs, outputs=outputs),
+        input_map=frozenset([(input, inputs)]),
+        output_map=frozenset([(output, outputs)]),
+        latch_map=frozenset()
+    )
 
 
 def reverse_gate(wordlen, input='x', output='rev(x)'):
@@ -110,21 +134,23 @@ def combine_gate(left_wordlen, left, right_wordlen, right, output):
     rights = named_indexes(right_wordlen, right)
     outputs = named_indexes(left_wordlen + right_wordlen, output)
 
-    aig = identity_gate(left_wordlen, left, left) \
+    aigbv = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
-    return aig >> aigbv.aig2aigbv(
-        aiger.identity(inputs=lefts + rights, outputs=outputs))
+    return aigbv._replace(
+        output_map=frozenset([(output, lefts+rights)])
+    )
 
 
-def split_gate(left_wordlen, left, right_wordlen, right, input):
+def split_gate(input, left_wordlen, left, right_wordlen, right):
     inputs = named_indexes(left_wordlen + right_wordlen, input)
     lefts = named_indexes(left_wordlen, left)
     rights = named_indexes(right_wordlen, right)
 
-    aig = identity_gate(left_wordlen, left, left) \
+    aigbv = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
-    return aigbv.aig2aigbv(
-        aiger.identity(inputs=inputs, outputs=lefts + rights)) >> aig
+    return aigbv._replace(
+        input_map=frozenset([(input, lefts+rights)])
+    )
 
 
 def unsigned_right_shift_gate(wordlen, shift, input='x', output='x'):

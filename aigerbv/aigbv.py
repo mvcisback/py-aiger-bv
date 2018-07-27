@@ -10,6 +10,8 @@ BV_MAP = FrozenSet[Tuple[str, Tuple[str]]]
 
 
 def _blast(bvname2vals, name_map):
+    if len(name_map) == 0:
+        return dict()
     return fn.merge(*(dict(zip(names, bvname2vals[bvname]))
                       for bvname, names in name_map))
 
@@ -131,7 +133,6 @@ class AIGBV(NamedTuple):
             latch_map=self.latch_map | set(new_latches),
         )
 
-
     def unroll(self, horizon, *, init=True, omit_latches=True):
         aig = self.aig.unroll(horizon, init=init, omit_latches=omit_latches)
         # TODO: generalize and apply to all maps.
@@ -153,8 +154,9 @@ class AIGBV(NamedTuple):
         )
 
 
-def _diagonal_map(keys):
-    return {k: k for k in keys}
+def _diagonal_map(keys, frozen=True):
+    dmap = {k: k for k in keys}
+    return frozenset(dmap.items()) if frozen else dmap
 
 
 def aig2aigbv(aig):
