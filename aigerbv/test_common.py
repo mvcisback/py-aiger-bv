@@ -6,6 +6,21 @@ from hypothesis import given
 
 
 @given(st.integers(-4, 3))
+def test_seqcomp(a):
+    circ1 = common.identity_gate(4, input='a', output='tmp')
+    circ2 = common.identity_gate(4, input='tmp', output='out')
+    circ3 = circ1 >> circ2
+    assert circ3.inputs == circ1.inputs
+    assert circ3.outputs == circ2.outputs
+
+    val = circ3({
+        'a': common.encode_int(4, a),
+    })[0]['out']
+    
+    assert common.decode_int(val) == a
+
+
+@given(st.integers(-4, 3))
 def test_source(int_value):
     var = common.source(wordlen=4, value=int_value, name='x')
     assert common.decode_int(var({})[0]['x']) == int_value
@@ -115,3 +130,46 @@ def test_addition(a, b):
         'b': common.encode_int(4, b),
     })[0]['out']
     assert common.decode_int(val) == a + b
+
+
+@given(st.integers(-4, 3))
+def test_inc(a):
+    circ = common.inc_gate(4, input='a', output='out')
+    assert circ.inputs == {'a'}
+    assert len(circ.aig.inputs) == 4
+    assert circ.outputs == {'out'}
+    assert len(circ.aig.outputs) == 4
+    val = circ({'a': common.encode_int(4, a)})[0]['out']
+    assert common.decode_int(val) == a + 1
+
+
+@given(st.integers(-4, 3))
+def test_negate(a):
+    circ = common.negate_gate(4, input='a', output='out')
+    assert circ.inputs == {'a'}
+    assert len(circ.aig.inputs) == 4
+    assert circ.outputs == {'out'}
+    assert len(circ.aig.outputs) == 4
+    val = circ({'a': common.encode_int(4, a)})[0]['out']
+    assert common.decode_int(val) == -a
+
+
+@given(st.integers(-4, 3))
+def test_dec(a):
+    circ = common.dec_gate(4, input='a', output='out')
+    assert circ.inputs == {'a'}
+    assert len(circ.aig.inputs) == 4
+    assert circ.outputs == {'out'}
+    assert len(circ.aig.outputs) == 4
+    val = circ({'a': common.encode_int(4, a)})[0]['out']
+    assert common.decode_int(val) == a - 1
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_subtraction(a, b):
+    circ = common.subtract_gate(4, left='a', right='b', output='out')
+    val = circ({
+        'a': common.encode_int(4, a),
+        'b': common.encode_int(4, b),
+    })[0]['out']
+    assert common.decode_int(val) == a - b

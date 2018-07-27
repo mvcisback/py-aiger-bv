@@ -65,10 +65,18 @@ class AIGBV(NamedTuple):
         assert not self.latches & other.latches
         assert not (self.outputs - interface) & other.outputs
 
+        # Relabel interface to match up.
+        imap, omap = dict(other.input_map), dict(self.output_map)
+        relabels = fn.merge(*(
+            dict(zip(omap[name], imap[name])) for name in interface
+        ))
+        aig = self.aig[('o', relabels)]
+        
+        # Create composed aigbv
         input_map2 = {kv for kv in other.input_map if kv[0] not in interface}
         output_map2 = {kv for kv in self.output_map if kv[0] not in interface}
         return AIGBV(
-            aig=self.aig >> other.aig,
+            aig=aig >> other.aig,
             input_map=self.input_map | input_map2,
             output_map=output_map2 | other.output_map,
             latch_map=self.latch_map | other.latch_map,

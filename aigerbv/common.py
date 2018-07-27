@@ -217,11 +217,21 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
     )
 
 
+def inc_gate(wordlen, input='x', output='inc'):
+    tmp = _fresh()
+    return source(wordlen, 1, tmp) >> add_gate(wordlen, tmp, input, output)
+
+
 def negate_gate(wordlen, input='x', output='~x'):
     """Implements two's complement negation."""
-    inc = source(wordlen, 1, 'const1') \
-        >> add_gate(wordlen, 'tmp', 'const1', output)
-    return bitwise_negate(wordlen, input, 'tmp') >> inc
+    neg = bitwise_negate(wordlen, input, "tmp")
+    inc = inc_gate(wordlen, "tmp", output)
+    return neg >> inc
+
+
+def dec_gate(wordlen, input='x', output='inc'):
+    tmp = _fresh()
+    return source(wordlen, -1, tmp) >> add_gate(wordlen, tmp, input, output)
 
 
 def subtract_gate(wordlen, left='x', right='y', output='x-y'):
