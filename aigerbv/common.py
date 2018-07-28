@@ -1,5 +1,6 @@
 import operator as op
 from functools import reduce
+from itertools import product
 from uuid import uuid1
 
 import aiger
@@ -12,8 +13,12 @@ def _fresh():
     return str(uuid1())
 
 
+def _name_idx(root, i):
+    return f"{root}[{i}]"
+
+
 def named_indexes(wordlen, root):
-    return tuple(f"{root}[{i}]" for i in range(wordlen))
+    return tuple(_name_idx(root, i) for i in range(wordlen))
 
 
 def encode_int(wordlen, value, signed=True):
@@ -111,6 +116,24 @@ def source(wordlen, value, name='x', signed=True):
         input_map=frozenset(),
         output_map=frozenset([(name, names)]),
         latch_map=frozenset(),
+    )
+
+
+def tee(wordlen, iomap):
+    input_map = frozenset((i, named_indexes(wordlen, i)) for i in iomap)
+    output_map = frozenset(
+        (o, named_indexes(wordlen, o)) for o in fn.cat(iomap.values())
+    )
+    blasted_iomap = fn.merge(
+        *({_name_idx(iname, idx): [_name_idx(o, idx) for o in iomap[iname]]}
+          for iname, idx in product(iomap, range(wordlen)))
+    )
+
+    return aigbv.AIGBV(
+        aig=aiger.tee(blasted_iomap),
+        input_map=input_map,
+        output_map=output_map,
+        latch_map=frozenset()
     )
 
 
@@ -243,7 +266,7 @@ def subtract_gate(wordlen, left='x', right='y', output='x-y'):
 
 
 def unsigned_lt_gate(wordlen, left, right, output):
-    # (x -> y) /\ active.
+    # out = ~x /\ y /\ active; active' = (x == y) /\ active .
     bit_comparer = aiger.bit_flipper(['x']) \
         >> aiger.and_gate(['x', 'y'], 'tmp') \
         >> aiger.and_gate(['active', 'tmp'], 'out')
@@ -282,14 +305,31 @@ def unsigned_lt_gate(wordlen, left, right, output):
     )
 
 
+def unsigned_le_gate(wordlen, left, right, output):
+    fresh = [_fresh() for _ in range(4)]
+    lt = unsigned_lt_gate(wordlen, fresh[0], fresh[2], 'lt')
+    eq = eq_gate(wordlen, fresh[1], fresh[3], 'eq')
+    return tee(wordlen, {left: fresh[:2], right: fresh[2:]}) \
+        >> (lt | eq) \
+        >> aigbv.aig2aigbv(aiger.or_gate(['lt', 'eq'], output))
+
+
+def unsigned_gt_gate(wordlen, left, right, output):
+    return unsigned_le_gate(wordlen, left, right, 'le') \
+        >> bitwise_negate(1, 'le', output)
+
+
+def unsigned_ge_gate(wordlen, left, right, output):
+    return unsigned_lt_gate(wordlen, left, right, 'ge') \
+        >> bitwise_negate(1, 'ge', output)
+
+
 def signed_lt_gate(wordlen, left, right, output):
     raise NotImplementedError
 
 
 def signed_le_gate(wordlen, left, right, output):
-    tmp = _fresh()
-    return signed_lt_gate(wordlen, right, left, tmp) \
-        >> bitwise_negate(1, tmp, output)
+    raise NotImplementedError
 
 
 def abs_gate():

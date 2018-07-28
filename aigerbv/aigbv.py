@@ -163,7 +163,7 @@ class AIGBV(NamedTuple):
 
 
 def _diagonal_map(keys, frozen=True):
-    dmap = {k: k for k in keys}
+    dmap = {k: (k,) for k in keys}
     return frozenset(dmap.items()) if frozen else dmap
 
 
