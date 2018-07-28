@@ -3,6 +3,7 @@ from functools import reduce
 from uuid import uuid1
 
 import aiger
+import funcy as fn
 
 from aigerbv import aigbv
 
@@ -41,8 +42,9 @@ def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
     rights = named_indexes(wordlen, right)
     outputs = named_indexes(wordlen, output)
 
-    aig = reduce(op.or_, (binop([l, r], o)
-                          for l, r, o in zip(lefts, rights, outputs)))
+    aig = reduce(op.or_,
+        (binop([l, r], o) for l, r, o in zip(lefts, rights, outputs))
+    )
     return aigbv.AIGBV(
         aig=aig,
         input_map=frozenset([(left, lefts), (right, rights)]),
@@ -238,6 +240,46 @@ def subtract_gate(wordlen, left='x', right='y', output='x-y'):
     tmp = _fresh()
     return negate_gate(wordlen, right, tmp) \
         >> add_gate(wordlen, left, tmp, output)
+
+
+def unsigned_lt_gate(wordlen, left, right, output):
+    # (x -> y) /\ active.
+    bit_comparer = aiger.bit_flipper(['x']) \
+        >> aiger.and_gate(['x', 'y'], 'tmp') \
+        >> aiger.and_gate(['active', 'tmp'], 'out')
+    check_active = aiger.parity_gate(['x', 'y'], 'tmp') \
+        >> aiger.bit_flipper(['tmp']) \
+        >> aiger.and_gate(['tmp', 'active'], 'active')
+    _gadget = bit_comparer | check_active
+
+    def gadget(params):
+        x, y, active, out = params
+        subs = {'x': x, 'y':y, 'active': active, 'out': out}
+        return _gadget[('i', subs)][('o', subs)]
+
+    # Create gadget for each pair of bits.
+    active = _fresh()
+    lefts = named_indexes(wordlen, left)
+    rights = named_indexes(wordlen, right)
+    outputs = named_indexes(wordlen, output)
+    actives = fn.repeat(active)
+
+    # Work GSB to LSB.
+    zipped = zip(lefts[::-1], rights[::-1], actives, outputs[::-1])
+    gadgets = map(gadget, zipped)
+
+    # Sequentially compose gadgets and take disjunction.
+    aig = aiger.source({active: True}) \
+        >> reduce(op.rshift, gadgets) \
+        >> aiger.or_gate(outputs, output) \
+        >> aiger.sink([active])
+
+    return aigbv.AIGBV(
+        aig=aig,
+        input_map=frozenset([(left, lefts), (right, rights)]),
+        output_map=frozenset([(output, (output,))]),
+        latch_map=frozenset(),
+    )
 
 
 def signed_lt_gate(wordlen, left, right, output):
