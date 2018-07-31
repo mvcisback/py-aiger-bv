@@ -92,7 +92,7 @@ def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
     )
 
 
-def neq_gate(wordlen, left='x', right='y', output='x!=y'):
+def ne_gate(wordlen, left='x', right='y', output='x!=y'):
     return bitwise_xor(wordlen, left, right, left+right) >> \
         is_nonzero_gate(wordlen, left+right, output)
 
@@ -103,7 +103,7 @@ def is_zero_gate(wordlen, input='x', output='is_zero'):
 
 
 def eq_gate(wordlen, left='x', right='y', output='x=y'):
-    return neq_gate(wordlen, left, right, left+right) >> \
+    return ne_gate(wordlen, left, right, left+right) >> \
         bitwise_negate(1, left+right, output)
 
 
@@ -219,9 +219,9 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
 
     adder_aig = aiger.source({carry_name: False})
 
-    lefts = named_indexes(wordlen, 'left')
-    rights = named_indexes(wordlen, 'right')
-    outputs = named_indexes(wordlen, 'output')
+    lefts = named_indexes(wordlen, left)
+    rights = named_indexes(wordlen, right)
+    outputs = named_indexes(wordlen, output)
 
     for lname, rname, oname in zip(lefts, rights, outputs):
         adder_aig >>= _full_adder(

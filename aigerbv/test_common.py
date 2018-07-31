@@ -68,8 +68,8 @@ def test_is_zero(a):
 
     
 @given(st.integers(-4, 3), st.integers(-4, 3))
-def test_neq(a, b):
-    circ = common.neq_gate(4, left='a', right='b', output='out')
+def test_ne(a, b):
+    circ = common.ne_gate(4, left='a', right='b', output='out')
     val = circ({
         'a': common.encode_int(4, a),
         'b': common.encode_int(4, b),
