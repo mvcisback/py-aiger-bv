@@ -213,3 +213,43 @@ def test_unsigned_ge(a, b):
         'b': common.encode_int(3, b, signed=False),
     })[0]['out'][0]
     assert val == (a >= b)
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_signed_lt(a, b):
+    circ = common.signed_lt_gate(3, left='a', right='b', output='out')
+    val = circ({
+        'a': common.encode_int(4, a, signed=True),
+        'b': common.encode_int(4, b, signed=True),
+    })[0]['out'][0]
+    assert val == (a < b)
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_signed_gt(a, b):
+    circ = common.signed_gt_gate(3, left='a', right='b', output='out')
+    val = circ({
+        'a': common.encode_int(4, a, signed=True),
+        'b': common.encode_int(4, b, signed=True),
+    })[0]['out'][0]
+    assert val == (a > b)
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_signed_ge(a, b):
+    circ = common.signed_ge_gate(3, left='a', right='b', output='out')
+    val = circ({
+        'a': common.encode_int(4, a, signed=True),
+        'b': common.encode_int(4, b, signed=True),
+    })[0]['out'][0]
+    assert val == (a >= b)
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_signed_le(a, b):
+    circ = common.signed_le_gate(3, left='a', right='b', output='out')
+    val = circ({
+        'a': common.encode_int(4, a, signed=True),
+        'b': common.encode_int(4, b, signed=True),
+    })[0]['out'][0]
+    assert val == (a <= b)

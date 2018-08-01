@@ -265,8 +265,24 @@ def subtract_gate(wordlen, left='x', right='y', output='x-y'):
         >> add_gate(wordlen, left, tmp, output)
 
 
+def index_gate(wordlen, idx, input, output=None):
+    assert 0 <= idx < wordlen
+    if output is None:
+        output = input
+
+    inputs = named_indexes(wordlen, input)
+    outputs = (inputs[idx],)
+    aig = aiger.sink(set(inputs) - set(outputs)) \
+        | aiger.identity(outputs)
+    return aigbv.AIGBV(
+        aig=aig,
+        input_map=frozenset([(input, inputs)]),
+        output_map=frozenset([(output, outputs)]),
+        latch_map=frozenset(),
+    )
+
+
 def unsigned_lt_gate(wordlen, left, right, output):
-    # out = ~x /\ y /\ active; active' = (x == y) /\ active .
     bit_comparer = aiger.bit_flipper(['x']) \
         >> aiger.and_gate(['x', 'y'], 'tmp') \
         >> aiger.and_gate(['active', 'tmp'], 'out')
@@ -325,12 +341,33 @@ def unsigned_ge_gate(wordlen, left, right, output):
 
 
 def signed_lt_gate(wordlen, left, right, output):
-    raise NotImplementedError
+    msb = _fresh()
+    msb2 = _fresh()
+    get_msb = index_gate(wordlen, wordlen-1, msb, msb)
+    get_msb2 = index_gate(wordlen, wordlen-1, msb2, msb2)
+
+    circ1 = get_msb >> combine_gate(wordlen, left, 1, msb, left)
+    circ2 = get_msb2 >> combine_gate(wordlen, right, 1, msb2, right)
+
+    return tee(wordlen, {left: (left, msb), right: (right, msb2)}) \
+        >> (circ1 | circ2) \
+        >> subtract_gate(wordlen+1, left, right, output) \
+        >> index_gate(wordlen+1, wordlen, output)
+
+
+def signed_gt_gate(wordlen, left, right, output):
+    return signed_lt_gate(wordlen, right, left, output)
+
+
+def signed_ge_gate(wordlen, left, right, output):
+    return signed_lt_gate(wordlen, left, right, 'tmp') \
+        >> bitwise_negate(1, 'tmp', output)
 
 
 def signed_le_gate(wordlen, left, right, output):
-    raise NotImplementedError
+    return signed_gt_gate(wordlen, left, right, 'tmp') \
+        >> bitwise_negate(1, 'tmp', output)
 
 
-def abs_gate():
+def abs_gate(wordlen, input, output):
     raise NotImplementedError
