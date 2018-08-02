@@ -284,3 +284,10 @@ def test_logical_right_shift(a, b):
     if b != 0:
         assert val[-1] == False
 
+@given(st.integers(-4, 3))
+def test_abs(a):
+    circ = common.abs_gate(8, 'a', output='out')
+    val = circ({
+        'a': common.encode_int(8, a, signed=True),
+    })[0]['out']
+    assert common.decode_int(val) == abs(a)

@@ -394,4 +394,9 @@ def arithmetic_right_shift_gate(wordlen, shift, input, output):
 
 
 def abs_gate(wordlen, input, output):
-    raise NotImplementedError
+    tmp, tmp2 = _fresh(), _fresh()
+    return tee(wordlen, {input: (input, tmp)}) \
+        >> arithmetic_right_shift_gate(wordlen, wordlen - 1, tmp, tmp) \
+        >> tee(wordlen, {tmp: (tmp, tmp2)}) \
+        >> add_gate(wordlen, input, tmp, output) \
+        >> bitwise_xor(wordlen, output, tmp2, output)
