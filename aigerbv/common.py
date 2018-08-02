@@ -137,6 +137,19 @@ def tee(wordlen, iomap):
     )
 
 
+def repeat(wordlen, input, output=None):
+    if output is None:
+        output = input
+    
+    outputs = named_indexes(wordlen, output)
+    return aigbv.AIGBV(
+        aig=aiger.tee({input: outputs}),
+        input_map=frozenset([(input, (input,))]),
+        output_map=frozenset([(input, outputs)]),
+        latch_map=frozenset()
+    )
+
+
 def identity_gate(wordlen, input='x', output='x'):
     inputs = named_indexes(wordlen, input)
     outputs = named_indexes(wordlen, output)
@@ -168,42 +181,23 @@ def combine_gate(left_wordlen, left, right_wordlen, right, output):
 
 def split_gate(input, left_wordlen, left, right_wordlen, right):
     inputs = named_indexes(left_wordlen + right_wordlen, input)
-    lefts = named_indexes(left_wordlen, left)
-    rights = named_indexes(right_wordlen, right)
+    lefts, rights = inputs[:left_wordlen], inputs[left_wordlen:]
 
-    aigbv = identity_gate(left_wordlen, left, left) \
-        | identity_gate(right_wordlen, right, right)
+    aigbv = identity_gate(left_wordlen + right_wordlen, input, input)
     return aigbv._replace(
-        input_map=frozenset([(input, lefts+rights)])
+        output_map=frozenset([(left, lefts), (right, rights)])
     )
 
 
-def unsigned_right_shift_gate(wordlen, shift, input='x', output='x'):
-    assert 0 <= shift < wordlen
-
-    if shift == 0:
-        return identity_gate(wordlen, input, output)
-
-    inputs = named_indexes(wordlen, input)
-    outputs = named_indexes(wordlen, output)
-    _, shifted_i = inputs[:shift], inputs[shift:]
-    const_o, shifted_o = outputs[:shift], outputs[shift:]
-
-    aig = aiger.identity(shifted_i, shifted_o)
-    aig |= aiger.source({n: False for n in const_o})
+def sink(wordlen, inputs):
+    blasted_inputs = [named_indexes(wordlen, i) for i in inputs]
     return aigbv.AIGBV(
-        aig=aig,
-        input_map=frozenset([(input, inputs)]),
-        output_map=frozenset([output, outputs]),
-        latch_map=frozenset(),
+        aig=aiger.sink(fn.lcat(blasted_inputs)),
+        input_map=frozenset(fn.lzip(inputs, blasted_inputs)),
+        output_map=frozenset(),
+        latch_map=frozenset()
     )
-
-
-def unsigned_left_shift_gate(wordlen, shift, input='x', output='x'):
-    return reverse_gate(wordlen, input, 'tmp') \
-        >> unsigned_right_shift_gate(wordlen, shift, 'tmp', 'tmp') \
-        >> reverse_gate(wordlen, 'tmp', output)
-
+    
 
 def _full_adder(x, y, carry_in, result, carry_out):
     # TODO: Rewrite in aiger.
@@ -367,6 +361,36 @@ def signed_ge_gate(wordlen, left, right, output):
 def signed_le_gate(wordlen, left, right, output):
     return signed_gt_gate(wordlen, left, right, 'tmp') \
         >> bitwise_negate(1, 'tmp', output)
+
+
+def left_shift_gate(wordlen, shift, input='x', output='x'):
+    return reverse_gate(wordlen, input, 'tmp') \
+        >> logical_right_shift_gate(wordlen, shift, 'tmp', 'tmp') \
+        >> reverse_gate(wordlen, 'tmp', output)
+
+
+def _right_shift_gate(wordlen, shift, shiftin, input='x', output='x'):
+    assert 0 <= shift
+    shift = min(shift, wordlen)
+        
+    return repeat(shift, shiftin) \
+        >> split_gate(input, shift, 'drop', wordlen - shift, output) \
+        >> sink(shift, ['drop']) \
+        >> combine_gate(wordlen - shift, output, shift, shiftin, output)
+
+
+def logical_right_shift_gate(wordlen, shift, input='x', output='x'):
+    tmp = _fresh()
+    return source(1, 0, tmp) \
+        >> _right_shift_gate(wordlen, shift, tmp, input, output)
+
+
+def arithmetic_right_shift_gate(wordlen, shift, input, output):
+    shiftin = _fresh()
+    circ = index_gate(wordlen, wordlen - 1, shiftin, shiftin) \
+        | identity_gate(wordlen, input, input)
+    return tee(wordlen, {input: (input, shiftin)}) >> circ \
+        >> _right_shift_gate(wordlen, shift, shiftin, input, output)
 
 
 def abs_gate(wordlen, input, output):

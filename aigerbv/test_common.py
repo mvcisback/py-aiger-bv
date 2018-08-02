@@ -253,3 +253,34 @@ def test_signed_le(a, b):
         'b': common.encode_int(4, b, signed=True),
     })[0]['out'][0]
     assert val == (a <= b)
+
+
+@given(st.integers(-3, 3), st.integers(0, 3))
+def test_left_shift(a, b):
+    circ = common.left_shift_gate(8, b, 'a', output='out')
+    val = circ({
+        'a': common.encode_int(8, a, signed=True),
+    })[0]['out']
+    assert common.decode_int(val) == a << b
+
+
+@given(st.integers(-4, 3), st.integers(0, 3))
+def test_arithmetic_right_shift(a, b):
+    circ = common.arithmetic_right_shift_gate(8, b, 'a', output='out')
+    val = circ({
+        'a': common.encode_int(8, a, signed=True),
+    })[0]['out']
+    assert common.decode_int(val) == a >> b
+
+
+@given(st.integers(-4, 3), st.integers(0, 3))
+def test_logical_right_shift(a, b):
+    circ = common.logical_right_shift_gate(8, b, 'a', output='out')
+    val = circ({
+        'a': common.encode_int(8, a, signed=True),
+    })[0]['out']
+    val2 = common.decode_int(val)
+    assert (val2 & (0xff >> b)) == ((a >> b) & (0xff >> b))
+    if b != 0:
+        assert val[-1] == False
+
