@@ -64,7 +64,7 @@ class SignedBVExpr(UnsignedBVExpr):
         return _binary_gate(cmn.signed_le_gate, self, other, boolean=True)
 
     def __lt__(self, other):
-        return _binary_gate(cmn.signed_le_gate, self, other, boolean=True)
+        return _binary_gate(cmn.signed_lt_gate, self, other, boolean=True)
 
     def __ge__(self, other):
         return _binary_gate(cmn.signed_ge_gate, self, other, boolean=True)
