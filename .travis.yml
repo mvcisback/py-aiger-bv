@@ -1,7 +1,7 @@
 language: python
 python:
   - "3.6"
-script: pytest --flake8 --cov=aiger_bv --cov-report=html -n2
+script: pytest --flake8 --cov=aigerbv --cov-report=html -n2
 cache:
   directories:
     - ${HOME}/.cache/pip
