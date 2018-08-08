@@ -1,16 +1,16 @@
 git+git://github.com/mvcisback/py-aiger.git@master#egg=aiger
 git+git://github.com/mvcisback/hypothesis-cfg.git@master#egg=hypothesis_cfg
-bidict==0.14.0
-blessings==1.6
+bidict==0.17.2
+blessings==1.7
 click==6.7
-dd==0.5.3
-funcy==1.9.1
-hypothesis==3.32.1
+codecov==2.0.15
+funcy==1.10.3
+hypothesis==3.66.30 # pyup: ignore
 lenses==0.4.0
-parsimonious==0.8.0
-pytest-cov==2.5.1
-pytest-flake8==0.9
-pytest==3.2.3
+parsimonious==0.8.1
+pytest-cov==2.5.1 # pyup: ignore
+pytest-flake8==0.9 # pyup: ignore
+pytest-sugar==0.9.1 # pyup: ignore
+pytest-xdist==1.22.5 # pyup: ignore
+pytest==3.2.3 # pyup: ignore
 toposort==1.5
-pytest-sugar==0.9.1
-codecov==2.0.9
