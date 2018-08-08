@@ -32,7 +32,7 @@ def encode_int(wordlen, value, signed=True):
     if value < 0:
         value = N + value
 
-    return [bool((value >> i) & 1) for i in range(wordlen)]    
+    return [bool((value >> i) & 1) for i in range(wordlen)]
 
 
 def decode_int(bits, signed=True):
@@ -47,9 +47,8 @@ def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
     rights = named_indexes(wordlen, right)
     outputs = named_indexes(wordlen, output)
 
-    aig = reduce(op.or_,
-        (binop([l, r], o) for l, r, o in zip(lefts, rights, outputs))
-    )
+    bw_aigs = (binop([l, r], o) for l, r, o in zip(lefts, rights, outputs))
+    aig = reduce(op.or_, bw_aigs)
     return aigbv.AIGBV(
         aig=aig,
         input_map=frozenset([(left, lefts), (right, rights)]),
@@ -140,7 +139,7 @@ def tee(wordlen, iomap):
 def repeat(wordlen, input, output=None):
     if output is None:
         output = input
-    
+
     outputs = named_indexes(wordlen, output)
     return aigbv.AIGBV(
         aig=aiger.tee({input: outputs}),
@@ -170,7 +169,6 @@ def reverse_gate(wordlen, input='x', output='rev(x)'):
 def combine_gate(left_wordlen, left, right_wordlen, right, output):
     lefts = named_indexes(left_wordlen, left)
     rights = named_indexes(right_wordlen, right)
-    outputs = named_indexes(left_wordlen + right_wordlen, output)
 
     aigbv = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
@@ -197,7 +195,7 @@ def sink(wordlen, inputs):
         output_map=frozenset(),
         latch_map=frozenset()
     )
-    
+
 
 def _full_adder(x, y, carry_in, result, carry_out):
     # TODO: Rewrite in aiger.
@@ -287,7 +285,7 @@ def unsigned_lt_gate(wordlen, left, right, output):
 
     def gadget(params):
         x, y, active, out = params
-        subs = {'x': x, 'y':y, 'active': active, 'out': out}
+        subs = {'x': x, 'y': y, 'active': active, 'out': out}
         return _gadget[('i', subs)][('o', subs)]
 
     # Create gadget for each pair of bits.
@@ -372,7 +370,7 @@ def left_shift_gate(wordlen, shift, input='x', output='x'):
 def _right_shift_gate(wordlen, shift, shiftin, input='x', output='x'):
     assert 0 <= shift
     shift = min(shift, wordlen)
-        
+
     return repeat(shift, shiftin) \
         >> split_gate(input, shift, 'drop', wordlen - shift, output) \
         >> sink(shift, ['drop']) \

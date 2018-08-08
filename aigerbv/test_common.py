@@ -16,7 +16,7 @@ def test_seqcomp(a):
     val = circ3({
         'a': common.encode_int(4, a),
     })[0]['out']
-    
+
     assert common.decode_int(val) == a
 
 
@@ -66,7 +66,7 @@ def test_is_zero(a):
     val = circ({'a': common.encode_int(4, a)})[0]['out']
     assert val[0] == (a == 0)
 
-    
+
 @given(st.integers(-4, 3), st.integers(-4, 3))
 def test_ne(a, b):
     circ = common.ne_gate(4, left='a', right='b', output='out')
@@ -282,7 +282,8 @@ def test_logical_right_shift(a, b):
     val2 = common.decode_int(val)
     assert (val2 & (0xff >> b)) == ((a >> b) & (0xff >> b))
     if b != 0:
-        assert val[-1] == False
+        assert val[-1] is False
+
 
 @given(st.integers(-4, 3))
 def test_abs(a):

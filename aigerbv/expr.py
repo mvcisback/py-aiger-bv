@@ -1,5 +1,7 @@
 from typing import NamedTuple, Union
 
+import funcy as fn
+
 from aigerbv import aigbv
 from aigerbv import common as cmn
 
@@ -75,7 +77,9 @@ class SignedBVExpr(UnsignedBVExpr):
     def __abs__(self):
         return _unary_gate(cmn.abs_gate, self)
 
+
 Expr = Union[UnsignedBVExpr, SignedBVExpr]
+
 
 def _binary_gate(gate, expr1, expr2, boolean=False):
     assert expr1.size == expr2.size
@@ -90,6 +94,10 @@ def _binary_gate(gate, expr1, expr2, boolean=False):
 def _unary_gate(gate, expr):
     circ = gate(expr.size, input=expr.output, output=cmn._fresh())
     return type(expr)(aigbv=expr.aigbv >> circ, size=expr.size)
+
+
+def _fresh_relabel(keys):
+    return {k: cmn._fresh() for k in keys}
 
 
 def _parcompose(wordlen, circ1, circ2):
@@ -108,8 +116,8 @@ def _parcompose(wordlen, circ1, circ2):
         tee = cmn.tee(wordlen, fn.merge_with(tuple, subs1, subs2))
         return tee >> (circ2['i', subs1] | circ1['i', subs2])
 
-    
-def atom(wordlen:int, val:Union[str, int], signed:bool=True) -> Expr:
+
+def atom(wordlen: int, val: Union[str, int], signed: bool=True) -> Expr:
     output = cmn._fresh()
     if isinstance(val, str):
         aig = cmn.identity_gate(wordlen, val, output)

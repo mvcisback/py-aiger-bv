@@ -73,7 +73,7 @@ class AIGBV(NamedTuple):
                 dict(zip(omap[name], imap[name])) for name in interface
             ))
             aig = aig[('o', relabels)]
-        
+
         # Create composed aigbv
         input_map2 = {kv for kv in other.input_map if kv[0] not in interface}
         output_map2 = {kv for kv in self.output_map if kv[0] not in interface}
@@ -115,18 +115,18 @@ class AIGBV(NamedTuple):
     def write(self, path):
         self.aig.write(path)
 
-    def feedback(self, inputs, outputs, initials=None, latches=None, 
+    def feedback(self, inputs, outputs, initials=None, latches=None,
                  keep_outputs=False):
         if latches is None:
             latches = inputs
 
         idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.input_map)
-        odrop, omap = fn.lsplit(lambda x: x[0] in output, self.output_map)
+        odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.output_map)
         new_latches = [(n, common.named_indexes(n)) for n in latches]
 
         def get_names(key_vals):
             return fn.lcat(fn.pluck(1, key_vals))
-        
+
         aig = self.aig.feedback(
             inputs=get_names(idrop),
             outputs=get_names(odrop),
