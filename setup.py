@@ -12,7 +12,6 @@ setup(
     license='MIT',
     install_requires=[
         'funcy',
-        'lenses',
         'py-aiger',
     ],
     packages=find_packages(),
