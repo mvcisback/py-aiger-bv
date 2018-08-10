@@ -10,8 +10,10 @@ class UnsignedBVExpr(NamedTuple):
     aigbv: aigbv.AIGBV
     size: int
 
-    def __call__(self, inputs):
-        return self.aigbv(inputs)[0]
+    def __call__(self, inputs=None):
+        if inputs is None:
+            inputs = {}
+        return self.aigbv(inputs)[0][self.output]
 
     @property
     def output(self):
@@ -49,7 +51,7 @@ class UnsignedBVExpr(NamedTuple):
         return _binary_gate(cmn.unsigned_le_gate, self, other, boolean=True)
 
     def __lt__(self, other):
-        return _binary_gate(cmn.unsigned_le_gate, self, other, boolean=True)
+        return _binary_gate(cmn.unsigned_lt_gate, self, other, boolean=True)
 
     def __ge__(self, other):
         return _binary_gate(cmn.unsigned_ge_gate, self, other, boolean=True)
