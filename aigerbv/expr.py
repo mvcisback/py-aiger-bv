@@ -8,7 +8,6 @@ from aigerbv import common as cmn
 
 class UnsignedBVExpr(NamedTuple):
     aigbv: aigbv.AIGBV
-    size: int
 
     def __call__(self, inputs=None):
         if inputs is None:
@@ -22,6 +21,11 @@ class UnsignedBVExpr(NamedTuple):
     @property
     def inputs(self):
         return self.aigbv.inputs
+
+    @property
+    def size(self):
+        
+        return len(list(self.aigbv.output_map)[0][1])
 
     def __invert__(self):
         return _unary_gate(cmn.bitwise_negate, self)
@@ -42,22 +46,22 @@ class UnsignedBVExpr(NamedTuple):
         return _binary_gate(cmn.bitwise_xor, self, other)
 
     def __eq__(self, other):
-        return _binary_gate(cmn.eq_gate, self, other, boolean=True)
+        return _binary_gate(cmn.eq_gate, self, other)
 
     def __ne__(self, other):
-        return _binary_gate(cmn.ne_gate, self, other, boolean=True)
+        return _binary_gate(cmn.ne_gate, self, other)
 
     def __le__(self, other):
-        return _binary_gate(cmn.unsigned_le_gate, self, other, boolean=True)
+        return _binary_gate(cmn.unsigned_le_gate, self, other)
 
     def __lt__(self, other):
-        return _binary_gate(cmn.unsigned_lt_gate, self, other, boolean=True)
+        return _binary_gate(cmn.unsigned_lt_gate, self, other)
 
     def __ge__(self, other):
-        return _binary_gate(cmn.unsigned_ge_gate, self, other, boolean=True)
+        return _binary_gate(cmn.unsigned_ge_gate, self, other)
 
     def __gt__(self, other):
-        return _binary_gate(cmn.unsigned_gt_gate, self, other, boolean=True)
+        return _binary_gate(cmn.unsigned_gt_gate, self, other)
 
 
 class SignedBVExpr(UnsignedBVExpr):
@@ -65,16 +69,16 @@ class SignedBVExpr(UnsignedBVExpr):
         return _unary_gate(cmn.negate_gate, self)
 
     def __le__(self, other):
-        return _binary_gate(cmn.signed_le_gate, self, other, boolean=True)
+        return _binary_gate(cmn.signed_le_gate, self, other)
 
     def __lt__(self, other):
-        return _binary_gate(cmn.signed_lt_gate, self, other, boolean=True)
+        return _binary_gate(cmn.signed_lt_gate, self, other)
 
     def __ge__(self, other):
-        return _binary_gate(cmn.signed_ge_gate, self, other, boolean=True)
+        return _binary_gate(cmn.signed_ge_gate, self, other)
 
     def __gt__(self, other):
-        return _binary_gate(cmn.signed_gt_gate, self, other, boolean=True)
+        return _binary_gate(cmn.signed_gt_gate, self, other)
 
     def __abs__(self):
         return _unary_gate(cmn.abs_gate, self)
@@ -83,14 +87,14 @@ class SignedBVExpr(UnsignedBVExpr):
 Expr = Union[UnsignedBVExpr, SignedBVExpr]
 
 
-def _binary_gate(gate, expr1, expr2, boolean=False):
+def _binary_gate(gate, expr1, expr2):
     assert expr1.size == expr2.size
     wordlen = expr1.size
     circ1, circ2 = expr1.aigbv, expr2.aigbv
     circ3 = _parcompose(wordlen, circ1, circ2)
     circ3 >>= gate(wordlen=wordlen, output=cmn._fresh(),
                    left=expr1.output, right=expr2.output)
-    return type(expr1)(aigbv=circ3, size=1 if boolean else wordlen)
+    return type(expr1)(aigbv=circ3)
 
 
 def _unary_gate(gate, expr):
@@ -126,4 +130,4 @@ def atom(wordlen: int, val: Union[str, int], signed: bool=True) -> Expr:
     else:
         aig = cmn.source(wordlen, val, output)
 
-    return (SignedBVExpr if signed else UnsignedBVExpr)(aig, wordlen)
+    return (SignedBVExpr if signed else UnsignedBVExpr)(aig)

@@ -1,12 +1,13 @@
 import operator as op
 from functools import reduce
-from itertools import product
+from itertools import product, starmap
 from uuid import uuid1
 
 import aiger
 import funcy as fn
 
 from aigerbv import aigbv
+from aigerbv import expr
 
 
 def _fresh():
@@ -398,3 +399,13 @@ def abs_gate(wordlen, input, output):
         >> tee(wordlen, {tmp: (tmp, tmp2)}) \
         >> add_gate(wordlen, input, tmp, output) \
         >> bitwise_xor(wordlen, output, tmp2, output)
+
+
+def lookup(wordlen, mapping, input, output):
+    # [(i = a1) -> b] /\ [(i = a2) -> c] /\ [(i = a3) -> d]
+    def guard(key, val):
+        e2 = expr.atom(wordlen, input) != expr.atom(wordlen, key)
+        circ = e2.aigbv >> repeat(wordlen, e2.output, 'tmp')
+        return expr.UnsignedBVExpr(circ) | expr.atom(wordlen, val)
+
+    return reduce(op.and_, starmap(guard, mapping.items())).aigbv
