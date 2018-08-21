@@ -24,7 +24,6 @@ class UnsignedBVExpr(NamedTuple):
 
     @property
     def size(self):
-        
         return len(list(self.aigbv.output_map)[0][1])
 
     def __invert__(self):
@@ -99,7 +98,7 @@ def _binary_gate(gate, expr1, expr2):
 
 def _unary_gate(gate, expr):
     circ = gate(expr.size, input=expr.output, output=cmn._fresh())
-    return type(expr)(aigbv=expr.aigbv >> circ, size=expr.size)
+    return type(expr)(aigbv=expr.aigbv >> circ)
 
 
 def _fresh_relabel(keys):
