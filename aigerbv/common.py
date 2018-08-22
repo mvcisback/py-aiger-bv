@@ -7,7 +7,6 @@ import aiger
 import funcy as fn
 
 from aigerbv import aigbv
-from aigerbv import expr
 
 
 def _fresh():
@@ -83,8 +82,8 @@ def bitwise_negate(wordlen, input='x', output='not x'):
 
 def reduce_binop(wordlen, inputs, output, op):
     def join(left, right):
-        (o1, *_), (o2, *_) = left.outputs, right.outputs
-        return (left | right) >> op(wordlen, left=o1, right=o2, output=_fresh())
+        (o1, *_), (o2, *_) = left.outputs, right.outputs # noqa
+        return (left | right) >> op(wordlen, o1, o2, _fresh())
 
     inputs = list(inputs)
     queue = [identity_gate(wordlen, i) for i in inputs]
