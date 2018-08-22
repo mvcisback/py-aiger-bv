@@ -127,6 +127,6 @@ def atom(wordlen: int, val: Union[str, int], signed: bool=True) -> Expr:
     if isinstance(val, str):
         aig = cmn.identity_gate(wordlen, val, output)
     else:
-        aig = cmn.source(wordlen, val, output)
+        aig = cmn.source(wordlen, val, output, signed)
 
     return (SignedBVExpr if signed else UnsignedBVExpr)(aig)
