@@ -122,7 +122,13 @@ class AIGBV(NamedTuple):
 
         idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.input_map)
         odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.output_map)
-        new_latches = [(n, common.named_indexes(n)) for n in latches]
+
+        wordlens = [len(vals) for _, vals in self.input_map]
+        new_latches = [(n, common.named_indexes(k, n)) 
+                       for k, n in zip(wordlens, latches)]
+
+        if initials is not None:
+            initials = fn.lcat([i]*k for k, i in zip(wordlens, initials))
 
         def get_names(key_vals):
             return fn.lcat(fn.pluck(1, key_vals))
@@ -130,7 +136,7 @@ class AIGBV(NamedTuple):
         aig = self.aig.feedback(
             inputs=get_names(idrop),
             outputs=get_names(odrop),
-            latches=new_latches,
+            latches=get_names(new_latches),
             initials=initials,
             keep_outputs=keep_outputs,
         )

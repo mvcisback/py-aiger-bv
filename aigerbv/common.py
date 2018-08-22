@@ -28,7 +28,7 @@ def encode_int(wordlen, value, signed=True):
         N2 = 1 << (wordlen - 1)
         assert N2 > value >= -N2
     else:
-        assert N - 1 > value >= 0
+        assert N > value >= 0
 
     if value < 0:
         value = N + value
