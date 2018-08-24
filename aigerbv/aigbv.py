@@ -129,7 +129,7 @@ class AIGBV(NamedTuple):
         odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.output_map)
 
         wordlens = [len(vals) for _, vals in self.input_map]
-        new_latches = [(n, common.named_indexes(k, n)) 
+        new_latches = [(n, common.named_indexes(k, n))
                        for k, n in zip(wordlens, latches)]
 
         if initials is not None:
