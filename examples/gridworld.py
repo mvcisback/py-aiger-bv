@@ -28,8 +28,8 @@ def gridworld(n, start=(0, 0)):
                     outlen=n,
                     in_signed=False)
 
-    accel = cmn.tee(2, {'a': ('tmp1', 'tmp2')}) >> (ax | ay)
-    return accel >> circ
+    action = cmn.tee(2, {'a': ('tmp1', 'tmp2')}) >> (ax | ay)
+    return action >> circ
 
 
 if __name__ == '__main__':
