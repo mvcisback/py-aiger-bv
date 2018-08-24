@@ -11,6 +11,12 @@
 [![PyPI version shields.io](https://img.shields.io/pypi/v/py-aiger-bv.svg)](https://pypi.python.org/pypi/py-aiger-bv/)
 [![PyPI license](https://img.shields.io/pypi/l/py-aiger-bv.svg)](https://pypi.python.org/pypi/py-aiger-bv/)
 
+# Table of Contents
+- [About](#about-py-aiger-bv)
+- [Installation](#installation)
+- [BitVector Expr DSL](#bitvector-expression-dsl)
+- [Sequential Circuit DSL](#sequential-circuit-dsl)
+
 # About Py-Aiger-BV
 
 This library provides word level abstractions on top of
@@ -18,18 +24,21 @@ This library provides word level abstractions on top of
 `AIGBV` which groups inputs, outputs, and latches into named
 **ordered** sequences (tuples).
 
-# Endianness
-
-TODO
-
 # Installation
 
 TODO
 
-# Sequential Word Level Circuit DSL
+# BitVector Expression DSL
 
-py-aiger-bv's Sequential Word Level Circuit DSL implements the same
-basic api as py-aiger's Sequential Circuit DSL.
+## Unsigned
+
+## Signed
+
+# Sequential Circuit DSL
+
+py-aiger-bv's Sequential Circuit DSL implements the same basic api as
+py-aiger's Sequential Circuit DSL, but operates at the (variable
+length) word level rather than the bit level.
 
 ```python
 import aiger
