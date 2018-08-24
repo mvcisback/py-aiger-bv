@@ -112,6 +112,11 @@ class AIGBV(NamedTuple):
             outputs, latches = self(inputs, latches)
             inputs = yield outputs, latches
 
+    def simulate(self, input_seq, latches=None):
+        sim = self.simulator()
+        next(sim)
+        return [sim.send(inputs) for inputs in input_seq]
+
     def write(self, path):
         self.aig.write(path)
 
