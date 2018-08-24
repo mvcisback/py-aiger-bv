@@ -158,7 +158,7 @@ circ9 = circ >> aigerbv.index_gate(wordlen=3, idx=1, input='x', output='x1')
 ## Encoding
 TODO
 
-## Bitwise Arithmetic
+## Bitwise Operations
 
 - `aigerbv.bitwise_and(3, left='x', right='y', output='x&y')`
 - `aigerbv.bitwise_or(3, left='x', right='y', output='x|y')`
@@ -173,7 +173,17 @@ TODO
 - `aigerbv.dec_gate(3, left='x', output='x+1')`
 - `aigerbv.negate_gate(3, left='x', output='-x')`
 
-## Arithmetic
+## Comparison
 
-
-# Scripts
+- `aigerbv.is_nonzero_gate(3, input='x', output='is_nonzero')`
+- `aigerbv.is_zero_gate(3, input='x', output='is_zero')`
+- `aigerbv.eq_gate(3, left='x', right='y', output='x=y')`
+- `aigerbv.ne_gate(3, left='x', right='y', output='x!=y')`
+- `aigerbv.unsigned_lt_gate(3, left='x', right='y', output='x<y')`
+- `aigerbv.unsigned_gt_gate(3, left='x', right='y', output='x>y')`
+- `aigerbv.unsigned_le_gate(3, left='x', right='y', output='x<=y')`
+- `aigerbv.unsigned_ge_gate(3, left='x', right='y', output='x>=y')`
+- `aigerbv.signed_lt_gate(3, left='x', right='y', output='x<y')`
+- `aigerbv.signed_gt_gate(3, left='x', right='y', output='x>y')`
+- `aigerbv.signed_le_gate(3, left='x', right='y', output='x<=y')`
+- `aigerbv.signed_ge_gate(3, left='x', right='y', output='x>=y')`
