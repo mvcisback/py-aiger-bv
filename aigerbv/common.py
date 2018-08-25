@@ -80,6 +80,10 @@ def bitwise_negate(wordlen, input='x', output='not x'):
     )
 
 
+def _apply_pairwise(func, seq):
+    return list(starmap(func, zip(seq[::2], seq[1::2])))
+
+
 def reduce_binop(wordlen, inputs, output, op):
     def join(left, right):
         (o1, *_), (o2, *_) = left.outputs, right.outputs # noqa
@@ -88,10 +92,10 @@ def reduce_binop(wordlen, inputs, output, op):
     inputs = list(inputs)
     queue = [identity_gate(wordlen, i) for i in inputs]
     while len(queue) > 1:
-        queue = list(starmap(join, zip(queue[::2], queue[1::2])))
+        queue = _apply_pairwise(join, queue)
 
     circ = queue[0]
-    if len(inputs) & 1:
+    if len(inputs) & 1:  # Odd number of elements.
         circ = join(circ, identity_gate(wordlen, inputs[-1]))
     return circ
 
