@@ -308,4 +308,3 @@ def test_lookup(a):
         'x': common.encode_int(2, a, signed=False),
     })[0]['out']
     assert common.decode_int(val) == lookup[a]
-    
