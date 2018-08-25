@@ -292,3 +292,20 @@ def test_abs(a):
         'a': common.encode_int(8, a, signed=True),
     })[0]['out']
     assert common.decode_int(val) == abs(a)
+
+
+@given(st.integers(0, 3))
+def test_lookup(a):
+    lookup = {0: 0, 1: 1, 2: 0, 3: -1}
+    circ = common.lookup(mapping=lookup,
+                         input='x',
+                         output='out',
+                         inlen=2,
+                         outlen=4,
+                         in_signed=False)
+
+    val = circ({
+        'x': common.encode_int(2, a, signed=False),
+    })[0]['out']
+    assert common.decode_int(val) == lookup[a]
+    
