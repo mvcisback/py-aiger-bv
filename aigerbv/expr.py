@@ -62,6 +62,9 @@ class UnsignedBVExpr(NamedTuple):
     def __gt__(self, other):
         return _binary_gate(cmn.unsigned_gt_gate, self, other)
 
+    def __abs__(self):
+        return self
+
 
 class SignedBVExpr(UnsignedBVExpr):
     def __neg__(self):

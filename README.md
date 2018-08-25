@@ -30,9 +30,53 @@ TODO
 
 # BitVector Expression DSL
 
-## Unsigned
+As in py-aiger, when writing combinatorial circuits, the Sequential
+Circuit DSL can be somewhat clumsy. For this common usecase, we have
+developed the BitVector Expression DSL. This DSL actually consists of
+two DSLs for signed and unsigned BitVectors.  All circuits generated
+this way have a single output word. We use a **big-endian** encoding
+where the most significant digit is the first element of the tuple
+representing the word. For signed numbers, two's complement is used.
 
-## Signed
+```python
+import aigerbv
+x, y = aigerbv.atom('x', signed=True), aigerbv.atom('y', signed=True)
+
+# bitwise ops.
+expr1 = x & y  # circuit with inputs 'x', 'y' and 1 output computing x AND y.
+expr2 = x | y  # logical or.
+expr3 = x ^ y  # logical xor.
+expr4 = ~x  # Bitwise negation.
+
+# arithmetic
+expr5 = x + y
+expr6 = x - y
+expr7 = x << y
+expr8 = x >> y  # logical if unsigned, arithmetic if signed.
+expr9 = -x  # Arithmetic negation. Only defined for signed expr.
+expr10 = abs(x)
+
+# comparison
+expr4 = x == y
+expr5 = x != y
+expr6 = x < y
+expr7 = x >= y
+expr8 = x > y
+expr8 = x >= y
+
+# Atoms can be constants.
+expr7 = x & aiger.atom(True)  # Equivilent to just x.
+expr8 = x & aiger.atom(False)  # Equivilent to const False.
+
+# And you can inspect the AIGBV if needed.
+circ = x.aigbv
+
+# And you can inspect the AIG if needed.
+circ = x.aigbv.aig
+
+# And of course, you can get a BoolExpr from a single output aig.
+expr9 = aiger.UnsignedBVExpr(circ)
+```
 
 # Sequential Circuit DSL
 
@@ -181,6 +225,9 @@ TODO
 - `aigerbv.inc_gate(3, left='x', output='x+1')`
 - `aigerbv.dec_gate(3, left='x', output='x+1')`
 - `aigerbv.negate_gate(3, left='x', output='-x')`
+- `aigerbv.logical_right_shift(3, shift=1, input='x', output='x>>1')`
+- `aigerbv.arithmetic_right_shift(3, shift=1, input='x', output='x>>1')`
+- `aigerbv.left_shift(3, shift=1, input='x', output='x<<1')`
 
 ## Comparison
 
@@ -196,3 +243,12 @@ TODO
 - `aigerbv.signed_gt_gate(3, left='x', right='y', output='x>y')`
 - `aigerbv.signed_le_gate(3, left='x', right='y', output='x<=y')`
 - `aigerbv.signed_ge_gate(3, left='x', right='y', output='x>=y')`
+
+
+## TODO: not implemented
+- `expr = x @ y  # inner product in F`,
+- `expr = x.concat(y)`
+- `expr = x.repeat(2)`
+- `expr1, expr2 = x.split(idx=2)`
+- `expr = x[2]`
+

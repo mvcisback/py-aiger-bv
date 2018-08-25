@@ -17,10 +17,9 @@ from aigerbv.common import bitwise_negate
 from aigerbv.common import encode_int, decode_int
 
 # Unary Arithmetic Gates
-#from aigerbv.common import logical_right_shift_gate
-#from aigerbv.common import arithmetic_right_shift_gate
-#from aigerbv.common import logical_left_shift_gate
-#from aigerbv.common import arithmetic_left_shift_gate
+from aigerbv.common import logical_right_shift_gate
+from aigerbv.common import arithmetic_right_shift_gate
+from aigerbv.common import left_shift_gate
 from aigerbv.common import abs_gate
 
 # Binary Arithmetic Gates
