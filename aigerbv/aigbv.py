@@ -135,6 +135,8 @@ class AIGBV(NamedTuple):
         if initials is not None:
             initials = fn.lcat([i]*k for k, i in zip(wordlens, initials))
 
+        assert len(inputs) == len(outputs) == len(initials) == len(latches)
+
         def get_names(key_vals):
             return fn.lcat(fn.pluck(1, key_vals))
 

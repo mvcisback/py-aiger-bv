@@ -7,7 +7,6 @@ import aiger
 import funcy as fn
 
 from aigerbv import aigbv
-from aigerbv import expr
 
 
 def _fresh():
@@ -81,6 +80,26 @@ def bitwise_negate(wordlen, input='x', output='not x'):
     )
 
 
+def _apply_pairwise(func, seq):
+    return list(starmap(func, zip(seq[::2], seq[1::2])))
+
+
+def reduce_binop(wordlen, inputs, output, op):
+    def join(left, right):
+        (o1, *_), (o2, *_) = left.outputs, right.outputs # noqa
+        return (left | right) >> op(wordlen, o1, o2, _fresh())
+
+    inputs = list(inputs)
+    queue = [identity_gate(wordlen, i) for i in inputs]
+    while len(queue) > 1:
+        queue = _apply_pairwise(join, queue)
+
+    circ = queue[0]
+    if len(inputs) & 1:  # Odd number of elements.
+        circ = join(circ, identity_gate(wordlen, inputs[-1]))
+    return circ
+
+
 def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
     inputs = named_indexes(wordlen, input)
     outputs = named_indexes(1, output)
@@ -150,7 +169,10 @@ def repeat(wordlen, input, output=None):
     )
 
 
-def identity_gate(wordlen, input='x', output='x'):
+def identity_gate(wordlen, input='x', output=None):
+    if output is None:
+        output = input
+
     inputs = named_indexes(wordlen, input)
     outputs = named_indexes(wordlen, output)
     return aigbv.AIGBV(
@@ -401,11 +423,21 @@ def abs_gate(wordlen, input, output):
         >> bitwise_xor(wordlen, output, tmp2, output)
 
 
-def lookup(wordlen, mapping, input, output):
+def lookup(inlen, outlen, mapping, input, output, *,
+           in_signed=True, out_signed=True):
     # [(i = a1) -> b] /\ [(i = a2) -> c] /\ [(i = a3) -> d]
     def guard(key, val):
-        e2 = expr.atom(wordlen, input) != expr.atom(wordlen, key)
-        circ = e2.aigbv >> repeat(wordlen, e2.output, 'tmp')
-        return expr.UnsignedBVExpr(circ) | expr.atom(wordlen, val)
+        circ = identity_gate(inlen, _fresh(), 'input') \
+            | source(inlen, key, 'key', in_signed) \
+            | source(outlen, val, 'val', out_signed)
+        circ >>= ne_gate(inlen, 'input', 'key', 'neq')
+        circ >>= repeat(outlen, 'neq', 'neq')
+        circ >>= bitwise_or(outlen, 'neq', 'val', _fresh())
+        return circ
 
-    return reduce(op.and_, starmap(guard, mapping.items())).aigbv
+    circ = reduce(op.or_, starmap(guard, mapping.items()))
+    circ = tee(inlen, {input: circ.inputs}) >> circ
+    if len(circ.outputs) > 1:
+        circ >>= reduce_binop(outlen, circ.outputs, output, bitwise_and)
+    out, *_ = circ.outputs
+    return circ['o', {out: output}]
