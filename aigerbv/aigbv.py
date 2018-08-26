@@ -10,6 +10,8 @@ BV_MAP = FrozenSet[Tuple[str, Tuple[str]]]
 
 
 def _blast(bvname2vals, name_map):
+    """Helper function to expand (blast) str -> int map into str ->
+    bool map. This is used to send word level inputs to aiger."""
     if len(name_map) == 0:
         return dict()
     return fn.merge(*(dict(zip(names, bvname2vals[bvname]))
@@ -17,6 +19,8 @@ def _blast(bvname2vals, name_map):
 
 
 def _unblast(name2vals, name_map):
+    """Helper function to lift str -> bool maps used by aiger
+    to the word level. Dual of the `_blast` function."""
     def _collect(names):
         return tuple(name2vals[n] for n in names)
 
