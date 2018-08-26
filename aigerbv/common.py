@@ -53,7 +53,6 @@ def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
         aig=aig,
         input_map=frozenset([(left, lefts), (right, rights)]),
         output_map=frozenset([(output, outputs)]),
-        latch_map=frozenset(),
     )
 
 
@@ -76,7 +75,6 @@ def bitwise_negate(wordlen, input='x', output='not x'):
         aig=aiger.bit_flipper(inputs=inputs, outputs=outputs),
         input_map=frozenset([(input, inputs)]),
         output_map=frozenset([(output, outputs)]),
-        latch_map=frozenset(),
     )
 
 
@@ -107,7 +105,6 @@ def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
         aig=aiger.or_gate(inputs, outputs[0]),
         input_map=frozenset([(input, inputs)]),
         output_map=frozenset([(output, outputs)]),
-        latch_map=frozenset(),
     )
 
 
@@ -132,9 +129,7 @@ def source(wordlen, value, name='x', signed=True):
     aig = aiger.source({name: bit for name, bit in zip(names, bits)})
     return aigbv.AIGBV(
         aig=aig,
-        input_map=frozenset(),
         output_map=frozenset([(name, names)]),
-        latch_map=frozenset(),
     )
 
 
@@ -152,7 +147,6 @@ def tee(wordlen, iomap):
         aig=aiger.tee(blasted_iomap),
         input_map=input_map,
         output_map=output_map,
-        latch_map=frozenset()
     )
 
 
@@ -165,7 +159,6 @@ def repeat(wordlen, input, output=None):
         aig=aiger.tee({input: outputs}),
         input_map=frozenset([(input, (input,))]),
         output_map=frozenset([(input, outputs)]),
-        latch_map=frozenset()
     )
 
 
@@ -179,7 +172,6 @@ def identity_gate(wordlen, input='x', output=None):
         aig=aiger.identity(inputs=inputs, outputs=outputs),
         input_map=frozenset([(input, inputs)]),
         output_map=frozenset([(output, outputs)]),
-        latch_map=frozenset()
     )
 
 
@@ -215,8 +207,6 @@ def sink(wordlen, inputs):
     return aigbv.AIGBV(
         aig=aiger.sink(fn.lcat(blasted_inputs)),
         input_map=frozenset(fn.lzip(inputs, blasted_inputs)),
-        output_map=frozenset(),
-        latch_map=frozenset()
     )
 
 
@@ -226,6 +216,20 @@ def _full_adder(x, y, carry_in, result, carry_out):
         "aag 10 3 0 2 7\n2\n4\n6\n18\n21\n8 4 2\n10 5 3\n"
         "12 11 9\n14 12 6\n16 13 7\n18 17 15\n20 15 9\n"
         f"i0 {x}\ni1 {y}\ni2 {carry_in}\no0 {result}\no1 {carry_out}\n")
+
+
+def even_popcount_gate(wordlen, input, output):
+    inputs = named_indexes(wordlen, input)
+    return aigbv.AIGBV(
+        aig=aiger.parity_gate(inputs, output),
+        input_map=frozenset([(input, inputs)]),
+        output_map=frozenset([(output, (output,))])
+    )
+
+
+def dot_mod2_gate(wordlen, left='x', right='y', output='x@y'):
+    return bitwise_and(wordlen, left, right, 'tmp') >> \
+        even_popcount_gate(wordlen, 'tmp', output)
 
 
 def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
@@ -253,7 +257,6 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
         aig=adder_aig,
         input_map=frozenset([(left, lefts), (right, rights)]),
         output_map=frozenset([(output, outputs)]),
-        latch_map=frozenset(),
     )
 
 
@@ -293,7 +296,6 @@ def index_gate(wordlen, idx, input, output=None):
         aig=aig,
         input_map=frozenset([(input, inputs)]),
         output_map=frozenset([(output, outputs)]),
-        latch_map=frozenset(),
     )
 
 
@@ -332,7 +334,6 @@ def unsigned_lt_gate(wordlen, left, right, output):
         aig=aig,
         input_map=frozenset([(left, lefts), (right, rights)]),
         output_map=frozenset([(output, (output,))]),
-        latch_map=frozenset(),
     )
 
 

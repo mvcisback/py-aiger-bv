@@ -25,9 +25,9 @@ def _unblast(name2vals, name_map):
 
 class AIGBV(NamedTuple):
     aig: aiger.AIG
-    input_map: BV_MAP
-    output_map: BV_MAP
-    latch_map: BV_MAP
+    input_map: BV_MAP = frozenset()
+    output_map: BV_MAP = frozenset()
+    latch_map: BV_MAP = frozenset()
 
     @property
     def inputs(self):

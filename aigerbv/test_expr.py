@@ -112,3 +112,32 @@ def test_expr_neg(a):
 def test_expr_abs(a):
     expr = abs(atom(4, a))
     assert common.decode_int(expr()) == abs(a)
+
+
+@given(st.integers(-4, 3))
+def test_expr_getitem(a):
+    expr = atom(4, a)
+    for i in range(4):
+        assert common.decode_int(expr[i](), signed=False) == (a >> i) & 1
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_concat(a, b):
+    expr1, expr2 = atom(4, a), atom(4, b)
+    expr3 = expr1.concat(expr2)
+    assert expr3.size == expr1.size + expr2.size
+    assert expr3() == expr1() + expr2()
+
+
+@given(st.booleans(), st.integers(1, 5))
+def test_expr_repeat(a, b):
+    expr = atom(1, a, signed=False)
+    assert expr.repeat(b)() == b*expr()
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_dotprod_mod2(a, b):
+    expr1, expr2 = atom(4, a), atom(4, b)
+    expr3 = expr1 @ expr2
+    val = sum([x*y for x, y in zip(expr1(), expr2())])
+    assert expr3()[0] == bool(val % 2)

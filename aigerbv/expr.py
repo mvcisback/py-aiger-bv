@@ -1,18 +1,40 @@
 from typing import NamedTuple, Union
 
+import attr
 import funcy as fn
 
 from aigerbv import aigbv
 from aigerbv import common as cmn
 
 
-class UnsignedBVExpr(NamedTuple):
-    aigbv: aigbv.AIGBV
+@attr.s(frozen=True, slots=True)
+class UnsignedBVExpr:
+    aigbv = attr.ib()
 
     def __call__(self, inputs=None):
         if inputs is None:
             inputs = {}
         return self.aigbv(inputs)[0][self.output]
+
+    def __getitem__(self, idx: int):
+        # TODO: support ranged indexing.
+        indexer = cmn.index_gate(self.size, idx, self.output, cmn._fresh())
+        return type(self)(self.aigbv >> indexer)
+
+    def concat(self, other):
+        combiner = cmn.combine_gate(
+            output=cmn._fresh(),
+            left_wordlen=self.size, left=self.output,
+            right_wordlen=other.size, right=other.output,
+        )
+        circ = self.aigbv | other.aigbv
+        return type(self)(circ >> combiner)
+
+    def repeat(self, times):
+        # TODO: support size != 1 via self concatenation.
+        assert self.size == 1
+        repeater = cmn.repeat(times, self.output, cmn._fresh())
+        return type(self)(self.aigbv >> repeater)
 
     @property
     def output(self):
@@ -37,6 +59,9 @@ class UnsignedBVExpr(NamedTuple):
 
     def __and__(self, other):
         return _binary_gate(cmn.bitwise_and, self, other)
+
+    def __matmul__(self, other):
+        return _binary_gate(cmn.dot_mod2_gate, self, other)
 
     def __or__(self, other):
         return _binary_gate(cmn.bitwise_or, self, other)
