@@ -1,4 +1,4 @@
-from typing import NamedTuple, Union
+from typing import Union
 
 import attr
 import funcy as fn
@@ -7,9 +7,9 @@ from aigerbv import aigbv
 from aigerbv import common as cmn
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, cmp=False, auto_attribs=True)
 class UnsignedBVExpr:
-    aigbv = attr.ib()
+    aigbv: aigbv.AIGBV
 
     def __call__(self, inputs=None):
         if inputs is None:
