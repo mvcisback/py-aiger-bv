@@ -19,7 +19,7 @@ class UnsignedBVExpr:
     def __getitem__(self, idx: int):
         # TODO: support ranged indexing.
         indexer = cmn.index_gate(self.size, idx, self.output, cmn._fresh())
-        return type(self)(self.aigbv >> indexer)
+        return UnsignedBVExpr(self.aigbv >> indexer)
 
     def concat(self, other):
         combiner = cmn.combine_gate(

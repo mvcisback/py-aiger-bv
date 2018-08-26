@@ -55,18 +55,28 @@ expr7 = x << y
 expr8 = x >> y  # logical if unsigned, arithmetic if signed.
 expr9 = -x  # Arithmetic negation. Only defined for signed expr.
 expr10 = abs(x)
+expr11 = x @ y  # inner product of bitvectors mod 2 (+ is xor).
 
 # comparison
-expr4 = x == y
-expr5 = x != y
-expr6 = x < y
-expr7 = x >= y
-expr8 = x > y
-expr8 = x >= y
+expr12 = x == y
+expr13 = x != y
+expr14 = x < y
+expr15 = x >= y
+expr16 = x > y
+expr17 = x >= y
 
 # Atoms can be constants.
-expr7 = x & aiger.atom(True)  # Equivilent to just x.
-expr8 = x & aiger.atom(False)  # Equivilent to const False.
+expr18 = x & aiger.atom(True)  # Equivilent to just x.
+expr19 = x & aiger.atom(False)  # Equivilent to const False.
+
+# BitVector expressions can be concatenated.
+expr20 = x.concat(y)
+
+# Particular bits can be indexed to create new expressions.
+expr21 = x[1]
+
+# Single bit expressions can be repeated.
+expr22 = x[1].repeat(10)
 
 # And you can inspect the AIGBV if needed.
 circ = x.aigbv
@@ -75,7 +85,7 @@ circ = x.aigbv
 circ = x.aigbv.aig
 
 # And of course, you can get a BoolExpr from a single output aig.
-expr9 = aiger.UnsignedBVExpr(circ)
+expr = aiger.UnsignedBVExpr(circ)
 ```
 
 # Sequential Circuit DSL
@@ -208,9 +218,6 @@ circ8 = circ >> aigerbv.split_gate(
 circ9 = circ >> aigerbv.index_gate(wordlen=3, idx=1, input='x', output='x1')
 ```
 
-## Encoding
-TODO
-
 ## Bitwise Operations
 
 - `aigerbv.bitwise_and(3, left='x', right='y', output='x&y')`
@@ -246,7 +253,7 @@ TODO
 
 
 ## TODO: not implemented
-- `expr = x @ y  # inner product in F`,
+- 
 - `expr = x.concat(y)`
 - `expr = x.repeat(2)`
 - `expr1, expr2 = x.split(idx=2)`
