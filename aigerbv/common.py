@@ -3,6 +3,7 @@ from functools import reduce
 from itertools import product, starmap
 from uuid import uuid1
 
+import attr
 import aiger
 import funcy as fn
 
@@ -177,29 +178,26 @@ def identity_gate(wordlen, input='x', output=None):
 
 def reverse_gate(wordlen, input='x', output='rev(x)'):
     circ = identity_gate(wordlen, input, output)
-    return identity_gate(wordlen, input, output)._replace(
-        output_map=frozenset((k, reversed(vs)) for k, vs in circ.output_map))
+    output_map = frozenset((k, reversed(vs)) for k, vs in circ.output_map)
+    return attr.evolve(circ, output_map=output_map)
 
 
 def combine_gate(left_wordlen, left, right_wordlen, right, output):
     lefts = named_indexes(left_wordlen, left)
     rights = named_indexes(right_wordlen, right)
 
-    aigbv = identity_gate(left_wordlen, left, left) \
+    circ = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
-    return aigbv._replace(
-        output_map=frozenset([(output, lefts+rights)])
-    )
+    return attr.evolve(circ, output_map=frozenset([(output, lefts+rights)]))
 
 
 def split_gate(input, left_wordlen, left, right_wordlen, right):
     inputs = named_indexes(left_wordlen + right_wordlen, input)
     lefts, rights = inputs[:left_wordlen], inputs[left_wordlen:]
 
-    aigbv = identity_gate(left_wordlen + right_wordlen, input, input)
-    return aigbv._replace(
-        output_map=frozenset([(left, lefts), (right, rights)])
-    )
+    circ = identity_gate(left_wordlen + right_wordlen, input, input)
+    output_map = frozenset([(left, lefts), (right, rights)])
+    return attr.evolve(circ, output_map=output_map)
 
 
 def sink(wordlen, inputs):

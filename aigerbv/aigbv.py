@@ -1,6 +1,7 @@
-from typing import Tuple, FrozenSet, NamedTuple
+from typing import Tuple, FrozenSet
 
 import aiger
+import attr
 import funcy as fn
 
 from aigerbv import common
@@ -27,7 +28,8 @@ def _unblast(name2vals, name_map):
     return {bvname: _collect(names) for bvname, names in name_map}
 
 
-class AIGBV(NamedTuple):
+@attr.s(frozen=True, slots=True, cmp=False, auto_attribs=True)
+class AIGBV:
     aig: aiger.AIG
     input_map: BV_MAP = frozenset()
     output_map: BV_MAP = frozenset()
@@ -61,7 +63,7 @@ class AIGBV(NamedTuple):
 
         attr_value = fn.walk_keys(lambda x: relabels.get(x, x),
                                   getattr(self, attr_name))
-        return self._replace(**{attr_name: attr_value})
+        return attr.evolve(self, **{attr_name: attr_value})
 
     def __rshift__(self, other):
         interface = self.outputs & other.inputs
