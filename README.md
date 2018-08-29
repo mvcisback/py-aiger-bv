@@ -8,7 +8,7 @@
 [![codecov](https://codecov.io/gh/mvcisback/py-aiger-bv/branch/master/graph/badge.svg)](https://codecov.io/gh/mvcisback/py-aiger-bv)
 [![Updates](https://pyup.io/repos/github/mvcisback/py-aiger-bv/shield.svg)](https://pyup.io/repos/github/mvcisback/py-aiger-bv/)
 
-[![PyPI version shields.io](https://img.shields.io/pypi/v/py-aiger-bv.svg)](https://pypi.python.org/pypi/py-aiger-bv/)
+[![PyPI version](https://badge.fury.io/py/py-aiger-bv.svg)](https://badge.fury.io/py/py-aiger-bv)
 [![PyPI license](https://img.shields.io/pypi/l/py-aiger-bv.svg)](https://pypi.python.org/pypi/py-aiger-bv/)
 
 # Table of Contents
