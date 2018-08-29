@@ -9,8 +9,8 @@
 [![Updates](https://pyup.io/repos/github/mvcisback/py-aiger-bv/shield.svg)](https://pyup.io/repos/github/mvcisback/py-aiger-bv/)
 
 [![PyPI version](https://badge.fury.io/py/py-aiger-bv.svg)](https://badge.fury.io/py/py-aiger-bv)
-[![PyPI license](https://img.shields.io/pypi/l/py-aiger-bv.svg)](https://pypi.python.org/pypi/py-aiger-bv/)
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ 
 # Table of Contents
 - [About](#about-py-aiger-bv)
 - [Installation](#installation)
