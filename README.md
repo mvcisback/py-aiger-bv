@@ -43,9 +43,9 @@ import aigerbv
 x, y = aigerbv.atom('x', signed=True), aigerbv.atom('y', signed=True)
 
 # bitwise ops.
-expr1 = x & y  # circuit with inputs 'x', 'y' and 1 output computing x AND y.
-expr2 = x | y  # logical or.
-expr3 = x ^ y  # logical xor.
+expr1 = x & y  # Bitwise and.
+expr2 = x | y  # Bitwise or.
+expr3 = x ^ y  # Bitwise xor.
 expr4 = ~x  # Bitwise negation.
 
 # arithmetic
@@ -61,7 +61,7 @@ expr11 = x @ y  # inner product of bitvectors mod 2 (+ is xor).
 expr12 = x == y
 expr13 = x != y
 expr14 = x < y
-expr15 = x >= y
+expr15 = x <= y
 expr16 = x > y
 expr17 = x >= y
 
@@ -250,12 +250,3 @@ circ9 = circ >> aigerbv.index_gate(wordlen=3, idx=1, input='x', output='x1')
 - `aigerbv.signed_gt_gate(3, left='x', right='y', output='x>y')`
 - `aigerbv.signed_le_gate(3, left='x', right='y', output='x<=y')`
 - `aigerbv.signed_ge_gate(3, left='x', right='y', output='x>=y')`
-
-
-## TODO: not implemented
-- 
-- `expr = x.concat(y)`
-- `expr = x.repeat(2)`
-- `expr1, expr2 = x.split(idx=2)`
-- `expr = x[2]`
-
