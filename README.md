@@ -66,8 +66,8 @@ expr16 = x > y
 expr17 = x >= y
 
 # Atoms can be constants.
-expr18 = x & aiger.atom(True)  # Equivilent to just x.
-expr19 = x & aiger.atom(False)  # Equivilent to const False.
+expr18 = x & aiger.atom(3)  # Equivilent to just x.
+expr19 = x & aiger.atom(0xff)  # Equivilent to const False.
 
 # BitVector expressions can be concatenated.
 expr20 = x.concat(y)
