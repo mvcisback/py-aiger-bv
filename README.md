@@ -40,7 +40,9 @@ representing the word. For signed numbers, two's complement is used.
 
 ```python
 import aigerbv
-x, y = aigerbv.atom('x', signed=True), aigerbv.atom('y', signed=True)
+
+# Create 16 bit variables.
+x, y = aigerbv.atom(16, 'x', signed=True), aigerbv.atom(16, 'y', signed=True)
 
 # bitwise ops.
 expr1 = x & y  # Bitwise and.
@@ -66,8 +68,8 @@ expr16 = x > y
 expr17 = x >= y
 
 # Atoms can be constants.
-expr18 = x & aiger.atom(3)  # Equivilent to just x.
-expr19 = x & aiger.atom(0xff)  # Equivilent to const False.
+expr18 = x & aiger.atom(3)
+expr19 = x & aiger.atom(0xff_12)
 
 # BitVector expressions can be concatenated.
 expr20 = x.concat(y)
