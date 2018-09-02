@@ -8,9 +8,9 @@
 [![codecov](https://codecov.io/gh/mvcisback/py-aiger-bv/branch/master/graph/badge.svg)](https://codecov.io/gh/mvcisback/py-aiger-bv)
 [![Updates](https://pyup.io/repos/github/mvcisback/py-aiger-bv/shield.svg)](https://pyup.io/repos/github/mvcisback/py-aiger-bv/)
 
-[![PyPI version shields.io](https://img.shields.io/pypi/v/py-aiger-bv.svg)](https://pypi.python.org/pypi/py-aiger-bv/)
-[![PyPI license](https://img.shields.io/pypi/l/py-aiger-bv.svg)](https://pypi.python.org/pypi/py-aiger-bv/)
-
+[![PyPI version](https://badge.fury.io/py/py-aiger-bv.svg)](https://badge.fury.io/py/py-aiger-bv)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ 
 # Table of Contents
 - [About](#about-py-aiger-bv)
 - [Installation](#installation)
@@ -40,12 +40,14 @@ representing the word. For signed numbers, two's complement is used.
 
 ```python
 import aigerbv
-x, y = aigerbv.atom('x', signed=True), aigerbv.atom('y', signed=True)
+
+# Create 16 bit variables.
+x, y = aigerbv.atom(16, 'x', signed=True), aigerbv.atom(16, 'y', signed=True)
 
 # bitwise ops.
-expr1 = x & y  # circuit with inputs 'x', 'y' and 1 output computing x AND y.
-expr2 = x | y  # logical or.
-expr3 = x ^ y  # logical xor.
+expr1 = x & y  # Bitwise and.
+expr2 = x | y  # Bitwise or.
+expr3 = x ^ y  # Bitwise xor.
 expr4 = ~x  # Bitwise negation.
 
 # arithmetic
@@ -61,13 +63,13 @@ expr11 = x @ y  # inner product of bitvectors mod 2 (+ is xor).
 expr12 = x == y
 expr13 = x != y
 expr14 = x < y
-expr15 = x >= y
+expr15 = x <= y
 expr16 = x > y
 expr17 = x >= y
 
 # Atoms can be constants.
-expr18 = x & aiger.atom(True)  # Equivilent to just x.
-expr19 = x & aiger.atom(False)  # Equivilent to const False.
+expr18 = x & aiger.atom(3)
+expr19 = x & aiger.atom(0xff_12)
 
 # BitVector expressions can be concatenated.
 expr20 = x.concat(y)
@@ -250,12 +252,3 @@ circ9 = circ >> aigerbv.index_gate(wordlen=3, idx=1, input='x', output='x1')
 - `aigerbv.signed_gt_gate(3, left='x', right='y', output='x>y')`
 - `aigerbv.signed_le_gate(3, left='x', right='y', output='x<=y')`
 - `aigerbv.signed_ge_gate(3, left='x', right='y', output='x>=y')`
-
-
-## TODO: not implemented
-- 
-- `expr = x.concat(y)`
-- `expr = x.repeat(2)`
-- `expr1, expr2 = x.split(idx=2)`
-- `expr = x[2]`
-
