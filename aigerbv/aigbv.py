@@ -91,23 +91,36 @@ class AIGBV:
         )
 
     def __or__(self, other):
-        assert not self.inputs & other.inputs
         assert not self.outputs & other.outputs
         assert not self.latches & other.latches
 
-        return AIGBV(
+        shared_inputs = self.inputs & other.inputs
+        input_map = dict(self.input_map)
+        if shared_inputs:
+            relabels1 = {n: common._fresh() for n in shared_inputs}
+            relabels2 = {n: common._fresh() for n in shared_inputs}
+            self, other = self['i', relabels1], other['i', relabels2]
+
+        circ = AIGBV(
             aig=self.aig | other.aig,
             input_map=self.input_map | other.input_map,
             output_map=self.output_map | other.output_map,
             latch_map=self.latch_map | other.latch_map)
 
+        if shared_inputs:
+            for orig in shared_inputs:
+                new1, new2 = relabels1[orig], relabels2[orig]
+                circ = common.tee(len(input_map[orig]), {orig: [new1, new2]}) \
+                    >> circ
+        return circ
+
     def __call__(self, inputs, latches=None):
-        if latches is None:
-            latches = dict()
+        if latches is not None:
+            latches = _blast(latches, self.latch_map)
 
         out_vals, latch_vals = self.aig(
             inputs=_blast(inputs, self.input_map),
-            latches=_blast(latches, self.latch_map))
+            latches=latches)
         outputs = _unblast(out_vals, self.output_map)
         latch_outs = _unblast(latch_vals, self.latch_map)
         return outputs, latch_outs
@@ -127,7 +140,7 @@ class AIGBV:
         self.aig.write(path)
 
     def feedback(self, inputs, outputs, initials=None, latches=None,
-                 keep_outputs=False):
+                 keep_outputs=False, signed=False):
         if latches is None:
             latches = inputs
 
@@ -138,10 +151,13 @@ class AIGBV:
         new_latches = [(n, common.named_indexes(k, n))
                        for k, n in zip(wordlens, latches)]
 
-        if initials is not None:
-            initials = fn.lcat([i]*k for k, i in zip(wordlens, initials))
-
+        if initials is None:
+            initials = [False for _ in inputs]
         assert len(inputs) == len(outputs) == len(initials) == len(latches)
+
+        initials = fn.lcat(
+            common.encode_int(k, i, signed) for k, i in zip(wordlens, initials)
+        )
 
         def get_names(key_vals):
             return fn.lcat(fn.pluck(1, key_vals))

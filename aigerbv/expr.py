@@ -1,7 +1,6 @@
 from typing import Union
 
 import attr
-import funcy as fn
 
 from aigerbv import aigbv
 from aigerbv import common as cmn
@@ -115,10 +114,12 @@ Expr = Union[UnsignedBVExpr, SignedBVExpr]
 
 
 def _binary_gate(gate, expr1, expr2):
+    if isinstance(expr2, int):
+        expr2 = atom(expr1.size, expr2, signed=isinstance(expr1, SignedBVExpr))
+
     assert expr1.size == expr2.size
     wordlen = expr1.size
-    circ1, circ2 = expr1.aigbv, expr2.aigbv
-    circ3 = _parcompose(wordlen, circ1, circ2)
+    circ3 = expr1.aigbv | expr2.aigbv
     circ3 >>= gate(wordlen=wordlen, output=cmn._fresh(),
                    left=expr1.output, right=expr2.output)
     return type(expr1)(aigbv=circ3)
@@ -131,23 +132,6 @@ def _unary_gate(gate, expr):
 
 def _fresh_relabel(keys):
     return {k: cmn._fresh() for k in keys}
-
-
-def _parcompose(wordlen, circ1, circ2):
-    inputs_collide = circ1.inputs & circ2.inputs
-    outputs_collide = circ1.outputs & circ2.outputs
-
-    if outputs_collide:
-        circ1 = circ1['o', _fresh_relabel(circ1.outputs)]
-        circ2 = circ2['o', _fresh_relabel(circ2.outputs)]
-
-    if not inputs_collide:
-        return circ1 | circ2
-    else:
-        subs1 = _fresh_relabel(circ1.inputs)
-        subs2 = _fresh_relabel(circ2.inputs)
-        tee = cmn.tee(wordlen, fn.merge_with(tuple, subs1, subs2))
-        return tee >> (circ2['i', subs1] | circ1['i', subs2])
 
 
 def atom(wordlen: int, val: Union[str, int], signed: bool=True) -> Expr:

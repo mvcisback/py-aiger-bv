@@ -6,6 +6,7 @@ from aigerbv.aigbv import AIGBV
 from aigerbv.aigbv import aig2aigbv
 from aigerbv.common import source, sink, tee, repeat, identity_gate
 from aigerbv.common import reverse_gate, combine_gate, split_gate, index_gate
+from aigerbv.common import lookup
 
 # Bitwise Binary Ops.
 from aigerbv.common import bitwise_and, bitwise_or, bitwise_xor
