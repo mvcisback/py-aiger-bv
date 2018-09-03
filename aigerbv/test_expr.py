@@ -12,6 +12,12 @@ def test_expr_bitwise_and(a, b):
     assert common.decode_int(expr()) == a & b
 
 
+@given(st.integers(-4, 3))
+def test_expr_bitwise_and2(a):
+    expr = atom(4, a) & atom(4, a)
+    assert common.decode_int(expr()) == a
+
+
 @given(st.integers(-4, 3), st.integers(-4, 3))
 def test_expr_bitwise_or(a, b):
     expr = atom(4, a) | atom(4, b)

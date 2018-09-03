@@ -89,6 +89,9 @@ class UnsignedBVExpr:
     def __abs__(self):
         return self
 
+    def _fresh_output(self):
+        return type(self)(self.aigbv['o', {self.output: cmn._fresh()}])
+
 
 class SignedBVExpr(UnsignedBVExpr):
     def __neg__(self):
@@ -119,6 +122,9 @@ def _binary_gate(gate, expr1, expr2):
 
     assert expr1.size == expr2.size
     wordlen = expr1.size
+    expr1 = expr1._fresh_output()
+    expr2 = expr2._fresh_output()
+
     circ3 = expr1.aigbv | expr2.aigbv
     circ3 >>= gate(wordlen=wordlen, output=cmn._fresh(),
                    left=expr1.output, right=expr2.output)
@@ -128,10 +134,6 @@ def _binary_gate(gate, expr1, expr2):
 def _unary_gate(gate, expr):
     circ = gate(expr.size, input=expr.output, output=cmn._fresh())
     return type(expr)(aigbv=expr.aigbv >> circ)
-
-
-def _fresh_relabel(keys):
-    return {k: cmn._fresh() for k in keys}
 
 
 def atom(wordlen: int, val: Union[str, int], signed: bool=True) -> Expr:
