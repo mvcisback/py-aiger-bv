@@ -90,6 +90,9 @@ class AIGBV:
             latch_map=self.latch_map | other.latch_map,
         )
 
+    def __lshift__(self, other):
+        return other >> self
+
     def __or__(self, other):
         assert not self.outputs & other.outputs
         assert not self.latches & other.latches
@@ -110,8 +113,8 @@ class AIGBV:
         if shared_inputs:
             for orig in shared_inputs:
                 new1, new2 = relabels1[orig], relabels2[orig]
-                circ = common.tee(len(input_map[orig]), {orig: [new1, new2]}) \
-                    >> circ
+                circ <<= common.tee(len(input_map[orig]), {orig: [new1, new2]})
+
         return circ
 
     def __call__(self, inputs, latches=None):
