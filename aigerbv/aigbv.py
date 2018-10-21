@@ -189,10 +189,12 @@ class AIGBV:
             lookup_root = fn.merge(*(
                 {v: k for v in vals} for k, vals in name_map)
             )
-            return frozenset(fn.group_by(
+            mapping = fn.group_by(
                 lambda x: lookup_root[x.split('##time_')[0]],
                 names
-            ).items())
+            )
+            mapping = fn.walk_values(tuple, mapping)  # Make hashable.
+            return frozenset(mapping.items())
 
         return AIGBV(
             aig=aig,
