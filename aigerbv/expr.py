@@ -136,7 +136,7 @@ def _unary_gate(gate, expr):
     return type(expr)(aigbv=expr.aigbv >> circ)
 
 
-def atom(wordlen: int, val: Union[str, int], signed: bool=True) -> Expr:
+def atom(wordlen: int, val: Union[str, int], signed: bool = True) -> Expr:
     output = cmn._fresh()
     if isinstance(val, str):
         aig = cmn.identity_gate(wordlen, val, output)
