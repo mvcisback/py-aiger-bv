@@ -26,7 +26,7 @@ This library provides word level abstractions on top of
 
 # Installation
 
-TODO
+`pip install py-aiger-bv`
 
 # BitVector Expression DSL
 
