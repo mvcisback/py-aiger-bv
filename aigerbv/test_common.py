@@ -308,3 +308,21 @@ def test_lookup(a):
         'x': common.encode_int(2, a, signed=False),
     })[0]['out']
     assert common.decode_int(val) == lookup[a]
+
+
+def test_kmodels():
+    def _test_kmodels(k):
+        circ = common.kmodels(4, k, input='x', output='x')
+        models = 0
+        for i in range(2**4):
+            val = circ({
+                'x': common.encode_int(4, i, signed=False)
+            })[0]['x'][0]
+            if val:
+                models += 1
+        assert models == k
+
+    _test_kmodels(0)
+    _test_kmodels(5)
+    _test_kmodels(4)
+    _test_kmodels(15)
