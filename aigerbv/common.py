@@ -298,40 +298,23 @@ def index_gate(wordlen, idx, input, output=None):
 
 
 def unsigned_lt_gate(wordlen, left, right, output):
-    bit_comparer = aiger.bit_flipper(['x']) \
-        >> aiger.and_gate(['x', 'y'], 'tmp') \
-        >> aiger.and_gate(['active', 'tmp'], 'out')
-    check_active = aiger.parity_gate(['x', 'y'], 'tmp') \
-        >> aiger.bit_flipper(['tmp']) \
-        >> aiger.and_gate(['tmp', 'active'], 'active')
-    _gadget = bit_comparer | check_active
+    left_names = named_indexes(wordlen, left)
+    right_names = named_indexes(wordlen, right)
 
-    def gadget(params):
-        x, y, active, out = params
-        subs = {'x': x, 'y': y, 'active': active, 'out': out}
-        return _gadget[('i', subs)][('o', subs)]
+    lefts = map(aiger.atom, left_names)
+    rights = map(aiger.atom, right_names)
 
-    # Create gadget for each pair of bits.
-    active = _fresh()
-    lefts = named_indexes(wordlen, left)
-    rights = named_indexes(wordlen, right)
-    outputs = named_indexes(wordlen, output)
-    actives = fn.repeat(active)
+    def test_bit(expr, lr):
+        l, r = lr
+        expr &= ~(l ^ r)  # l == r.
+        expr |= ~l & r  # l < r.
+        return expr
 
-    # Work GSB to LSB.
-    zipped = zip(lefts[::-1], rights[::-1], actives, outputs[::-1])
-    gadgets = map(gadget, zipped)
-
-    # Sequentially compose gadgets and take disjunction.
-    aig = aiger.source({active: True}) \
-        >> reduce(op.rshift, gadgets) \
-        >> aiger.or_gate(outputs, output) \
-        >> aiger.sink([active])
-
+    expr = reduce(test_bit, zip(lefts, rights), aiger.atom(False))
     return aigbv.AIGBV(
-        aig=aig,
-        input_map=frozenset([(left, lefts), (right, rights)]),
-        output_map=frozenset([(output, (output,))]),
+        aig=expr.aig,
+        input_map=frozenset([(left, left_names), (right, right_names)]),
+        output_map=frozenset([(output, (expr.output,))]),
     )
 
 
