@@ -5,8 +5,13 @@ from aigerbv import common
 import hypothesis.strategies as st
 from hypothesis import given
 
+@given(st.integers(0, 7), st.integers(0, 3))
+def test_srl_unsigned(a, b):
+	expr = atom(4, a) >> b
+	assert common.decode_int(expr(), signed=False) == a >> b
+
 @given(st.integers(-8, 7), st.integers(0, 3))
-def test_srl(a, b):
+def test_srl_signed(a, b):
 	expr = atom(4, a) >> b
 	assert common.decode_int(expr()) == a >> b
 

@@ -54,7 +54,7 @@ class UnsignedBVExpr:
 		return _shift_gate(cmn.left_shift_gate, self, n_bits)
 
 	def __rshift__(self, n_bits):
-		return _shift_gate(cmn.arithmetic_right_shift_gate, self, n_bits)
+		return _shift_gate(cmn.logical_right_shift_gate, self, n_bits)
 
 	def __add__(self, other):
 		return _binary_gate(cmn.add_gate, self, other)
@@ -114,6 +114,9 @@ class SignedBVExpr(UnsignedBVExpr):
 
 	def __gt__(self, other):
 		return _binary_gate(cmn.signed_gt_gate, self, other)
+
+	def __rshift__(self, n_bits):
+		return _shift_gate(cmn.arithmetic_right_shift_gate, self, n_bits)
 
 	def __abs__(self):
 		return _unary_gate(cmn.abs_gate, self)
