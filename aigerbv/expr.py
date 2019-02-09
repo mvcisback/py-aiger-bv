@@ -4,7 +4,7 @@ import attr
 
 from aigerbv import aigbv
 from aigerbv import common as cmn
-
+import inspect
 
 @attr.s(frozen=True, slots=True, cmp=False, auto_attribs=True)
 class UnsignedBVExpr:
@@ -102,7 +102,6 @@ class UnsignedBVExpr:
 class SignedBVExpr(UnsignedBVExpr):
 	def __neg__(self):
 		return _unary_gate(cmn.negate_gate, self)
-
 	def __le__(self, other):
 		return _binary_gate(cmn.signed_le_gate, self, other)
 
@@ -114,7 +113,6 @@ class SignedBVExpr(UnsignedBVExpr):
 
 	def __gt__(self, other):
 		return _binary_gate(cmn.signed_gt_gate, self, other)
-
 	def __rshift__(self, n_bits):
 		return _shift_gate(cmn.arithmetic_right_shift_gate, self, n_bits)
 

@@ -20,11 +20,50 @@ def test_sll(a, b):
 	expr = atom(4, a) << b
 	assert common.decode_int(expr()) == a << b
 
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_lt_literal(a, b):
+	expr = atom(4, a, signed=False) < b
+	assert expr()[0] == (a < b)
+
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_gt_literal(a, b):
+	expr = atom(4, a, signed=False) > b
+	assert expr()[0] == (a > b)
+
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_ge_literal(a, b):
+	expr = atom(4, a, signed=False) >= b
+	assert expr()[0] == (a >= b)
+
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_le_literal(a, b):
+	expr = atom(4, a, signed=False) <= b
+	assert expr()[0] == (a <= b)
+
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_lt_literal(a, b):
+	expr = atom(4, a, signed=True) < b
+	assert expr()[0] == (a < b)
+
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_gt_literal(a, b):
+	expr = atom(4, a, signed=True) > b
+	assert expr()[0] == (a > b)
+
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_ge_literal(a, b):
+	expr = atom(4, a, signed=True) >= b
+	assert expr()[0] == (a >= b)
+
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_le_literal(a, b):
+	expr = atom(4, a, signed=True) <= b
+	assert expr()[0] == (a <= b)
+
 @given(st.integers(-4, 3), st.integers(-4, 3))
 def test_expr_bitwise_and(a, b):
 	expr = atom(4, a) & atom(4, b)
 	assert common.decode_int(expr()) == a & b
-
 
 @given(st.integers(-4, 3))
 def test_expr_bitwise_and2(a):
@@ -108,7 +147,6 @@ def test_expr_unsigned_le(a, b):
 def test_expr_unsigned_lt(a, b):
 	expr = atom(4, a, signed=False) < atom(4, b, signed=False)
 	assert expr()[0] == (a < b)
-
 
 @given(st.integers(0, 7), st.integers(0, 7))
 def test_expr_unsigned_gt(a, b):
