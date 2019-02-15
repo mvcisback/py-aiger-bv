@@ -4,6 +4,7 @@ from aigerbv import common
 import hypothesis.strategies as st
 from hypothesis import given
 
+
 @given(st.integers(-4, 3))
 def test_seqcomp(a):
     circ1 = common.identity_gate(4, input='a', output='tmp')

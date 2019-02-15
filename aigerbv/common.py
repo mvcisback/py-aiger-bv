@@ -17,6 +17,7 @@ def _fresh():
 def _name_idx(root, i):
     return f"{root}[{i}]"
 
+
 def named_indexes(wordlen, root):
     return tuple(_name_idx(root, i) for i in range(wordlen))
 
@@ -76,6 +77,7 @@ def bitwise_negate(wordlen, input='x', output='not x'):
         input_map=frozenset([(input, inputs)]),
         output_map=frozenset([(output, outputs)]),
     )
+
 
 def _apply_pairwise(func, seq):
     return list(starmap(func, zip(seq[::2], seq[1::2])))
