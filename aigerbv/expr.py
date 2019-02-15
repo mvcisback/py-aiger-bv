@@ -4,6 +4,7 @@ import attr
 
 from aigerbv import aigbv
 from aigerbv import common as cmn
+from functools import partial
 
 
 @attr.s(frozen=True, slots=True, cmp=False, auto_attribs=True)
@@ -49,6 +50,12 @@ class UnsignedBVExpr:
 
     def __invert__(self):
         return _unary_gate(cmn.bitwise_negate, self)
+
+    def __lshift__(self, n_bits):
+        return _shift_gate(cmn.left_shift_gate, self, n_bits)
+
+    def __rshift__(self, n_bits):
+        return _shift_gate(cmn.logical_right_shift_gate, self, n_bits)
 
     def __add__(self, other):
         return _binary_gate(cmn.add_gate, self, other)
@@ -109,11 +116,18 @@ class SignedBVExpr(UnsignedBVExpr):
     def __gt__(self, other):
         return _binary_gate(cmn.signed_gt_gate, self, other)
 
+    def __rshift__(self, n_bits):
+        return _shift_gate(cmn.arithmetic_right_shift_gate, self, n_bits)
+
     def __abs__(self):
         return _unary_gate(cmn.abs_gate, self)
 
 
 Expr = Union[UnsignedBVExpr, SignedBVExpr]
+
+
+def _shift_gate(gate, expr, n_bits):
+    return _unary_gate(gate=partial(gate, shift=n_bits), expr=expr)
 
 
 def _binary_gate(gate, expr1, expr2):

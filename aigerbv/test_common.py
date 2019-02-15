@@ -16,7 +16,6 @@ def test_seqcomp(a):
     val = circ3({
         'a': common.encode_int(4, a),
     })[0]['out']
-
     assert common.decode_int(val) == a
 
 
