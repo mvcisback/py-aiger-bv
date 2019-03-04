@@ -7,6 +7,15 @@ from aigerbv import common as cmn
 from functools import partial
 
 
+def constk(k, size=None):
+    def _constk(expr):
+        nonlocal size
+        if size is None:
+            size = expr.size
+        return cmn.source(size, k, signed=False)
+    return _constk
+
+
 @attr.s(frozen=True, slots=True, cmp=False, auto_attribs=True)
 class UnsignedBVExpr:
     aigbv: aigbv.AIGBV
@@ -58,62 +67,43 @@ class UnsignedBVExpr:
         return _shift_gate(cmn.logical_right_shift_gate, self, n_bits)
 
     def __add__(self, other):
-        return _binary_gate(cmn.add_gate, self, other)
+        return _binary_gate(cmn.add_gate, self, other, lambda x: x)
 
     def __sub__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(self.size, 0, signed=False)
-        return _binary_gate(cmn.subtract_gate, self, other)
+        return _binary_gate(cmn.subtract_gate, self, other, constk(0))
 
     def __and__(self, other):
-        if self.aigbv == other.aigbv:
-            return self
-        return _binary_gate(cmn.bitwise_and, self, other)
+        return _binary_gate(cmn.bitwise_and, self, other, lambda x: x)
 
     def __matmul__(self, other):
-        if self.aigbv == other.aigbv:
-            return _unary_gate(cmn.even_popcount_gate, self)
-        return _binary_gate(cmn.dot_mod2_gate, self, other)
+        return _binary_gate(
+            cmn.dot_mod2_gate, self, other,
+            lambda e: _unary_gate(cmn.even_popcount_gate, e).aigbv
+        )
 
     def __or__(self, other):
-        if self.aigbv == other.aigbv:
-            return self
-        return _binary_gate(cmn.bitwise_or, self, other)
+        return _binary_gate(cmn.bitwise_or, self, other, lambda x: x)
 
     def __xor__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(self.size, 0, signed=False)
-        return _binary_gate(cmn.bitwise_xor, self, other)
-
-    def __eq__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 1, signed=False)
-        return _binary_gate(cmn.eq_gate, self, other)
+        return _binary_gate(cmn.bitwise_xor, self, other, constk(0))
 
     def __ne__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 0, signed=False)
-        return _binary_gate(cmn.ne_gate, self, other)
+        return _binary_gate(cmn.ne_gate, self, other, constk(0, 1))
+
+    def __eq__(self, other):
+        return ~(self != other)
 
     def __le__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 1, signed=False)
-        return _binary_gate(cmn.unsigned_le_gate, self, other)
-
-    def __lt__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 0, signed=False)
-        return _binary_gate(cmn.unsigned_lt_gate, self, other)
+        return _binary_gate(cmn.unsigned_le_gate, self, other, constk(1, 1))
 
     def __ge__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 1, signed=False)
-        return _binary_gate(cmn.unsigned_ge_gate, self, other)
+        return _binary_gate(cmn.unsigned_ge_gate, self, other, constk(1, 1))
+
+    def __lt__(self, other):
+        return ~(self >= other)
 
     def __gt__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 0, signed=False)
-        return _binary_gate(cmn.unsigned_gt_gate, self, other)
+        return ~(self <= other)
 
     def __abs__(self):
         return self
@@ -136,24 +126,10 @@ class SignedBVExpr(UnsignedBVExpr):
         return _unary_gate(cmn.negate_gate, self)
 
     def __le__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 1, signed=False)
-        return _binary_gate(cmn.signed_le_gate, self, other)
-
-    def __lt__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 0, signed=False)
-        return _binary_gate(cmn.signed_lt_gate, self, other)
+        return _binary_gate(cmn.signed_le_gate, self, other, constk(1, 1))
 
     def __ge__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 1, signed=False)
-        return _binary_gate(cmn.signed_ge_gate, self, other)
-
-    def __gt__(self, other):
-        if self.aigbv == other.aigbv:
-            return cmn.source(1, 0, signed=False)
-        return _binary_gate(cmn.signed_gt_gate, self, other)
+        return _binary_gate(cmn.signed_ge_gate, self, other, constk(1, 1))
 
     def __rshift__(self, n_bits):
         return _shift_gate(cmn.arithmetic_right_shift_gate, self, n_bits)
@@ -169,12 +145,14 @@ def _shift_gate(gate, expr, n_bits):
     return _unary_gate(gate=partial(gate, shift=n_bits), expr=expr)
 
 
-def _binary_gate(gate, expr1, expr2):
+def _binary_gate(gate, expr1, expr2, same_circ=None):
     if isinstance(expr2, int):
         expr2 = atom(expr1.size, expr2, signed=isinstance(expr1, SignedBVExpr))
 
     assert expr1.size == expr2.size
-    if expr1.aigbv.aig.outputs & expr2.aigbv.aig.outputs:
+    if expr1.aigbv == expr2.aigbv and same_circ is not None:
+        return type(expr1)(same_circ(expr1))
+    elif expr1.aigbv.aig.outputs & expr2.aigbv.aig.outputs:
         expr2 = expr2._fresh_output()
 
     circ3 = expr1.aigbv | expr2.aigbv
