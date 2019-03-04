@@ -1,4 +1,4 @@
-from aigerbv.expr import atom
+from aigerbv.expr import atom, ite
 from aigerbv import common
 
 # additional imports for testing frammework
@@ -215,3 +215,11 @@ def test_expr_dotprod_mod2(a, b):
     expr3 = expr1 @ expr2
     val = sum([x * y for x, y in zip(expr1(), expr2())])
     assert expr3()[0] == bool(val % 2)
+
+
+@given(st.booleans(), st.integers(-4, 3), st.integers(-4, 3))
+def test_ite(test, a, b):
+    _test, _a, _b = atom(1, test, signed=False), atom(4, a), atom(4, b)
+    expr = ite(_test, _a, _b)
+    val = common.decode_int(expr())
+    assert val == (a if test else b)

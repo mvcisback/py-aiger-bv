@@ -178,7 +178,9 @@ def identity_gate(wordlen, input='x', output=None):
 
 def reverse_gate(wordlen, input='x', output='rev(x)'):
     circ = identity_gate(wordlen, input, output)
-    output_map = frozenset((k, reversed(vs)) for k, vs in circ.output_map)
+    output_map = frozenset(
+        (k, tuple(reversed(vs))) for k, vs in circ.output_map
+    )
     return attr.evolve(circ, output_map=output_map)
 
 
