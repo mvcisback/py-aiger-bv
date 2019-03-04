@@ -429,6 +429,10 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
     """Return a circuit taking a wordlen bitvector where only k
     valuations return True. Uses encoding from [1].
 
+    Note that this is equivalent to (~x < k).
+    - TODO: Add automated simplification so that the circuits
+            are equiv.
+
     [1]: Chakraborty, Supratik, et al. "From Weighted to Unweighted Model
     Counting." IJCAI. 2015.
     """

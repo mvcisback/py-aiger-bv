@@ -61,43 +61,74 @@ class UnsignedBVExpr:
         return _binary_gate(cmn.add_gate, self, other)
 
     def __sub__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(self.size, 0, signed=False)
         return _binary_gate(cmn.subtract_gate, self, other)
 
     def __and__(self, other):
+        if self.aigbv == other.aigbv:
+            return self
         return _binary_gate(cmn.bitwise_and, self, other)
 
     def __matmul__(self, other):
+        if self.aigbv == other.aigbv:
+            return _unary_gate(cmn.even_popcount_gate, self)
         return _binary_gate(cmn.dot_mod2_gate, self, other)
 
     def __or__(self, other):
+        if self.aigbv == other.aigbv:
+            return self
         return _binary_gate(cmn.bitwise_or, self, other)
 
     def __xor__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(self.size, 0, signed=False)
         return _binary_gate(cmn.bitwise_xor, self, other)
 
     def __eq__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 1, signed=False)
         return _binary_gate(cmn.eq_gate, self, other)
 
     def __ne__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 0, signed=False)
         return _binary_gate(cmn.ne_gate, self, other)
 
     def __le__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 1, signed=False)
         return _binary_gate(cmn.unsigned_le_gate, self, other)
 
     def __lt__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 0, signed=False)
         return _binary_gate(cmn.unsigned_lt_gate, self, other)
 
     def __ge__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 1, signed=False)
         return _binary_gate(cmn.unsigned_ge_gate, self, other)
 
     def __gt__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 0, signed=False)
         return _binary_gate(cmn.unsigned_gt_gate, self, other)
 
     def __abs__(self):
         return self
 
     def _fresh_output(self):
-        return type(self)(self.aigbv['o', {self.output: cmn._fresh()}])
+        # Change bit level names.
+        outputs = dict(self.aigbv.output_map)
+        relabels = {n: cmn._fresh() for n in outputs[self.output]}
+        aig = self.aigbv.aig['o', relabels]
+        circ = attr.evolve(
+            self.aigbv, aig=aig,
+            output_map=frozenset([(self.output, aig.outputs)])
+        )
+        # Change word level name.
+        return type(self)(circ['o', {self.output: cmn._fresh()}])
 
 
 class SignedBVExpr(UnsignedBVExpr):
@@ -105,15 +136,23 @@ class SignedBVExpr(UnsignedBVExpr):
         return _unary_gate(cmn.negate_gate, self)
 
     def __le__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 1, signed=False)
         return _binary_gate(cmn.signed_le_gate, self, other)
 
     def __lt__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 0, signed=False)
         return _binary_gate(cmn.signed_lt_gate, self, other)
 
     def __ge__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 1, signed=False)
         return _binary_gate(cmn.signed_ge_gate, self, other)
 
     def __gt__(self, other):
+        if self.aigbv == other.aigbv:
+            return cmn.source(1, 0, signed=False)
         return _binary_gate(cmn.signed_gt_gate, self, other)
 
     def __rshift__(self, n_bits):
@@ -135,12 +174,11 @@ def _binary_gate(gate, expr1, expr2):
         expr2 = atom(expr1.size, expr2, signed=isinstance(expr1, SignedBVExpr))
 
     assert expr1.size == expr2.size
-    wordlen = expr1.size
-    expr1 = expr1._fresh_output()
-    expr2 = expr2._fresh_output()
+    if expr1.aigbv.aig.outputs & expr2.aigbv.aig.outputs:
+        expr2 = expr2._fresh_output()
 
     circ3 = expr1.aigbv | expr2.aigbv
-    circ3 >>= gate(wordlen=wordlen, output=cmn._fresh(),
+    circ3 >>= gate(wordlen=expr1.size, output=cmn._fresh(),
                    left=expr1.output, right=expr2.output)
     return type(expr1)(aigbv=circ3)
 
