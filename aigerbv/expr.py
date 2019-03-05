@@ -13,7 +13,7 @@ def constk(k, size=None):
         if size is None:
             size = expr.size
         return cmn.source(size, k, signed=False) \
-            |  cmn.sink(expr.size, expr.inputs)
+            | cmn.sink(expr.size, expr.inputs)
     return _constk
 
 
