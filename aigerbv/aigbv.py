@@ -47,6 +47,10 @@ class AIGBV:
     def latches(self):
         return set(fn.pluck(0, self.latch_map))
 
+    @property
+    def aig(self):
+        return self.aigbv.aig
+
     def __getitem__(self, others):
         if not isinstance(others, tuple):
             return super().__getitem__(others)

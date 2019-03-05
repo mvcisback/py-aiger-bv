@@ -57,6 +57,10 @@ class UnsignedBVExpr:
     def size(self):
         return len(list(self.aigbv.output_map)[0][1])
 
+    @property
+    def aig(self):
+        return self.aigbv.aig
+
     def __invert__(self):
         return _unary_gate(cmn.bitwise_negate, self)
 

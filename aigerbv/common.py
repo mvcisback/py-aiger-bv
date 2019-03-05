@@ -436,6 +436,7 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
     [1]: Chakraborty, Supratik, et al. "From Weighted to Unweighted Model
     Counting." IJCAI. 2015.
     """
+
     assert 0 <= k < 2**wordlen
     if output is None:
         output = _fresh()
