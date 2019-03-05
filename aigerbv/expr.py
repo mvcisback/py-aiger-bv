@@ -170,6 +170,13 @@ def _unary_gate(gate, expr):
     return type(expr)(aigbv=expr.aigbv >> circ)
 
 
+def ite(test, expr_true, expr_false):
+    assert test.size == 1
+    assert expr_true.size == expr_false.size
+    test = test.repeat(expr_true.size)
+    return (~test | expr_true) & (test | expr_false)
+
+
 def atom(wordlen: int, val: Union[str, int], signed: bool = True) -> Expr:
     output = cmn._fresh()
     if isinstance(val, str):
