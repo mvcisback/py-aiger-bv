@@ -12,7 +12,8 @@ def constk(k, size=None):
         nonlocal size
         if size is None:
             size = expr.size
-        return cmn.source(size, k, signed=False)
+        return cmn.source(size, k, signed=False) \
+            |  cmn.sink(expr.size, expr.inputs)
     return _constk
 
 
@@ -177,8 +178,14 @@ def ite(test, expr_true, expr_false):
     return (~test | expr_true) & (test | expr_false)
 
 
-def atom(wordlen: int, val: Union[str, int], signed: bool = True) -> Expr:
+Val = Union[str, int, None]
+
+
+def atom(wordlen: int, val: Val, signed: bool = True) -> Expr:
     output = cmn._fresh()
+    if val is None:
+        val = cmn._fresh()
+
     if isinstance(val, str):
         aig = cmn.identity_gate(wordlen, val, output)
     else:
