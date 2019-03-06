@@ -4,7 +4,7 @@ import attr
 
 from aigerbv import aigbv
 from aigerbv import common as cmn
-from functools import partial
+from functools import partial, reduce
 
 
 def constk(k, size=None):
@@ -26,9 +26,28 @@ class UnsignedBVExpr:
             inputs = {}
         return self.aigbv(inputs)[0][self.output]
 
-    def __getitem__(self, idx: int):
-        # TODO: support ranged indexing.
-        indexer = cmn.index_gate(self.size, idx, self.output, cmn._fresh())
+    def __getitem__(self, idx: Union[int, slice]):
+        # TODO: support slice steps.
+        def _indexer(idx):
+            return cmn.index_gate(self.size, idx, self.output, cmn._fresh())
+
+        if not isinstance(idx, slice):
+            idx = slice(idx, idx+1)
+        if idx.start is None:
+            idx = slice(0, idx.stop)
+        if idx.stop is None:
+            idx = slice(idx.start, self.size)
+        if idx.step is not None:
+            raise NotImplementedError
+
+        assert 0 <= idx.start < idx.stop <= self.size
+        indicies = list(range(idx.start, idx.stop))
+
+        if len(indicies) == 1:
+            return UnsignedBVExpr(self.aigbv >> _indexer(indicies[0]))
+
+        indexers = map(_indexer, indicies)
+        indexer = reduce(lambda x, y: x | y, indexers)
         return UnsignedBVExpr(self.aigbv >> indexer)
 
     def concat(self, other):

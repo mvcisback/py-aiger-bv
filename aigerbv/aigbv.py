@@ -150,12 +150,12 @@ class AIGBV:
         idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.input_map)
         odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.output_map)
 
-        wordlens = [len(vals) for _, vals in self.input_map]
+        wordlens = [len(vals) for i, vals in idrop]
         new_latches = [(n, common.named_indexes(k, n))
                        for k, n in zip(wordlens, latches)]
 
         if initials is None:
-            initials = [False for _ in inputs]
+            initials = [0 for _ in inputs]
         assert len(inputs) == len(outputs) == len(initials) == len(latches)
 
         initials = fn.lcat(
@@ -177,7 +177,7 @@ class AIGBV:
         return AIGBV(
             aig=aig,
             input_map=imap,
-            output_map=omap | (odrop if keep_outputs else {}),
+            output_map=omap | (odrop if keep_outputs else frozenset()),
             latch_map=self.latch_map | set(new_latches),
         )
 
