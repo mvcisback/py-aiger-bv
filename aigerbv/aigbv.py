@@ -181,8 +181,13 @@ class AIGBV:
             latch_map=self.latch_map | set(new_latches),
         )
 
-    def unroll(self, horizon, *, init=True, omit_latches=True):
-        aig = self.aig.unroll(horizon, init=init, omit_latches=omit_latches)
+    def unroll(self, horizon, *, init=True, omit_latches=True,
+               only_last_outputs=False):
+        aig = self.aig.unroll(
+            horizon, init=init,
+            omit_latches=omit_latches,
+            only_last_outputs=only_last_outputs
+        )
         # TODO: generalize and apply to all maps.
 
         def extract_map(name_map, names):
