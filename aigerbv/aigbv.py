@@ -188,6 +188,7 @@ class AIGBV:
             omit_latches=omit_latches,
             only_last_outputs=only_last_outputs
         )
+
         # TODO: generalize and apply to all maps.
 
         def extract_map(name_map, names):
@@ -201,12 +202,29 @@ class AIGBV:
             mapping = fn.walk_values(tuple, mapping)  # Make hashable.
             return frozenset(mapping.items())
 
-        return AIGBV(
+        circ = AIGBV(
             aig=aig,
             input_map=extract_map(self.input_map, aig.inputs),
             output_map=extract_map(self.output_map, aig.outputs),
             latch_map=extract_map(self.latch_map, aig.latches),
         )
+        # PROBLEM: aigbv.unroll currently doesn't preserve variable
+        #          order.
+        # WORK AROUND: Sort input and output maps
+        # TODO: Remove when fixed!
+
+        def _fix_order(names):
+            def to_key(x):
+                name, time = x.split('##time_')
+                return int(time), name
+
+            return tuple(sorted(names, key=to_key))
+
+        def fix_order(mapping):
+            return frozenset(fn.walk_values(_fix_order, dict(mapping)).items())
+
+        imap, omap = fix_order(circ.input_map), fix_order(circ.output_map)
+        return attr.evolve(circ, input_map=imap, output_map=omap)
 
 
 def _diagonal_map(keys, frozen=True):
