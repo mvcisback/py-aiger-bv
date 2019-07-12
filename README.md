@@ -4,7 +4,8 @@
     sequential bitvector circuits.</figcaption>
 </figure>
 
-[![Build Status](https://travis-ci.org/mvcisback/py-aiger-bv.svg?branch=master)](https://travis-ci.org/mvcisback/py-aiger-bv)
+
+[![Build Status](https://cloud.drone.io/api/badges/mvcisback/py-aiger-bv/status.svg)](https://cloud.drone.io/mvcisback/py-aiger-bv)
 [![codecov](https://codecov.io/gh/mvcisback/py-aiger-bv/branch/master/graph/badge.svg)](https://codecov.io/gh/mvcisback/py-aiger-bv)
 [![Updates](https://pyup.io/repos/github/mvcisback/py-aiger-bv/shield.svg)](https://pyup.io/repos/github/mvcisback/py-aiger-bv/)
 
