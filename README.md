@@ -27,7 +27,16 @@ This library provides word level abstractions on top of
 
 # Installation
 
-`pip install py-aiger-bv`
+If you just need to use `aigerbv`, you can just run:
+
+`$ pip install py-aiger-bv`
+
+For developers, note that this project uses the
+[poetry](https://poetry.eustace.io/) python package/dependency
+management tool. Please familarize yourself with it and then
+run:
+
+`$ poetry install`
 
 # BitVector Expression DSL
 
