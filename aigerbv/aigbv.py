@@ -117,7 +117,17 @@ class AIGBV:
 
         return circ
 
+    def _encode_val(self, i, word, imap):
+        # TODO: figure out encoding for word type.
+        return tuple(common.encode_int(len(imap[i]), word, signed=False))
+
     def __call__(self, inputs, latches=None):
+        imap = dict(self.input_map)
+        encoded_inputs = {i for i, v in inputs.items() if isinstance(v, int)}
+        inputs.update({
+            i: self._encode_val(i, inputs[i], imap) for i in encoded_inputs
+        })
+
         if latches is not None:
             latches = _blast(latches, self.latch_map)
 
