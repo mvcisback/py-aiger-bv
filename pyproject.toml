@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 attrs = "^19.1"
 funcy = "^1.12"
 py-aiger = "^3.3.2"
