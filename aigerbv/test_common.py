@@ -2,7 +2,7 @@ from aigerbv import common
 
 # additional imports for testing frammework
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 
 
 @given(st.integers(-4, 3))
@@ -131,6 +131,7 @@ def test_addition(a, b):
     assert common.decode_int(val) == a + b
 
 
+@settings(deadline=None)
 @given(st.integers(-4, 3))
 def test_inc(a):
     circ = common.inc_gate(4, input='a', output='out')
