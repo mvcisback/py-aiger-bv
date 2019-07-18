@@ -13,7 +13,7 @@ packages = [
 python = "^3.6"
 attrs = "^19.1"
 funcy = "^1.12"
-py-aiger = "^3.3.2"
+py-aiger = "^3.3.3"
 
 [tool.poetry.dev-dependencies]
 hypothesis_cfg = {git = "git://github.com/mvcisback/hypothesis-cfg.git"}
