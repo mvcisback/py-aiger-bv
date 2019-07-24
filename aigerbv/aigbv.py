@@ -129,7 +129,8 @@ class AIGBV:
         })
 
         if latches is not None:
-            latches = _blast(latches, self.latch_map)
+            latch_map = [(k, v) for k, v in self.latch_map if k in latches]
+            latches = _blast(latches, latch_map)
 
         out_vals, latch_vals = self.aig(
             inputs=_blast(inputs, self.input_map),
