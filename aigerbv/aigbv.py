@@ -28,7 +28,7 @@ def _unblast(name2vals, name_map):
     return {bvname: _collect(names) for bvname, names in name_map}
 
 
-@attr.s(frozen=True, slots=True, cmp=False, auto_attribs=True)
+@attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
     input_map: BV_MAP = frozenset()   # TODO: add converter
