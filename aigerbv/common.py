@@ -228,8 +228,7 @@ i1 y
 i2 carry_in
 o0 result
 o1 carry_out
-"""
-)
+""")
 
 
 def _full_adder(x, y, carry_in, result, carry_out):
