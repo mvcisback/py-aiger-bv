@@ -210,34 +210,22 @@ def sink(wordlen, inputs):
     )
 
 
-FULL_ADDER = aiger.parse("""aag 10 3 0 2 7
-2
-4
-6
-18
-21
-8 4 2
-10 5 3
-12 11 9
-14 12 6
-16 13 7
-18 17 15
-20 15 9
-i0 x
-i1 y
-i2 carry_in
-o0 result
-o1 carry_out
-""")
+def __full_adder():
+    x, y, cin = map(aiger.atom, ('x', 'y', 'ci'))
+    tmp = x ^ y
+    res = (tmp ^ cin)
+    cout = ((tmp & cin) | (x & y))
+    circ = res.aig | cout.aig
+    relabels = {res.output: 'res', cout.output: 'co'}
+    return (circ)['o', relabels]
+
+
+FULL_ADDER_GADGET = __full_adder()
 
 
 def _full_adder(x, y, carry_in, result, carry_out):
-    # TODO: Rewrite in aiger.
-    circ = FULL_ADDER['i', {'x': x, 'y': y, 'carry_in': carry_in}]['o', {
-        'carry_out': carry_out,
-        'result': result
-    }]
-    return circ
+    relabels = {'x': x, 'y': y, 'ci': carry_in, 'res': result, 'co': carry_out}
+    return FULL_ADDER_GADGET['i', relabels]['o', relabels]
 
 
 def even_popcount_gate(wordlen, input, output):
