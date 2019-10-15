@@ -17,7 +17,7 @@ def constk(k, size=None):
     return _constk
 
 
-@attr.s(frozen=True, slots=True, cmp=False, auto_attribs=True)
+@attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class UnsignedBVExpr:
     aigbv: aigbv.AIGBV
 
