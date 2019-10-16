@@ -1,4 +1,4 @@
-from typing import Tuple, FrozenSet
+from typing import Tuple
 
 import aiger
 import attr
@@ -30,22 +30,22 @@ def _unblast(name2vals, name_map):
     return {bvname: _collect(names) for bvname, names in name_map}
 
 
+def omit(mapping, keys):
+    return fn.omit(dict(mapping), keys)
+
+
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
     imap: BV_MAP = attr.ib(
         default=pmap(), converter=pmap
-    )# TODO: add converter
+    )
     output_map: BV_MAP = frozenset()  # from dict-like obj.
     latch_map: BV_MAP = frozenset()
 
     @property
-    def input_map(self):
-        return frozenset(self.imap.items())
-
-    @property
     def inputs(self):
-        return set(fn.pluck(0, self.input_map))
+        return set(self.imap.keys())
 
     @property
     def outputs(self):
@@ -82,18 +82,17 @@ class AIGBV:
         # Relabel interface to match up.
         aig = self.aig
         if interface:
-            imap, omap = dict(other.input_map), dict(self.output_map)
+            imap, omap = other.imap, dict(self.output_map)
             relabels = fn.merge(*(
                 dict(zip(omap[name], imap[name])) for name in interface
             ))
             aig = aig[('o', relabels)]
 
         # Create composed aigbv
-        input_map2 = {kv for kv in other.input_map if kv[0] not in interface}
         output_map2 = {kv for kv in self.output_map if kv[0] not in interface}
         return AIGBV(
             aig=aig >> other.aig,
-            imap=self.input_map | input_map2,
+            imap=self.imap + omit(other.imap, interface),
             output_map=output_map2 | other.output_map,
             latch_map=self.latch_map | other.latch_map,
         )
@@ -106,7 +105,6 @@ class AIGBV:
         assert not self.latches & other.latches
 
         shared_inputs = self.inputs & other.inputs
-        input_map = dict(self.input_map)
         if shared_inputs:
             relabels1 = {n: common._fresh() for n in shared_inputs}
             relabels2 = {n: common._fresh() for n in shared_inputs}
@@ -114,14 +112,14 @@ class AIGBV:
 
         circ = AIGBV(
             aig=self.aig | other.aig,
-            imap=self.input_map | other.input_map,
+            imap=self.imap + other.imap,
             output_map=self.output_map | other.output_map,
             latch_map=self.latch_map | other.latch_map)
 
         if shared_inputs:
             for orig in shared_inputs:
                 new1, new2 = relabels1[orig], relabels2[orig]
-                circ <<= common.tee(len(input_map[orig]), {orig: [new1, new2]})
+                circ <<= common.tee(len(self.imap[orig]), {orig: [new1, new2]})
 
         return circ
 
@@ -130,10 +128,9 @@ class AIGBV:
         return tuple(common.encode_int(len(imap[i]), word, signed=False))
 
     def __call__(self, inputs, latches=None):
-        imap = dict(self.input_map)
-        encoded_inputs = {i for i, v in inputs.items() if isinstance(v, int)}
+        encoded_in = {i for i, v in inputs.items() if isinstance(v, int)}
         inputs.update({
-            i: self._encode_val(i, inputs[i], imap) for i in encoded_inputs
+            i: self._encode_val(i, inputs[i], self.imap) for i in encoded_in
         })
 
         if latches is not None:
@@ -141,7 +138,7 @@ class AIGBV:
             latches = _blast(latches, latch_map)
 
         out_vals, latch_vals = self.aig(
-            inputs=_blast(inputs, self.input_map),
+            inputs=_blast(inputs, self.imap.items()),
             latches=latches)
         outputs = _unblast(out_vals, self.output_map)
         latch_outs = _unblast(latch_vals, self.latch_map)
@@ -166,7 +163,7 @@ class AIGBV:
         if latches is None:
             latches = inputs
 
-        idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.input_map)
+        idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.imap.items())
         odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.output_map)
 
         wordlens = [len(vals) for i, vals in idrop]
@@ -223,7 +220,7 @@ class AIGBV:
 
         circ = AIGBV(
             aig=aig,
-            imap=extract_map(self.input_map, aig.inputs),
+            imap=extract_map(self.imap.items(), aig.inputs),
             output_map=extract_map(self.output_map, aig.outputs),
             latch_map=extract_map(self.latch_map, aig.latches),
         )
@@ -242,7 +239,7 @@ class AIGBV:
         def fix_order(mapping):
             return frozenset(fn.walk_values(_fix_order, dict(mapping)).items())
 
-        imap, omap = fix_order(circ.input_map), fix_order(circ.output_map)
+        imap, omap = fix_order(circ.imap.items()), fix_order(circ.output_map)
         return attr.evolve(circ, imap=imap, output_map=omap)
 
 

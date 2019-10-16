@@ -135,7 +135,7 @@ def source(wordlen, value, name='x', signed=True):
 
 
 def tee(wordlen, iomap):
-    input_map = frozenset((i, named_indexes(wordlen, i)) for i in iomap)
+    imap = {i: named_indexes(wordlen, i) for i in iomap}
     output_map = frozenset(
         (o, named_indexes(wordlen, o)) for o in fn.cat(iomap.values())
     )
@@ -146,7 +146,7 @@ def tee(wordlen, iomap):
 
     return aigbv.AIGBV(
         aig=aiger.tee(blasted_iomap),
-        imap=input_map,
+        imap=imap,
         output_map=output_map,
     )
 
