@@ -34,16 +34,16 @@ def omit(mapping, keys):
     return fn.omit(dict(mapping), keys)
 
 
+def project(mapping, keys):
+    return fn.project(dict(mapping), keys)
+
+
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
     imap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
     omap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
     lmap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
-
-    @property
-    def latch_map(self):
-        return frozenset(self.lmap.items())
 
     @property
     def inputs(self):
@@ -95,7 +95,7 @@ class AIGBV:
             aig=aig >> other.aig,
             imap=self.imap + omit(other.imap, interface),
             omap=other.omap + omit(self.omap, interface),
-            lmap=self.latch_map | other.latch_map,
+            lmap=self.lmap + other.lmap,
         )
 
     def __lshift__(self, other):
@@ -115,7 +115,7 @@ class AIGBV:
             aig=self.aig | other.aig,
             imap=self.imap + other.imap,
             omap=self.omap + other.omap,
-            lmap=self.latch_map | other.latch_map)
+            lmap=self.lmap + other.lmap)
 
         if shared_inputs:
             for orig in shared_inputs:
@@ -135,14 +135,13 @@ class AIGBV:
         })
 
         if latches is not None:
-            latch_map = [(k, v) for k, v in self.latch_map if k in latches]
-            latches = _blast(latches, latch_map)
+            latches = _blast(latches, project(self.lmap, latches).items())
 
         out_vals, latch_vals = self.aig(
             inputs=_blast(inputs, self.imap.items()),
             latches=latches)
         outputs = _unblast(out_vals, self.omap.items())
-        latch_outs = _unblast(latch_vals, self.latch_map)
+        latch_outs = _unblast(latch_vals, self.lmap.items())
         return outputs, latch_outs
 
     def simulator(self, latches=None):
@@ -195,7 +194,7 @@ class AIGBV:
             aig=aig,
             imap=imap,
             omap=omap | (odrop if keep_outputs else frozenset()),
-            lmap=self.latch_map | set(new_latches),
+            lmap=self.lmap + dict(new_latches),
         )
 
     def unroll(self, horizon, *, init=True, omit_latches=True,
@@ -223,7 +222,7 @@ class AIGBV:
             aig=aig,
             imap=extract_map(self.imap.items(), aig.inputs),
             omap=extract_map(self.omap.items(), aig.outputs),
-            lmap=extract_map(self.latch_map, aig.latches),
+            lmap=extract_map(self.lmap.items(), aig.latches),
         )
         # PROBLEM: aigbv.unroll currently doesn't preserve variable
         #          order.
