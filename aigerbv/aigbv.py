@@ -39,7 +39,11 @@ class AIGBV:
     aig: aiger.AIG
     imap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
     omap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
-    latch_map: BV_MAP = frozenset()
+    lmap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
+
+    @property
+    def latch_map(self):
+        return frozenset(self.lmap.items())
 
     @property
     def inputs(self):
@@ -51,7 +55,7 @@ class AIGBV:
 
     @property
     def latches(self):
-        return set(fn.pluck(0, self.latch_map))
+        return set(self.lmap.keys())
 
     def __getitem__(self, others):
         if not isinstance(others, tuple):
@@ -64,7 +68,7 @@ class AIGBV:
         attr_name = {
             'i': 'imap',
             'o': 'omap',
-            'l': 'latch_map',
+            'l': 'lmap',
         }.get(kind)
 
         attr_value = fn.walk_keys(lambda x: relabels.get(x, x),
@@ -91,7 +95,7 @@ class AIGBV:
             aig=aig >> other.aig,
             imap=self.imap + omit(other.imap, interface),
             omap=other.omap + omit(self.omap, interface),
-            latch_map=self.latch_map | other.latch_map,
+            lmap=self.latch_map | other.latch_map,
         )
 
     def __lshift__(self, other):
@@ -111,7 +115,7 @@ class AIGBV:
             aig=self.aig | other.aig,
             imap=self.imap + other.imap,
             omap=self.omap + other.omap,
-            latch_map=self.latch_map | other.latch_map)
+            lmap=self.latch_map | other.latch_map)
 
         if shared_inputs:
             for orig in shared_inputs:
@@ -191,7 +195,7 @@ class AIGBV:
             aig=aig,
             imap=imap,
             omap=omap | (odrop if keep_outputs else frozenset()),
-            latch_map=self.latch_map | set(new_latches),
+            lmap=self.latch_map | set(new_latches),
         )
 
     def unroll(self, horizon, *, init=True, omit_latches=True,
@@ -219,7 +223,7 @@ class AIGBV:
             aig=aig,
             imap=extract_map(self.imap.items(), aig.inputs),
             omap=extract_map(self.omap.items(), aig.outputs),
-            latch_map=extract_map(self.latch_map, aig.latches),
+            lmap=extract_map(self.latch_map, aig.latches),
         )
         # PROBLEM: aigbv.unroll currently doesn't preserve variable
         #          order.
@@ -250,5 +254,5 @@ def aig2aigbv(aig):
         aig=aig,
         imap=_diagonal_map(aig.inputs),
         omap=_diagonal_map(aig.outputs),
-        latch_map=_diagonal_map(aig.latches),
+        lmap=_diagonal_map(aig.latches),
     )
