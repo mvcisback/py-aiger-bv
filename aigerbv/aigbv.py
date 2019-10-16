@@ -42,16 +42,12 @@ class AIGBV:
     latch_map: BV_MAP = frozenset()
 
     @property
-    def output_map(self):
-        return frozenset(self.omap.items())
-
-    @property
     def inputs(self):
         return set(self.imap.keys())
 
     @property
     def outputs(self):
-        return set(fn.pluck(0, self.output_map))
+        return set(self.omap.keys())
 
     @property
     def latches(self):
@@ -84,18 +80,17 @@ class AIGBV:
         # Relabel interface to match up.
         aig = self.aig
         if interface:
-            imap, omap = other.imap, dict(self.output_map)
+            imap, omap = other.imap, self.omap
             relabels = fn.merge(*(
                 dict(zip(omap[name], imap[name])) for name in interface
             ))
             aig = aig[('o', relabels)]
 
         # Create composed aigbv
-        output_map2 = {kv for kv in self.output_map if kv[0] not in interface}
         return AIGBV(
             aig=aig >> other.aig,
             imap=self.imap + omit(other.imap, interface),
-            omap=output_map2 | other.output_map,
+            omap=other.omap + omit(self.omap, interface),
             latch_map=self.latch_map | other.latch_map,
         )
 
@@ -115,7 +110,7 @@ class AIGBV:
         circ = AIGBV(
             aig=self.aig | other.aig,
             imap=self.imap + other.imap,
-            omap=self.output_map | other.output_map,
+            omap=self.omap + other.omap,
             latch_map=self.latch_map | other.latch_map)
 
         if shared_inputs:
@@ -142,7 +137,7 @@ class AIGBV:
         out_vals, latch_vals = self.aig(
             inputs=_blast(inputs, self.imap.items()),
             latches=latches)
-        outputs = _unblast(out_vals, self.output_map)
+        outputs = _unblast(out_vals, self.omap.items())
         latch_outs = _unblast(latch_vals, self.latch_map)
         return outputs, latch_outs
 
@@ -166,7 +161,7 @@ class AIGBV:
             latches = inputs
 
         idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.imap.items())
-        odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.output_map)
+        odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.omap.items())
 
         wordlens = [len(vals) for i, vals in idrop]
         new_latches = [(n, common.named_indexes(k, n))
@@ -241,7 +236,7 @@ class AIGBV:
         def fix_order(mapping):
             return frozenset(fn.walk_values(_fix_order, dict(mapping)).items())
 
-        imap, omap = fix_order(circ.imap.items()), fix_order(circ.output_map)
+        imap, omap = fix_order(circ.imap.items()), fix_order(circ.omap.items())
         return attr.evolve(circ, imap=imap, omap=omap)
 
 

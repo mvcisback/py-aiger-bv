@@ -75,7 +75,7 @@ class UnsignedBVExpr:
 
     @property
     def size(self):
-        return len(list(self.aigbv.output_map)[0][1])
+        return len(list(self.aigbv.omap.items())[0][1])
 
     @property
     def aig(self):
