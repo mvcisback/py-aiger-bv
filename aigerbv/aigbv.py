@@ -3,11 +3,13 @@ from typing import Tuple, FrozenSet
 import aiger
 import attr
 import funcy as fn
+from pyrsistent import pmap
+from pyrsistent.typing import PMap
 
 from aigerbv import common
 
 
-BV_MAP = FrozenSet[Tuple[str, Tuple[str]]]
+BV_MAP = PMap[str, Tuple[str]]
 
 
 def _blast(bvname2vals, name_map):
@@ -31,9 +33,15 @@ def _unblast(name2vals, name_map):
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
-    input_map: BV_MAP = frozenset()   # TODO: add converter
+    imap: BV_MAP = attr.ib(
+        default=pmap(), converter=pmap
+    )# TODO: add converter
     output_map: BV_MAP = frozenset()  # from dict-like obj.
     latch_map: BV_MAP = frozenset()
+
+    @property
+    def input_map(self):
+        return frozenset(self.imap.items())
 
     @property
     def inputs(self):
@@ -85,7 +93,7 @@ class AIGBV:
         output_map2 = {kv for kv in self.output_map if kv[0] not in interface}
         return AIGBV(
             aig=aig >> other.aig,
-            input_map=self.input_map | input_map2,
+            imap=self.input_map | input_map2,
             output_map=output_map2 | other.output_map,
             latch_map=self.latch_map | other.latch_map,
         )
@@ -106,7 +114,7 @@ class AIGBV:
 
         circ = AIGBV(
             aig=self.aig | other.aig,
-            input_map=self.input_map | other.input_map,
+            imap=self.input_map | other.input_map,
             output_map=self.output_map | other.output_map,
             latch_map=self.latch_map | other.latch_map)
 
@@ -187,7 +195,7 @@ class AIGBV:
         imap, odrop, omap = map(frozenset, [imap, odrop, omap])
         return AIGBV(
             aig=aig,
-            input_map=imap,
+            imap=imap,
             output_map=omap | (odrop if keep_outputs else frozenset()),
             latch_map=self.latch_map | set(new_latches),
         )
@@ -215,7 +223,7 @@ class AIGBV:
 
         circ = AIGBV(
             aig=aig,
-            input_map=extract_map(self.input_map, aig.inputs),
+            imap=extract_map(self.input_map, aig.inputs),
             output_map=extract_map(self.output_map, aig.outputs),
             latch_map=extract_map(self.latch_map, aig.latches),
         )
@@ -235,7 +243,7 @@ class AIGBV:
             return frozenset(fn.walk_values(_fix_order, dict(mapping)).items())
 
         imap, omap = fix_order(circ.input_map), fix_order(circ.output_map)
-        return attr.evolve(circ, input_map=imap, output_map=omap)
+        return attr.evolve(circ, imap=imap, output_map=omap)
 
 
 def _diagonal_map(keys, frozen=True):
@@ -246,7 +254,7 @@ def _diagonal_map(keys, frozen=True):
 def aig2aigbv(aig):
     return AIGBV(
         aig=aig,
-        input_map=_diagonal_map(aig.inputs),
+        imap=_diagonal_map(aig.inputs),
         output_map=_diagonal_map(aig.outputs),
         latch_map=_diagonal_map(aig.latches),
     )
