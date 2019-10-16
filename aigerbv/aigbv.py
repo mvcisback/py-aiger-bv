@@ -37,11 +37,13 @@ def omit(mapping, keys):
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
-    imap: BV_MAP = attr.ib(
-        default=pmap(), converter=pmap
-    )
-    output_map: BV_MAP = frozenset()  # from dict-like obj.
+    imap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
+    omap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
     latch_map: BV_MAP = frozenset()
+
+    @property
+    def output_map(self):
+        return frozenset(self.omap.items())
 
     @property
     def inputs(self):
@@ -64,13 +66,13 @@ class AIGBV:
             raise NotImplementedError
 
         attr_name = {
-            'i': 'input_map',
-            'o': 'output_map',
+            'i': 'imap',
+            'o': 'omap',
             'l': 'latch_map',
         }.get(kind)
 
         attr_value = fn.walk_keys(lambda x: relabels.get(x, x),
-                                  getattr(self, attr_name))
+                                  dict(getattr(self, attr_name)))
         return attr.evolve(self, **{attr_name: attr_value})
 
     def __rshift__(self, other):
@@ -93,7 +95,7 @@ class AIGBV:
         return AIGBV(
             aig=aig >> other.aig,
             imap=self.imap + omit(other.imap, interface),
-            output_map=output_map2 | other.output_map,
+            omap=output_map2 | other.output_map,
             latch_map=self.latch_map | other.latch_map,
         )
 
@@ -113,7 +115,7 @@ class AIGBV:
         circ = AIGBV(
             aig=self.aig | other.aig,
             imap=self.imap + other.imap,
-            output_map=self.output_map | other.output_map,
+            omap=self.output_map | other.output_map,
             latch_map=self.latch_map | other.latch_map)
 
         if shared_inputs:
@@ -193,7 +195,7 @@ class AIGBV:
         return AIGBV(
             aig=aig,
             imap=imap,
-            output_map=omap | (odrop if keep_outputs else frozenset()),
+            omap=omap | (odrop if keep_outputs else frozenset()),
             latch_map=self.latch_map | set(new_latches),
         )
 
@@ -221,7 +223,7 @@ class AIGBV:
         circ = AIGBV(
             aig=aig,
             imap=extract_map(self.imap.items(), aig.inputs),
-            output_map=extract_map(self.output_map, aig.outputs),
+            omap=extract_map(self.omap.items(), aig.outputs),
             latch_map=extract_map(self.latch_map, aig.latches),
         )
         # PROBLEM: aigbv.unroll currently doesn't preserve variable
@@ -240,7 +242,7 @@ class AIGBV:
             return frozenset(fn.walk_values(_fix_order, dict(mapping)).items())
 
         imap, omap = fix_order(circ.imap.items()), fix_order(circ.output_map)
-        return attr.evolve(circ, imap=imap, output_map=omap)
+        return attr.evolve(circ, imap=imap, omap=omap)
 
 
 def _diagonal_map(keys, frozen=True):
@@ -252,6 +254,6 @@ def aig2aigbv(aig):
     return AIGBV(
         aig=aig,
         imap=_diagonal_map(aig.inputs),
-        output_map=_diagonal_map(aig.outputs),
+        omap=_diagonal_map(aig.outputs),
         latch_map=_diagonal_map(aig.latches),
     )

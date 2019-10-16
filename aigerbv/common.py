@@ -53,7 +53,7 @@ def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
     return aigbv.AIGBV(
         aig=aig,
         imap={left: lefts, right: rights},
-        output_map=frozenset([(output, outputs)]),
+        omap={output: outputs},
     )
 
 
@@ -75,7 +75,7 @@ def bitwise_negate(wordlen, input='x', output='not x'):
     return aigbv.AIGBV(
         aig=aiger.bit_flipper(inputs=inputs, outputs=outputs),
         imap={input: inputs},
-        output_map=frozenset([(output, outputs)]),
+        omap={output: outputs},
     )
 
 
@@ -105,7 +105,7 @@ def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
     return aigbv.AIGBV(
         aig=aiger.or_gate(inputs, outputs[0]),
         imap={input: inputs},
-        output_map=frozenset([(output, outputs)]),
+        omap={output: outputs},
     )
 
 
@@ -130,15 +130,13 @@ def source(wordlen, value, name='x', signed=True):
     aig = aiger.source({name: bit for name, bit in zip(names, bits)})
     return aigbv.AIGBV(
         aig=aig,
-        output_map=frozenset([(name, names)]),
+        omap={name: names},
     )
 
 
 def tee(wordlen, iomap):
     imap = {i: named_indexes(wordlen, i) for i in iomap}
-    output_map = frozenset(
-        (o, named_indexes(wordlen, o)) for o in fn.cat(iomap.values())
-    )
+    omap = {o: named_indexes(wordlen, o) for o in fn.cat(iomap.values())}
     blasted_iomap = fn.merge(
         *({_name_idx(iname, idx): [_name_idx(o, idx) for o in iomap[iname]]}
           for iname, idx in product(iomap, range(wordlen)))
@@ -147,7 +145,7 @@ def tee(wordlen, iomap):
     return aigbv.AIGBV(
         aig=aiger.tee(blasted_iomap),
         imap=imap,
-        output_map=output_map,
+        omap=omap,
     )
 
 
@@ -159,7 +157,7 @@ def repeat(wordlen, input, output=None):
     return aigbv.AIGBV(
         aig=aiger.tee({input: outputs}),
         imap={input: (input,)},
-        output_map=frozenset([(input, outputs)]),
+        omap={output: outputs},
     )
 
 
@@ -172,16 +170,14 @@ def identity_gate(wordlen, input='x', output=None):
     return aigbv.AIGBV(
         aig=aiger.identity(inputs=inputs, outputs=outputs),
         imap={input: inputs},
-        output_map=frozenset([(output, outputs)]),
+        omap={output: outputs},
     )
 
 
 def reverse_gate(wordlen, input='x', output='rev(x)'):
     circ = identity_gate(wordlen, input, output)
-    output_map = frozenset(
-        (k, tuple(reversed(vs))) for k, vs in circ.output_map
-    )
-    return attr.evolve(circ, output_map=output_map)
+    omap = {k: tuple(reversed(vs)) for k, vs in circ.omap.items()}
+    return attr.evolve(circ, omap=omap)
 
 
 def combine_gate(left_wordlen, left, right_wordlen, right, output):
@@ -190,7 +186,7 @@ def combine_gate(left_wordlen, left, right_wordlen, right, output):
 
     circ = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
-    return attr.evolve(circ, output_map=frozenset([(output, lefts+rights)]))
+    return attr.evolve(circ, omap={output: lefts+rights})
 
 
 def split_gate(input, left_wordlen, left, right_wordlen, right):
@@ -198,8 +194,7 @@ def split_gate(input, left_wordlen, left, right_wordlen, right):
     lefts, rights = inputs[:left_wordlen], inputs[left_wordlen:]
 
     circ = identity_gate(left_wordlen + right_wordlen, input, input)
-    output_map = frozenset([(left, lefts), (right, rights)])
-    return attr.evolve(circ, output_map=output_map)
+    return attr.evolve(circ, omap={left: lefts, right: rights})
 
 
 def sink(wordlen, inputs):
@@ -233,7 +228,7 @@ def even_popcount_gate(wordlen, input, output):
     return aigbv.AIGBV(
         aig=aiger.parity_gate(inputs, output),
         imap={input: inputs},
-        output_map=frozenset([(output, (output,))])
+        omap={output: (output,)}
     )
 
 
@@ -266,7 +261,7 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
     return aigbv.AIGBV(
         aig=adder_aig,
         imap={left: lefts, right: rights},
-        output_map=frozenset([(output, outputs)]),
+        omap={output: outputs},
     )
 
 
@@ -305,7 +300,7 @@ def index_gate(wordlen, idx, input, output=None):
     return aigbv.AIGBV(
         aig=aig,
         imap={input: inputs},
-        output_map=frozenset([(output, outputs)]),
+        omap={output: outputs},
     )
 
 
@@ -326,7 +321,7 @@ def unsigned_lt_gate(wordlen, left, right, output):
     return aigbv.AIGBV(
         aig=expr.aig,
         imap={left: left_names, right: right_names},
-        output_map=frozenset([(output, (expr.output,))]),
+        omap={output: (expr.output,)},
     )
 
 
@@ -470,5 +465,5 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
     return aigbv.AIGBV(
         aig=expr.aig,
         imap={input: tuple(input_names)},
-        output_map=frozenset([(output, (expr.output,))]),
+        omap={output: (expr.output,)},
     )
