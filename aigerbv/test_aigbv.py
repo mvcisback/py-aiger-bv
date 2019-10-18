@@ -41,3 +41,10 @@ def test_AIGBV_or_compose():
         'tmp': (True,),
         'x4': (False,),
     }
+
+
+def test_relabel():
+    circ = aigbv.aig2aigbv(aiger.and_gate(['x', 'y'], output='out'))
+    circ2 = circ['i', {'x': 'z'}]
+    assert circ2.inputs == {'y', 'z'}
+    assert circ2.aig.inputs == {'y[0]', 'z[0]'}
