@@ -39,3 +39,20 @@ def test_idx():
         x[-2]
 
     assert x[:4] == ("x[0]", "x[1]", "x[2]", "x[3]")
+
+
+def test_bundle_map():
+    imap1 = bdl.BundleMap({'x': 2, 'y': 4})
+    assert imap1['x'] == bdl.Bundle(name='x', size=2)
+    assert imap1['y'] == bdl.Bundle(name='y', size=4)
+
+    imap2 = bdl.BundleMap({'z': 2, 'w': 4})
+    imap12 = imap1 + imap2
+
+    assert (imap1 + imap2)['x'] == imap1['x']
+    assert (imap1 + imap2)['z'] == imap2['z']
+    assert set(imap12) == set(imap1) | set(imap2)
+
+    with pytest.raises(AssertionError):
+        imap1 + imap12
+
