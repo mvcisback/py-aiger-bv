@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, FrozenSet
 
 import aiger
 import attr
@@ -7,10 +7,7 @@ from pyrsistent import pmap
 from pyrsistent.typing import PMap
 
 from aigerbv import common
-from aigerbv.bundle import Bundle
-
-
-BV_MAP = PMap[str, Bundle]
+from aigerbv.bundle import BundleMap
 
 
 def _blast(bvname2vals, name_map):
@@ -31,32 +28,21 @@ def _unblast(name2vals, name_map):
     return {bvname: _collect(names) for bvname, names in name_map}
 
 
-def omit(mapping, keys):
-    return fn.omit(dict(mapping), keys)
-
-
-def project(mapping, keys):
-    return fn.project(dict(mapping), keys)
-
-
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
-    imap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
-    omap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
-    lmap: BV_MAP = attr.ib(default=pmap(), converter=pmap)
+    imap: BundleMap = BundleMap()
+    omap: BundleMap = BundleMap()
+    lmap: BundleMap = BundleMap()
 
     @property
-    def inputs(self):
-        return set(self.imap.keys())
+    def inputs(self): return set(self.imap.keys())
 
     @property
-    def outputs(self):
-        return set(self.omap.keys())
+    def outputs(self): return set(self.omap.keys())
 
     @property
-    def latches(self):
-        return set(self.lmap.keys())
+    def latches(self): return set(self.lmap.keys())
 
     def __getitem__(self, others):
         if not isinstance(others, tuple):
@@ -66,36 +52,23 @@ class AIGBV:
         if kind not in {'i', 'o', 'l'}:
             raise NotImplementedError
 
-        attr_name = {
-            'i': 'imap',
-            'o': 'omap',
-            'l': 'lmap',
-        }.get(kind)
-
-        attr_value = fn.walk_keys(lambda x: relabels.get(x, x),
-                                  dict(getattr(self, attr_name)))
+        attr_name = {'i': 'imap', 'o': 'omap', 'l': 'lmap'}.get(kind)
+        attr_value = fn.walk_keys(
+            lambda x: relabels.get(x, x),
+            dict(getattr(self, attr_name))
+        )
+        # TODO: Need to update underlying aig!
         return attr.evolve(self, **{attr_name: attr_value})
 
     def __rshift__(self, other):
         interface = self.outputs & other.inputs
-
         assert not self.latches & other.latches
         assert not (self.outputs - interface) & other.outputs
 
-        # Relabel interface to match up.
-        aig = self.aig
-        if interface:
-            imap, omap = other.imap, self.omap
-            relabels = fn.merge(*(
-                dict(zip(omap[name], imap[name])) for name in interface
-            ))
-            aig = aig[('o', relabels)]
-
-        # Create composed aigbv
-        return aigbv(
-            aig=aig >> other.aig,
-            imap=self.imap + omit(other.imap, interface),
-            omap=other.omap + omit(self.omap, interface),
+        return AIGBV(
+            aig=self.aig >> other.aig,
+            imap=self.imap + other.imap.omit(interface),
+            omap=other.omap + self.omap.omit(interface),
             lmap=self.lmap + other.lmap,
         )
 
@@ -112,7 +85,7 @@ class AIGBV:
             relabels2 = {n: common._fresh() for n in shared_inputs}
             self, other = self['i', relabels1], other['i', relabels2]
 
-        circ = aigbv(
+        circ = AIGBV(
             aig=self.aig | other.aig,
             imap=self.imap + other.imap,
             omap=self.omap + other.omap,
@@ -130,20 +103,17 @@ class AIGBV:
         return tuple(common.encode_int(len(imap[i]), word, signed=False))
 
     def __call__(self, inputs, latches=None):
+        # TODO: Make this an extension.
         encoded_in = {i for i, v in inputs.items() if isinstance(v, int)}
         inputs.update({
             i: self._encode_val(i, inputs[i], self.imap) for i in encoded_in
         })
 
-        if latches is not None:
-            latches = _blast(latches, project(self.lmap, latches).items())
-
-        out_vals, latch_vals = self.aig(
-            inputs=_blast(inputs, self.imap.items()),
-            latches=latches)
-        outputs = _unblast(out_vals, self.omap.items())
-        latch_outs = _unblast(latch_vals, self.lmap.items())
-        return outputs, latch_outs
+        out2val, latch2val = self.aig(
+            inputs=self.imap.blast(inputs),
+            latches=None if latches is None else self.lmap.blast(latches)
+        )
+        return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
 
     def simulator(self, latches=None):
         inputs = yield
@@ -191,7 +161,7 @@ class AIGBV:
         )
 
         imap, odrop, omap = map(frozenset, [imap, odrop, omap])
-        return aigbv(
+        return AIGBV(
             aig=aig,
             imap=imap,
             omap=omap | (odrop if keep_outputs else frozenset()),
@@ -219,7 +189,7 @@ class AIGBV:
             mapping = fn.walk_values(tuple, mapping)  # Make hashable.
             return frozenset(mapping.items())
 
-        circ = aigbv(
+        circ = AIGBV(
             aig=aig,
             imap=extract_map(self.imap.items(), aig.inputs),
             omap=extract_map(self.omap.items(), aig.outputs),
@@ -244,19 +214,24 @@ class AIGBV:
         return attr.evolve(circ, imap=imap, omap=omap)
 
 
-def _diagonal_map(keys, frozen=True):
-    dmap = {k: (k,) for k in keys}
-    return frozenset(dmap.items()) if frozen else dmap
+######### Lifting AIG to AIGBVs
+
+
+def _diagonal_map(keys):
+    return BundleMap({k: 1 for k in keys})
+
+
+def append_index(aig):
+    for key in ['inputs', 'outputs', 'latches']:
+        relabels = {name: f"{name}[0]" for name in  getattr(aig, key)}
+        aig = aig[key[0], relabels]
+    return aig
 
 
 def aig2aigbv(aig):
-    return aigbv(
-        aig=aig,
+    return AIGBV(
+        aig=append_index(aig),
         imap=_diagonal_map(aig.inputs),
         omap=_diagonal_map(aig.outputs),
         lmap=_diagonal_map(aig.latches),
     )
-
-
-def aigbv(aig, imap=pmap(), omap=pmap(), lmap=pmap()):
-    return AIGBV(aig=aig, imap=imap, omap=omap, lmap=lmap)
