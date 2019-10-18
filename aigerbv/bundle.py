@@ -37,6 +37,9 @@ class Bundle:
         assert len(val) == self.size
         return dict(zip(self, val))
 
+    def unblast(self, idx2val):
+        return tuple(idx2val[idx] for idx in self)
+
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class BundleMap:
@@ -58,3 +61,6 @@ class BundleMap:
     def blast(self, idx2vals):
         idx2vals = idx2vals.items()
         return fn.merge(*(self[idx].blast(val) for idx, val in idx2vals))
+
+    def unblast(self, idx2val):
+        return {k: self[k].unblast(idx2val) for k in self.keys()}

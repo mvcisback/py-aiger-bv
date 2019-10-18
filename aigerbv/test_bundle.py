@@ -43,9 +43,11 @@ def test_idx():
 
 def test_blast():
     x = bdl.Bundle("x", 4)
-    assert x.blast((True, True, False, True)) == {
+    val = (True, True, False, True)
+    assert x.blast(val) == {
         'x[0]': True, 'x[1]': True, 'x[2]': False, 'x[3]': True
     }
+    assert x.unblast(x.blast(val)) == val
 
 
 def test_bundle_map():
@@ -66,7 +68,9 @@ def test_bundle_map():
 
 def test_blast_map():
     imap = bdl.BundleMap({'x': 2, 'y': 3})
-    assert imap.blast({'x': (True, False), 'y': (False, False, False)}) == {
+    idx2val = {'x': (True, False), 'y': (False, False, False)}
+    assert imap.blast(idx2val) == {
         'x[0]': True, 'x[1]': False, 
         'y[0]': False, 'y[1]': False, 'y[2]': False
     }
+    assert imap.unblast(imap.blast(idx2val)) == idx2val
