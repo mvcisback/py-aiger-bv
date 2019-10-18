@@ -41,6 +41,13 @@ def test_idx():
     assert x[:4] == ("x[0]", "x[1]", "x[2]", "x[3]")
 
 
+def test_blast():
+    x = bdl.Bundle("x", 4)
+    assert x.blast((True, True, False, True)) == {
+        'x[0]': True, 'x[1]': True, 'x[2]': False, 'x[3]': True
+    }
+
+
 def test_bundle_map():
     imap1 = bdl.BundleMap({'x': 2, 'y': 4})
     assert imap1['x'] == bdl.Bundle(name='x', size=2)
@@ -56,3 +63,10 @@ def test_bundle_map():
     with pytest.raises(AssertionError):
         imap1 + imap12
 
+
+def test_blast_map():
+    imap = bdl.BundleMap({'x': 2, 'y': 3})
+    assert imap.blast({'x': (True, False), 'y': (False, False, False)}) == {
+        'x[0]': True, 'x[1]': False, 
+        'y[0]': False, 'y[1]': False, 'y[2]': False
+    }

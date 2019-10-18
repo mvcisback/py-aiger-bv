@@ -1,6 +1,7 @@
 from itertools import islice
 
 import attr
+import funcy as fn
 from pyrsistent import pmap
 from pyrsistent.typing import PMap
 
@@ -32,8 +33,12 @@ class Bundle:
         step = 1 if idx.step is None else idx.step
         return tuple(islice(self, start, stop, step))
 
+    def blast(self, val):
+        assert len(val) == self.size
+        return dict(zip(self, val))
 
-@attr.s(frozen=True, slots=True, auto_attribs=True, repr=False)
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class BundleMap:
     mapping: PMap[str, int] = attr.ib(default=pmap(), converter=pmap)
 
@@ -47,4 +52,9 @@ class BundleMap:
 
     def __add__(self, other):
         assert not (set(self.keys()) & set(other.keys()))
-        return BundleMap(self.mapping + other.mapping)
+        mapping2 = other.mapping if isinstance(other, BundleMap) else other
+        return BundleMap(self.mapping + mapping2)
+
+    def blast(self, idx2vals):
+        idx2vals = idx2vals.items()
+        return fn.merge(*(self[idx].blast(val) for idx, val in idx2vals))
