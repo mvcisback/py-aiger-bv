@@ -7,9 +7,10 @@ from pyrsistent import pmap
 from pyrsistent.typing import PMap
 
 from aigerbv import common
+from aigerbv.bundle import Bundle
 
 
-BV_MAP = PMap[str, Tuple[str]]
+BV_MAP = PMap[str, Bundle]
 
 
 def _blast(bvname2vals, name_map):
@@ -91,7 +92,7 @@ class AIGBV:
             aig = aig[('o', relabels)]
 
         # Create composed aigbv
-        return AIGBV(
+        return aigbv(
             aig=aig >> other.aig,
             imap=self.imap + omit(other.imap, interface),
             omap=other.omap + omit(self.omap, interface),
@@ -111,7 +112,7 @@ class AIGBV:
             relabels2 = {n: common._fresh() for n in shared_inputs}
             self, other = self['i', relabels1], other['i', relabels2]
 
-        circ = AIGBV(
+        circ = aigbv(
             aig=self.aig | other.aig,
             imap=self.imap + other.imap,
             omap=self.omap + other.omap,
@@ -190,7 +191,7 @@ class AIGBV:
         )
 
         imap, odrop, omap = map(frozenset, [imap, odrop, omap])
-        return AIGBV(
+        return aigbv(
             aig=aig,
             imap=imap,
             omap=omap | (odrop if keep_outputs else frozenset()),
@@ -218,7 +219,7 @@ class AIGBV:
             mapping = fn.walk_values(tuple, mapping)  # Make hashable.
             return frozenset(mapping.items())
 
-        circ = AIGBV(
+        circ = aigbv(
             aig=aig,
             imap=extract_map(self.imap.items(), aig.inputs),
             omap=extract_map(self.omap.items(), aig.outputs),
@@ -249,9 +250,13 @@ def _diagonal_map(keys, frozen=True):
 
 
 def aig2aigbv(aig):
-    return AIGBV(
+    return aigbv(
         aig=aig,
         imap=_diagonal_map(aig.inputs),
         omap=_diagonal_map(aig.outputs),
         lmap=_diagonal_map(aig.latches),
     )
+
+
+def aigbv(aig, imap=pmap(), omap=pmap(), lmap=pmap()):
+    return AIGBV(aig=aig, imap=imap, omap=omap, lmap=lmap)

@@ -50,7 +50,7 @@ def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
 
     bw_aigs = (binop([l, r], o) for l, r, o in zip(lefts, rights, outputs))
     aig = reduce(op.or_, bw_aigs)
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aig,
         imap={left: lefts, right: rights},
         omap={output: outputs},
@@ -72,7 +72,7 @@ def bitwise_xor(wordlen, left='x', right='y', output='x&y'):
 def bitwise_negate(wordlen, input='x', output='not x'):
     inputs = named_indexes(wordlen, input)
     outputs = named_indexes(wordlen, output)
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aiger.bit_flipper(inputs=inputs, outputs=outputs),
         imap={input: inputs},
         omap={output: outputs},
@@ -102,7 +102,7 @@ def reduce_binop(wordlen, inputs, output, op):
 def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
     inputs = named_indexes(wordlen, input)
     outputs = named_indexes(1, output)
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aiger.or_gate(inputs, outputs[0]),
         imap={input: inputs},
         omap={output: outputs},
@@ -116,22 +116,19 @@ def ne_gate(wordlen, left='x', right='y', output='x!=y'):
 
 def is_zero_gate(wordlen, input='x', output='is_zero'):
     return is_nonzero_gate(wordlen, input, input+'out') >> \
-        bitwise_negate(1, input+'out', output)
+        bitwise_negate(1, input + 'out', output)
 
 
 def eq_gate(wordlen, left='x', right='y', output='x=y'):
-    return ne_gate(wordlen, left, right, left+right) >> \
-        bitwise_negate(1, left+right, output)
+    return ne_gate(wordlen, left, right, left + right) >> \
+        bitwise_negate(1, left + right, output)
 
 
 def source(wordlen, value, name='x', signed=True):
     names = named_indexes(wordlen, name)
     bits = encode_int(wordlen, value, signed)
     aig = aiger.source({name: bit for name, bit in zip(names, bits)})
-    return aigbv.AIGBV(
-        aig=aig,
-        omap={name: names},
-    )
+    return aigbv.aigbv(aig=aig, omap={name: names},)
 
 
 def tee(wordlen, iomap):
@@ -142,7 +139,7 @@ def tee(wordlen, iomap):
           for iname, idx in product(iomap, range(wordlen)))
     )
 
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aiger.tee(blasted_iomap),
         imap=imap,
         omap=omap,
@@ -154,7 +151,7 @@ def repeat(wordlen, input, output=None):
         output = input
 
     outputs = named_indexes(wordlen, output)
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aiger.tee({input: outputs}),
         imap={input: (input,)},
         omap={output: outputs},
@@ -167,7 +164,7 @@ def identity_gate(wordlen, input='x', output=None):
 
     inputs = named_indexes(wordlen, input)
     outputs = named_indexes(wordlen, output)
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aiger.identity(inputs=inputs, outputs=outputs),
         imap={input: inputs},
         omap={output: outputs},
@@ -199,7 +196,7 @@ def split_gate(input, left_wordlen, left, right_wordlen, right):
 
 def sink(wordlen, inputs):
     blasted_inputs = [named_indexes(wordlen, i) for i in inputs]
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aiger.sink(fn.lcat(blasted_inputs)),
         imap=zip(inputs, blasted_inputs),
     )
@@ -225,7 +222,7 @@ def _full_adder(x, y, carry_in, result, carry_out):
 
 def even_popcount_gate(wordlen, input, output):
     inputs = named_indexes(wordlen, input)
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aiger.parity_gate(inputs, output),
         imap={input: inputs},
         omap={output: (output,)}
@@ -258,7 +255,7 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
     if not has_carry:
         adder_aig >>= aiger.sink([output + '_carry'])
 
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=adder_aig,
         imap={left: lefts, right: rights},
         omap={output: outputs},
@@ -297,7 +294,7 @@ def index_gate(wordlen, idx, input, output=None):
     outputs = (inputs[idx],)
     aig = aiger.sink(set(inputs) - set(outputs)) \
         | aiger.identity(outputs)
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=aig,
         imap={input: inputs},
         omap={output: outputs},
@@ -318,7 +315,7 @@ def unsigned_lt_gate(wordlen, left, right, output):
         return expr
 
     expr = reduce(test_bit, zip(lefts, rights), aiger.atom(False))
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=expr.aig,
         imap={left: left_names, right: right_names},
         omap={output: (expr.output,)},
@@ -462,7 +459,7 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
             continue
         expr = (expr | atom) if bit else (expr & atom)
 
-    return aigbv.AIGBV(
+    return aigbv.aigbv(
         aig=expr.aig,
         imap={input: tuple(input_names)},
         omap={output: (expr.output,)},
