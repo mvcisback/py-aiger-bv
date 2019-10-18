@@ -25,7 +25,7 @@ def test_AIGBV_seq_compose():
     assert circ12.inputs == circ1.inputs | circ2.inputs - {'tmp'}
     assert circ12.outputs == circ2.outputs
 
-    assert circ12({'x1': (True,), 'x2': (True,), 'x3': (True,)})
+    assert circ12({'x1': (True,), 'x2': (True,), 'x3': (True,)})[0]['x4'][0]
 
 
 def test_AIGBV_or_compose():
@@ -35,3 +35,9 @@ def test_AIGBV_or_compose():
 
     assert circ12.inputs == circ1.inputs | circ2.inputs
     assert circ12.outputs == circ1.outputs | circ2.outputs
+
+    vals = {'x1': (True,), 'x2': (True,), 'x3': (True,), 'tmp': (False,)}
+    assert circ12(vals)[0] == {
+        'tmp': (True,),
+        'x4': (False,),
+    }
