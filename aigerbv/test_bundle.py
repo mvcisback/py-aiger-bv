@@ -62,6 +62,9 @@ def test_bundle_map():
     assert (imap1 + imap2)['z'] == imap2['z']
     assert set(imap12) == set(imap1) | set(imap2)
 
+    assert imap12.omit(['z', 'w']) == imap1
+    assert imap12.project(['z', 'w']) == imap2
+
     with pytest.raises(AssertionError):
         imap1 + imap12
 

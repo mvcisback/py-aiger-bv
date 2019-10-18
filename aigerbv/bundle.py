@@ -64,3 +64,9 @@ class BundleMap:
 
     def unblast(self, idx2val):
         return {k: self[k].unblast(idx2val) for k in self.keys()}
+
+    def omit(self, keys):
+        return BundleMap(fn.omit(dict(self.mapping), keys))
+
+    def project(self, keys):
+        return BundleMap(fn.project(dict(self.mapping), keys))
