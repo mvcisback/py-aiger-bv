@@ -60,3 +60,18 @@ def test_write():
     circ = aigbv.aig2aigbv(aiger.and_gate(['x', 'y'], output='out'))
     with TemporaryDirectory() as tmpdir:
         circ.write(Path(tmpdir) / "test.aag")
+
+
+def test_latch2init():
+    circ = aigbv.aig2aigbv(aiger.delay(['x', 'y'], initials=[False, True]))
+    assert circ.aig.inputs == {'x[0]', 'y[0]'}
+    assert circ.aig.outputs == {'x[0]', 'y[0]'}
+    assert circ.aig.latches == {'x[0]', 'y[0]'}
+
+
+def test_rebundle():
+    circ = aigbv.aig2aigbv(aiger.and_gate(['x', 'y'], output='z'))
+    circ2 = aigbv.rebundle_aig(circ.aig)
+    assert circ.imap == circ2.imap
+    assert circ.omap == circ2.omap
+    assert circ.lmap == circ2.lmap

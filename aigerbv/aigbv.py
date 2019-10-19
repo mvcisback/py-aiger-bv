@@ -1,3 +1,4 @@
+import re
 from typing import Tuple, FrozenSet
 
 import aiger
@@ -32,13 +33,11 @@ class AIGBV:
     @property
     def latches(self): return set(self.lmap.keys())
 
-    def __call__(self, inputs, latches=None):
-        # TODO: Make this an extension.
-        encoded_in = {i for i, v in inputs.items() if isinstance(v, int)}
-        inputs.update({
-            i: self._encode_val(i, inputs[i], self.imap) for i in encoded_in
-        })
+    @property
+    def latch2init(self):
+        return self.lmap.unblast(self.aig.latch2init)
 
+    def __call__(self, inputs, latches=None):
         out2val, latch2val = self.aig(
             inputs=self.imap.blast(inputs),
             latches=None if latches is None else self.lmap.blast(latches)
@@ -101,48 +100,23 @@ class AIGBV:
         ))
         return attr.evolve(circ, aig=circ.aig[kind, relabels_aig])
 
-    def _encode_val(self, i, word, imap):
-        # TODO: figure out encoding for word type.
-        return tuple(common.encode_int(len(imap[i]), word, signed=False))
-
     def feedback(self, inputs, outputs, initials=None, latches=None,
-                 keep_outputs=False, signed=False):
+                 keep_outputs=False):
         if latches is None:
             latches = inputs
-
-        idrop, imap = fn.lsplit(lambda x: x[0] in inputs, self.imap.items())
-        odrop, omap = fn.lsplit(lambda x: x[0] in outputs, self.omap.items())
-
-        wordlens = [len(vals) for i, vals in idrop]
-        new_latches = [(n, common.named_indexes(k, n))
-                       for k, n in zip(wordlens, latches)]
-
-        if initials is None:
-            initials = [0 for _ in inputs]
-        assert len(inputs) == len(outputs) == len(initials) == len(latches)
-
-        initials = fn.lcat(
-            common.encode_int(k, i, signed) for k, i in zip(wordlens, initials)
+        l2init = self.latch2init.update(
+            {l: v for l, v in zip(latches, initials) if v is not None}
         )
 
-        def get_names(key_vals):
-            return fn.lcat(fn.pluck(1, key_vals))
+        inputs = fn.lcat(self.imap[k] for k in inputs)
+        outputs = fn.lcat(self.omap[k] for k in outputs)
+        latches = fn.lcat(self.lmap[k] for k in latches)
+        initials = fn.lcat(l2init[l] for l in latches)
 
-        aig = self.aig.feedback(
-            inputs=get_names(idrop),
-            outputs=get_names(odrop),
-            latches=get_names(new_latches),
-            initials=initials,
-            keep_outputs=keep_outputs,
-        )
-
-        imap, odrop, omap = map(frozenset, [imap, odrop, omap])
-        return AIGBV(
-            aig=aig,
-            imap=imap,
-            omap=omap | (odrop if keep_outputs else frozenset()),
-            lmap=self.lmap + dict(new_latches),
-        )
+        return rebundle_aig(self.aig.feedback(
+            inputs=inputs, outputs=outputs, latches=latches,
+            initials=initials, keep_outputs=keep_outputs,
+        ))
 
     def unroll(self, horizon, *, init=True, omit_latches=True,
                only_last_outputs=False):
@@ -190,7 +164,7 @@ class AIGBV:
         return attr.evolve(circ, imap=imap, omap=omap)
 
 
-######### Lifting AIG to AIGBVs
+######### Lifting AIGs to AIGBVs
 
 
 def _diagonal_map(keys):
@@ -210,4 +184,34 @@ def aig2aigbv(aig):
         imap=_diagonal_map(aig.inputs),
         omap=_diagonal_map(aig.outputs),
         lmap=_diagonal_map(aig.latches),
+    )
+
+
+BV_NAME = re.compile("(.*)\[(\d+)\]$")
+
+
+def unpack_name(name):
+    root, idx = BV_NAME.match(name).groups()
+    return root, int(idx)
+
+
+def to_size(idxs):
+    idxs2 = set(idxs)
+    assert len(idxs2) == len(idxs)
+    assert min(idxs2) == 0
+    assert max(idxs2) == len(idxs) - 1
+    return len(idxs)
+
+
+def rebundle_names(names):
+    grouped_names = fn.group_values(map(unpack_name, names))
+    return BundleMap(pmap(fn.walk_values(to_size, grouped_names)))
+
+
+def rebundle_aig(aig):
+    return AIGBV(
+        aig=append_index(aig),
+        imap=rebundle_names(aig.inputs),
+        omap=rebundle_names(aig.outputs),
+        lmap=rebundle_names(aig.latches),
     )
