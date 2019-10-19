@@ -99,4 +99,9 @@ def test_latch2init():
     circ = aigbv.rebundle_aig(
         aiger.delay(['x[0]', 'y[0]'], initials=[False, True])
     )
-    assert circ.inputs == circ.latches == circ.outputs == {'x', 'y'}
+    assert circ.latch2init == {'x': (False,), 'y': (True,)}
+
+    circ = aigbv.rebundle_aig(
+        aiger.delay(['x[0]', 'x[1]'], initials=[False, True])
+    )
+    assert circ.latch2init == {'x': (False, True)}
