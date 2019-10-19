@@ -1,4 +1,7 @@
 import aiger
+import pytest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from aigerbv import aigbv
 from aigerbv import bundle as bdl
@@ -48,3 +51,12 @@ def test_relabel():
     circ2 = circ['i', {'x': 'z'}]
     assert circ2.inputs == {'y', 'z'}
     assert circ2.aig.inputs == {'y[0]', 'z[0]'}
+
+    with pytest.raises(AssertionError):
+        circ['i', {'x': 'y', }]
+
+
+def test_write():
+    circ = aigbv.aig2aigbv(aiger.and_gate(['x', 'y'], output='out'))
+    with TemporaryDirectory() as tmpdir:
+        circ.write(Path(tmpdir) / "test.aag")

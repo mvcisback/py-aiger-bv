@@ -90,6 +90,7 @@ class AIGBV:
 
         attr_name = {'i': 'imap', 'o': 'omap', 'l': 'lmap'}.get(kind)
         bmap1 = getattr(self, attr_name)
+        assert not set(relabels.values()) & set(bmap1.keys())
         bmap2 = bmap1.relabel(relabels)
         circ = attr.evolve(self, **{attr_name: bmap2})
 
