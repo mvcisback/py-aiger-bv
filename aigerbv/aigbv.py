@@ -35,7 +35,7 @@ class AIGBV:
 
     @property
     def latch2init(self):
-        return self.lmap.unblast(self.aig.latch2init)
+        return self.lmap.unblast(dict(self.aig.latch2init))
 
     def __call__(self, inputs, latches=None):
         out2val, latch2val = self.aig(
@@ -210,7 +210,7 @@ def rebundle_names(names):
 
 def rebundle_aig(aig):
     return AIGBV(
-        aig=append_index(aig),
+        aig=aig,
         imap=rebundle_names(aig.inputs),
         omap=rebundle_names(aig.outputs),
         lmap=rebundle_names(aig.latches),

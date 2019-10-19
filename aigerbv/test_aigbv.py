@@ -19,6 +19,11 @@ def test_AIGBV_smoke():
 
     assert circ.imap == bdl.BundleMap({'x': 1, 'y': 1})
 
+    circ = aigbv.aig2aigbv(aiger.delay(['x', 'y'], initials=[False, True]))
+    assert circ.aig.inputs == {'x[0]', 'y[0]'}
+    assert circ.aig.outputs == {'x[0]', 'y[0]'}
+    assert circ.aig.latches == {'x[0]', 'y[0]'}
+
 
 def test_AIGBV_seq_compose():
     circ1 = aigbv.aig2aigbv(aiger.and_gate(['x1', 'x2'], output='tmp'))
@@ -46,27 +51,10 @@ def test_AIGBV_or_compose():
     }
 
 
-def test_relabel():
-    circ = aigbv.aig2aigbv(aiger.and_gate(['x', 'y'], output='out'))
-    circ2 = circ['i', {'x': 'z'}]
-    assert circ2.inputs == {'y', 'z'}
-    assert circ2.aig.inputs == {'y[0]', 'z[0]'}
-
-    with pytest.raises(AssertionError):
-        circ['i', {'x': 'y', }]
-
-
 def test_write():
     circ = aigbv.aig2aigbv(aiger.and_gate(['x', 'y'], output='out'))
     with TemporaryDirectory() as tmpdir:
         circ.write(Path(tmpdir) / "test.aag")
-
-
-def test_latch2init():
-    circ = aigbv.aig2aigbv(aiger.delay(['x', 'y'], initials=[False, True]))
-    assert circ.aig.inputs == {'x[0]', 'y[0]'}
-    assert circ.aig.outputs == {'x[0]', 'y[0]'}
-    assert circ.aig.latches == {'x[0]', 'y[0]'}
 
 
 def test_rebundle():
@@ -75,3 +63,40 @@ def test_rebundle():
     assert circ.imap == circ2.imap
     assert circ.omap == circ2.omap
     assert circ.lmap == circ2.lmap
+    assert circ2.aig.inputs == {'x[0]', 'y[0]'}
+    assert circ2.aig.outputs == {'z[0]'}
+
+    circ = aigbv.rebundle_aig(
+        aiger.delay(['x[0]', 'y[0]'], initials=[False, True])
+    )
+    assert circ.inputs == circ.latches == circ.outputs == {'x', 'y'}
+    assert circ.aig.inputs == circ.aig.outputs == circ.aig.latches \
+        == {'x[0]', 'y[0]'}
+
+
+def test_relabel():
+    circ = aigbv.aig2aigbv(aiger.and_gate(['x', 'y'], output='out'))
+    circ2 = circ['i', {'x': 'z'}]
+    assert circ2.inputs == {'y', 'z'}
+    assert circ2.aig.inputs == {'y[0]', 'z[0]'}
+
+    circ2 = circ['o', {'out': 'tmp'}]
+    assert circ2.outputs == {'tmp'}
+    assert circ2.aig.outputs == {'tmp[0]'}
+
+    with pytest.raises(AssertionError):
+        circ['i', {'x': 'y', }]
+
+    circ = aigbv.rebundle_aig(
+        aiger.delay(['x[0]', 'y[0]'], initials=[False, True])
+    )
+    circ2 = circ['l', {'x': 'z'}]
+    assert circ2.latches == {'z', 'y'}
+    assert circ2.aig.latches == {'z[0]', 'y[0]'}
+
+
+def test_latch2init():
+    circ = aigbv.rebundle_aig(
+        aiger.delay(['x[0]', 'y[0]'], initials=[False, True])
+    )
+    assert circ.inputs == circ.latches == circ.outputs == {'x', 'y'}
