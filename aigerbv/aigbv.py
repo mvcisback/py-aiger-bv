@@ -187,7 +187,7 @@ def aig2aigbv(aig):
     )
 
 
-BV_NAME = re.compile("(.*)\[(\d+)\]$")
+BV_NAME = re.compile(r"(.*)\[(\d+)\]$")
 
 
 def unpack_name(name):
