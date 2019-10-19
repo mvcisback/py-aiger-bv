@@ -77,3 +77,10 @@ def test_blast_map():
         'y[0]': False, 'y[1]': False, 'y[2]': False
     }
     assert imap.unblast(imap.blast(idx2val)) == idx2val
+
+
+def test_relabel():
+    imap = bdl.BundleMap({'x': 2, 'y': 3})
+    imap2 = imap.relabel({'x': 'z', 'w': 'f'})
+    assert set(imap.values()) == set(imap2.values())
+    assert set(imap2.keys()) == {'z', 'y'}

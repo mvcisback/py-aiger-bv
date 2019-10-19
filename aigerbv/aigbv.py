@@ -10,30 +10,18 @@ from aigerbv import common
 from aigerbv.bundle import BundleMap
 
 
-def _blast(bvname2vals, name_map):
-    """Helper function to expand (blast) str -> int map into str ->
-    bool map. This is used to send word level inputs to aiger."""
-    if len(name_map) == 0:
-        return dict()
-    return fn.merge(*(dict(zip(names, bvname2vals[bvname]))
-                      for bvname, names in name_map))
-
-
-def _unblast(name2vals, name_map):
-    """Helper function to lift str -> bool maps used by aiger
-    to the word level. Dual of the `_blast` function."""
-    def _collect(names):
-        return tuple(name2vals[n] for n in names)
-
-    return {bvname: _collect(names) for bvname, names in name_map}
-
-
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
     imap: BundleMap = BundleMap()
     omap: BundleMap = BundleMap()
     lmap: BundleMap = BundleMap()
+
+    simulate = aiger.AIG.simulate
+    simulator = aiger.AIG.simulator
+
+    def write(self, path): 
+        self.aig.write(path)
 
     @property
     def inputs(self): return set(self.imap.keys())
@@ -44,21 +32,21 @@ class AIGBV:
     @property
     def latches(self): return set(self.lmap.keys())
 
-    def __getitem__(self, others):
-        if not isinstance(others, tuple):
-            return super().__getitem__(others)
+    def __call__(self, inputs, latches=None):
+        # TODO: Make this an extension.
+        encoded_in = {i for i, v in inputs.items() if isinstance(v, int)}
+        inputs.update({
+            i: self._encode_val(i, inputs[i], self.imap) for i in encoded_in
+        })
 
-        kind, relabels = others
-        if kind not in {'i', 'o', 'l'}:
-            raise NotImplementedError
-
-        attr_name = {'i': 'imap', 'o': 'omap', 'l': 'lmap'}.get(kind)
-        attr_value = fn.walk_keys(
-            lambda x: relabels.get(x, x),
-            dict(getattr(self, attr_name))
+        out2val, latch2val = self.aig(
+            inputs=self.imap.blast(inputs),
+            latches=None if latches is None else self.lmap.blast(latches)
         )
-        # TODO: Need to update underlying aig!
-        return attr.evolve(self, **{attr_name: attr_value})
+        return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
+
+    def __lshift__(self, other):
+        return other >> self
 
     def __rshift__(self, other):
         interface = self.outputs & other.inputs
@@ -71,9 +59,6 @@ class AIGBV:
             omap=other.omap + self.omap.omit(interface),
             lmap=self.lmap + other.lmap,
         )
-
-    def __lshift__(self, other):
-        return other >> self
 
     def __or__(self, other):
         assert not self.outputs & other.outputs
@@ -98,36 +83,26 @@ class AIGBV:
 
         return circ
 
+    def __getitem__(self, others):
+        kind, relabels = others
+        if kind not in {'i', 'o', 'l'}:
+            raise NotImplementedError
+
+        attr_name = {'i': 'imap', 'o': 'omap', 'l': 'lmap'}.get(kind)
+        bmap1 = getattr(self, attr_name)
+        bmap2 = bmap1.relabel(relabels)
+        circ = attr.evolve(self, **{attr_name: bmap2})
+
+        # Update AIG to match new interface.
+        relabels_aig = fn.merge(*(
+            dict(zip(bmap1[k], bmap2[v])) for k, v in relabels.items()
+            if k in bmap1
+        ))
+        return attr.evolve(circ, aig=circ.aig[kind, relabels_aig])
+
     def _encode_val(self, i, word, imap):
         # TODO: figure out encoding for word type.
         return tuple(common.encode_int(len(imap[i]), word, signed=False))
-
-    def __call__(self, inputs, latches=None):
-        # TODO: Make this an extension.
-        encoded_in = {i for i, v in inputs.items() if isinstance(v, int)}
-        inputs.update({
-            i: self._encode_val(i, inputs[i], self.imap) for i in encoded_in
-        })
-
-        out2val, latch2val = self.aig(
-            inputs=self.imap.blast(inputs),
-            latches=None if latches is None else self.lmap.blast(latches)
-        )
-        return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
-
-    def simulator(self, latches=None):
-        inputs = yield
-        while True:
-            outputs, latches = self(inputs, latches)
-            inputs = yield outputs, latches
-
-    def simulate(self, input_seq, latches=None):
-        sim = self.simulator()
-        next(sim)
-        return [sim.send(inputs) for inputs in input_seq]
-
-    def write(self, path):
-        self.aig.write(path)
 
     def feedback(self, inputs, outputs, initials=None, latches=None,
                  keep_outputs=False, signed=False):

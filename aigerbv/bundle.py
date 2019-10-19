@@ -1,4 +1,5 @@
 from itertools import islice
+from functools import reduce
 
 import attr
 import funcy as fn
@@ -52,6 +53,7 @@ class BundleMap:
     def values(self): return self.mapping.values()
     def items(self): return self.mapping.items()
     def __iter__(self): return iter(self.mapping)
+    def __contains__(self, elem): return elem in self.mapping
 
     def __add__(self, other):
         assert not (set(self.keys()) & set(other.keys()))
@@ -66,7 +68,18 @@ class BundleMap:
         return {k: self[k].unblast(idx2val) for k in self.keys()}
 
     def omit(self, keys):
-        return BundleMap(fn.omit(dict(self.mapping), keys))
+        mapping = reduce(lambda x, k: x.discard(k), keys, self.mapping)
+        return BundleMap(mapping)
 
     def project(self, keys):
-        return BundleMap(fn.project(dict(self.mapping), keys))
+        return self.omit(set(self.keys()) - set(keys))
+
+    def relabel(self, old2new):
+        assert not (set(old2new.keys()) & set(old2new.values()))
+        bmap2 = self.mapping.evolver()
+        for k, v in old2new.items():
+            if k not in self.mapping:
+                continue
+            del bmap2[k]
+            bmap2[v] = self.mapping[k]
+        return BundleMap(bmap2.persistent())
