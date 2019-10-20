@@ -289,23 +289,18 @@ def index_gate(wordlen, idx, input, output=None):
     if output is None:
         output = input
 
-    inputs = named_indexes(wordlen, input)
-    outputs = (inputs[idx],)
-    aig = aiger.sink(set(inputs) - set(outputs)) \
-        | aiger.identity(outputs)
-    return aigbv.AIGBV(
-        aig=aig,
-        imap={input: inputs},
-        omap={output: outputs},
-    )
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    inputs, outputs= imap[input], (imap[input][idx],)
+
+    aig = aiger.sink(set(inputs) - set(outputs)) | aiger.identity(outputs)
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)
 
 
 def unsigned_lt_gate(wordlen, left, right, output):
-    left_names = named_indexes(wordlen, left)
-    right_names = named_indexes(wordlen, right)
+    imap, omap = BundleMap({left: wordlen, right: wordlen}), BundleMap({output: 1})
 
-    lefts = map(aiger.atom, left_names)
-    rights = map(aiger.atom, right_names)
+    lefts = map(aiger.atom, imap[left])
+    rights = map(aiger.atom, imap[right])
 
     def test_bit(expr, lr):
         l, r = lr
@@ -314,11 +309,7 @@ def unsigned_lt_gate(wordlen, left, right, output):
         return expr
 
     expr = reduce(test_bit, zip(lefts, rights), aiger.atom(False))
-    return aigbv.AIGBV(
-        aig=expr.aig,
-        imap={left: left_names, right: right_names},
-        omap={output: (expr.output,)},
-    )
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=expr.aig)
 
 
 def unsigned_le_gate(wordlen, left, right, output):
@@ -447,8 +438,8 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
     if input is None:
         input = _fresh()
 
-    input_names = named_indexes(wordlen, input)
-    atoms = map(aiger.atom, input_names)
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    atoms = map(aiger.atom, imap[input])
 
     active = False
     expr = aiger.atom(False)
@@ -458,8 +449,5 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
             continue
         expr = (expr | atom) if bit else (expr & atom)
 
-    return aigbv.AIGBV(
-        aig=expr.aig,
-        imap={input: tuple(input_names)},
-        omap={output: (expr.output,)},
-    )
+    aig = expr.aig['o', {expr.output: omap[output][0]}]
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)
