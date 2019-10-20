@@ -8,7 +8,7 @@ from pyrsistent import pmap
 from pyrsistent.typing import PMap
 
 from aigerbv import common
-from aigerbv.bundle import BundleMap
+from aigerbv.bundle import BundleMap, Bundle
 
 
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
@@ -104,19 +104,26 @@ class AIGBV:
                  keep_outputs=False):
         if latches is None:
             latches = inputs
-        l2init = self.latch2init.update(
-            {l: v for l, v in zip(latches, initials) if v is not None}
+
+        def blast(bmap, vals):
+            return fn.lmapcat(bmap.get, vals)
+
+        lmap = BundleMap(
+            {l: self.imap[i].size for i, l in zip(inputs, latches)}
         )
-
-        inputs = fn.lcat(self.imap[k] for k in inputs)
-        outputs = fn.lcat(self.omap[k] for k in outputs)
-        latches = fn.lcat(self.lmap[k] for k in latches)
-        initials = fn.lcat(l2init[l] for l in latches)
-
-        return rebundle_aig(self.aig.feedback(
-            inputs=inputs, outputs=outputs, latches=latches,
-            initials=initials, keep_outputs=keep_outputs,
+        aig = rebundle_aig(self.aig.feedback(
+            inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
+            latches=blast(lmap, latches), keep_outputs=keep_outputs,
         ))
+        
+        if initials is not None:
+            l2init = dict(aig.latch2init).update(
+                {l: v for l, v in zip(latches, initials) if v is not None}
+            )
+            initials = fn.lcat(l2init[l] for l in latches)
+
+        return aig
+
 
     def unroll(self, horizon, *, init=True, omit_latches=True,
                only_last_outputs=False):
