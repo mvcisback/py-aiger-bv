@@ -1,10 +1,11 @@
+from functools import partial, reduce
 from typing import Union
 
 import attr
+import funcy as fn
 
 from aigerbv import aigbv
 from aigerbv import common as cmn
-from functools import partial, reduce
 
 
 def constk(k, size=None):
@@ -67,7 +68,7 @@ class UnsignedBVExpr:
 
     @property
     def output(self):
-        return list(self.aigbv.outputs)[0]
+        return fn.first(self.aigbv.outputs)
 
     @property
     def inputs(self):
@@ -75,7 +76,7 @@ class UnsignedBVExpr:
 
     @property
     def size(self):
-        return len(list(self.aigbv.omap.items())[0][1])
+        return fn.first(self.aigbv.omap.values())
 
     @property
     def aig(self):
