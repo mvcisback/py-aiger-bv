@@ -54,6 +54,8 @@ def test_bundle_map():
     imap1 = bdl.BundleMap({'x': 2, 'y': 4})
     assert imap1['x'] == bdl.Bundle(name='x', size=2)
     assert imap1['y'] == bdl.Bundle(name='y', size=4)
+    assert imap1.get('x') == bdl.Bundle(name='x', size=2)
+    assert imap1.get('z') is None
 
     imap2 = bdl.BundleMap({'z': 2, 'w': 4})
     imap12 = imap1 + imap2
