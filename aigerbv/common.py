@@ -188,19 +188,20 @@ def combine_gate(left_wordlen, left, right_wordlen, right, output):
 
 
 def split_gate(input, left_wordlen, left, right_wordlen, right):
-    inputs = named_indexes(left_wordlen + right_wordlen, input)
-    lefts, rights = inputs[:left_wordlen], inputs[left_wordlen:]
+    omap=BundleMap({left: left_wordlen, right: right_wordlen})
 
     circ = identity_gate(left_wordlen + right_wordlen, input, input)
-    return attr.evolve(circ, omap={left: lefts, right: rights})
+    relabels = fn.merge(
+        dict(zip(circ.omap[input][:left_wordlen], omap[left])),
+        dict(zip(circ.omap[input][left_wordlen:], omap[right])),
+    )
+
+    return attr.evolve(circ, omap=omap, aig=circ.aig['o', relabels])
 
 
 def sink(wordlen, inputs):
-    blasted_inputs = [named_indexes(wordlen, i) for i in inputs]
-    return aigbv.AIGBV(
-        aig=aiger.sink(fn.lcat(blasted_inputs)),
-        imap=zip(inputs, blasted_inputs),
-    )
+    imap = BundleMap({i: wordlen for i in inputs})
+    return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, inputs)))
 
 
 def __full_adder():
