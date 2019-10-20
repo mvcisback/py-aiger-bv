@@ -175,12 +175,16 @@ def reverse_gate(wordlen, input='x', output='rev(x)'):
 
 
 def combine_gate(left_wordlen, left, right_wordlen, right, output):
-    lefts = named_indexes(left_wordlen, left)
-    rights = named_indexes(right_wordlen, right)
-
     circ = identity_gate(left_wordlen, left, left) \
         | identity_gate(right_wordlen, right, right)
-    return attr.evolve(circ, omap={output: lefts+rights})
+
+    omap1 = circ.omap
+    relabels = {
+        k: f"{left}[{i + left_wordlen}]" for i, k in enumerate(omap1[right])
+    }
+    omap2 = BundleMap({left: left_wordlen + right_wordlen})
+    circ = attr.evolve(circ, omap=omap2, aig=circ.aig['o', relabels])
+    return circ['o', {left: output}]
 
 
 def split_gate(input, left_wordlen, left, right_wordlen, right):
