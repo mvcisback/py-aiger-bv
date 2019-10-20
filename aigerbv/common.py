@@ -1,4 +1,5 @@
 import operator as op
+from collections import defaultdict
 from functools import reduce
 from itertools import product, starmap
 from uuid import uuid1
@@ -8,7 +9,7 @@ import aiger
 import funcy as fn
 
 from aigerbv import aigbv
-from aigerbv.bundle import BundleMap
+from aigerbv.bundle import BundleMap, Bundle
 
 
 def _fresh():
@@ -128,29 +129,27 @@ def source(wordlen, value, name='x', signed=True):
 
 
 def tee(wordlen, iomap):
-    imap = {i: named_indexes(wordlen, i) for i in iomap}
-    omap = {o: named_indexes(wordlen, o) for o in fn.cat(iomap.values())}
-    blasted_iomap = fn.merge(
-        *({_name_idx(iname, idx): [_name_idx(o, idx) for o in iomap[iname]]}
-          for iname, idx in product(iomap, range(wordlen)))
-    )
+    imap = BundleMap({i: wordlen for i in iomap})
+    omap = BundleMap({o: wordlen for o in fn.cat(iomap.values())})
 
-    return aigbv.AIGBV(
-        aig=aiger.tee(blasted_iomap),
-        imap=imap,
-        omap=omap,
-    )
+    blasted = defaultdict(list)
+
+    for i, outs in iomap.items():
+        for o in outs:
+            for k, v in zip(imap[i], omap[o]):
+                blasted[k].append(v)
+
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aiger.tee(blasted))
 
 
 def repeat(wordlen, input, output=None):
     if output is None:
         output = input
 
-    outputs = named_indexes(wordlen, output)
+    imap, omap = BundleMap({input: 1}), BundleMap({output: wordlen})
     return aigbv.AIGBV(
-        aig=aiger.tee({input: outputs}),
-        imap={input: (input,)},
-        omap={output: outputs},
+        imap=imap, omap=omap,
+        aig=aiger.tee({imap[input]: omap[output]}),
     )
 
 
@@ -158,19 +157,21 @@ def identity_gate(wordlen, input='x', output=None):
     if output is None:
         output = input
 
-    inputs = named_indexes(wordlen, input)
-    outputs = named_indexes(wordlen, output)
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: wordlen})
     return aigbv.AIGBV(
-        aig=aiger.identity(inputs=inputs, outputs=outputs),
-        imap={input: inputs},
-        omap={output: outputs},
+        imap=imap, omap=omap,
+        aig=aiger.identity(inputs=imap[input], outputs=omap[output]),
     )
 
 
 def reverse_gate(wordlen, input='x', output='rev(x)'):
-    circ = identity_gate(wordlen, input, output)
-    omap = {k: tuple(reversed(vs)) for k, vs in circ.omap.items()}
-    return attr.evolve(circ, omap=omap)
+    circ = identity_gate(wordlen, input, output=output)
+
+    tmp, obdl = Bundle(_fresh(), wordlen), Bundle(output, wordlen)
+    aig = circ.aig['o', dict(zip(obdl, reversed(tmp)))]
+    aig = circ.aig['o', dict(zip(tmp, obdl))]
+
+    return attr.evolve(circ, aig=aig)
 
 
 def combine_gate(left_wordlen, left, right_wordlen, right, output):
