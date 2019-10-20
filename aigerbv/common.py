@@ -8,6 +8,7 @@ import aiger
 import funcy as fn
 
 from aigerbv import aigbv
+from aigerbv.bundle import BundleMap
 
 
 def _fresh():
@@ -44,16 +45,13 @@ def decode_int(bits, signed=True):
 
 
 def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
-    lefts = named_indexes(wordlen, left)
-    rights = named_indexes(wordlen, right)
-    outputs = named_indexes(wordlen, output)
+    imap = BundleMap({left: wordlen, right: wordlen})
+    omap = BundleMap({output: wordlen})
 
-    bw_aigs = (binop([l, r], o) for l, r, o in zip(lefts, rights, outputs))
-    aig = reduce(op.or_, bw_aigs)
+    names = zip(imap[left], imap[right], omap[output])
     return aigbv.AIGBV(
-        aig=aig,
-        imap={left: lefts, right: rights},
-        omap={output: outputs},
+        imap=imap, omap=omap,
+        aig=reduce(op.or_, (binop([l, r], o) for l, r, o in names)),
     )
 
 
@@ -70,12 +68,10 @@ def bitwise_xor(wordlen, left='x', right='y', output='x&y'):
 
 
 def bitwise_negate(wordlen, input='x', output='not x'):
-    inputs = named_indexes(wordlen, input)
-    outputs = named_indexes(wordlen, output)
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: wordlen})
     return aigbv.AIGBV(
-        aig=aiger.bit_flipper(inputs=inputs, outputs=outputs),
-        imap={input: inputs},
-        omap={output: outputs},
+        imap=imap, omap=omap,
+        aig=aiger.bit_flipper(inputs=imap[input], outputs=omap[output]),
     )
 
 
@@ -100,12 +96,10 @@ def reduce_binop(wordlen, inputs, output, op):
 
 
 def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
-    inputs = named_indexes(wordlen, input)
-    outputs = named_indexes(1, output)
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
     return aigbv.AIGBV(
-        aig=aiger.or_gate(inputs, outputs[0]),
-        imap={input: inputs},
-        omap={output: outputs},
+        imap=imap, omap=omap,
+        aig=aiger.or_gate(imap[input][0], omap[output][0]),
     )
 
 
@@ -125,10 +119,12 @@ def eq_gate(wordlen, left='x', right='y', output='x=y'):
 
 
 def source(wordlen, value, name='x', signed=True):
-    names = named_indexes(wordlen, name)
-    bits = encode_int(wordlen, value, signed)
-    aig = aiger.source({name: bit for name, bit in zip(names, bits)})
-    return aigbv.AIGBV(aig=aig, omap={name: names},)
+    if isinstance(value, int):
+        value = encode_int(wordlen, value, signed)
+    
+    omap = BundleMap({name: wordlen})
+    aig = aiger.source({name: bit for name, bit in zip(omap[name], value)})
+    return aigbv.AIGBV(aig=aig, omap=omap)
 
 
 def tee(wordlen, iomap):
