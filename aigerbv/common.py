@@ -204,6 +204,19 @@ def sink(wordlen, inputs):
     return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, inputs)))
 
 
+def even_popcount_gate(wordlen, input, output):
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.parity_gate(imap[input], omap[output][0]),
+    )
+
+
+def dot_mod2_gate(wordlen, left='x', right='y', output='x@y'):
+    return bitwise_and(wordlen, left, right, 'tmp') >> \
+        even_popcount_gate(wordlen, 'tmp', output)
+
+
 def __full_adder():
     x, y, cin = map(aiger.atom, ('x', 'y', 'ci'))
     tmp = x ^ y
@@ -222,31 +235,19 @@ def _full_adder(x, y, carry_in, result, carry_out):
     return FULL_ADDER_GADGET['i', relabels]['o', relabels]
 
 
-def even_popcount_gate(wordlen, input, output):
-    inputs = named_indexes(wordlen, input)
-    return aigbv.AIGBV(
-        aig=aiger.parity_gate(inputs, output),
-        imap={input: inputs},
-        omap={output: (output,)}
-    )
-
-
-def dot_mod2_gate(wordlen, left='x', right='y', output='x@y'):
-    return bitwise_and(wordlen, left, right, 'tmp') >> \
-        even_popcount_gate(wordlen, 'tmp', output)
-
-
 def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
     carry_name = f'{output}_carry'
     assert left != carry_name and right != carry_name
 
     adder_aig = aiger.source({carry_name: False})
-
-    lefts = named_indexes(wordlen, left)
-    rights = named_indexes(wordlen, right)
+    
+    imap = BundleMap({left: wordlen, right: wordlen})
+    omap = BundleMap(
+        {output: wordlen, has_carry: 1} if has_carry else {output: wordlen}
+    )
     outputs = named_indexes(wordlen, output)
 
-    for lname, rname, oname in zip(lefts, rights, outputs):
+    for lname, rname, oname in zip(imap[left], imap[right], omap[output]):
         adder_aig >>= _full_adder(
             x=lname,
             y=rname,
@@ -257,11 +258,7 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
     if not has_carry:
         adder_aig >>= aiger.sink([output + '_carry'])
 
-    return aigbv.AIGBV(
-        aig=adder_aig,
-        imap={left: lefts, right: rights},
-        omap={output: outputs},
-    )
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=adder_aig)
 
 
 def inc_gate(wordlen, input='x', output='inc'):
