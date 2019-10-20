@@ -100,7 +100,7 @@ def is_nonzero_gate(wordlen, input='x', output='is_nonzero'):
     imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
     return aigbv.AIGBV(
         imap=imap, omap=omap,
-        aig=aiger.or_gate(imap[input][0], omap[output][0]),
+        aig=aiger.or_gate(imap[input], omap[output][0]),
     )
 
 
@@ -168,8 +168,9 @@ def reverse_gate(wordlen, input='x', output='rev(x)'):
     circ = identity_gate(wordlen, input, output=output)
 
     tmp, obdl = Bundle(_fresh(), wordlen), Bundle(output, wordlen)
+
     aig = circ.aig['o', dict(zip(obdl, reversed(tmp)))]
-    aig = circ.aig['o', dict(zip(tmp, obdl))]
+    aig = aig['o', dict(zip(tmp, obdl))]
 
     return attr.evolve(circ, aig=aig)
 
@@ -184,7 +185,7 @@ def combine_gate(left_wordlen, left, right_wordlen, right, output):
     }
     omap2 = BundleMap({left: left_wordlen + right_wordlen})
     circ = attr.evolve(circ, omap=omap2, aig=circ.aig['o', relabels])
-    return circ['o', {left: output}]
+    return circ if left == output else circ['o', {left: output}]
 
 
 def split_gate(input, left_wordlen, left, right_wordlen, right):
@@ -293,7 +294,8 @@ def index_gate(wordlen, idx, input, output=None):
     inputs, outputs= imap[input], (imap[input][idx],)
 
     aig = aiger.sink(set(inputs) - set(outputs)) | aiger.identity(outputs)
-    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)
+    relabels = {outputs[0]: omap[output][0]}
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig['o', relabels])
 
 
 def unsigned_lt_gate(wordlen, left, right, output):
@@ -309,7 +311,8 @@ def unsigned_lt_gate(wordlen, left, right, output):
         return expr
 
     expr = reduce(test_bit, zip(lefts, rights), aiger.atom(False))
-    return aigbv.AIGBV(imap=imap, omap=omap, aig=expr.aig)
+    aig = expr.aig['o', {expr.output: omap[output][0]}]
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)
 
 
 def unsigned_le_gate(wordlen, left, right, output):

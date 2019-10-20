@@ -61,6 +61,9 @@ class BundleMap:
         return BundleMap(self.mapping + mapping2)
 
     def blast(self, idx2vals):
+        if len(idx2vals) == 0:
+            return idx2vals
+
         idx2vals = idx2vals.items()
         return fn.merge(*(self[idx].blast(val) for idx, val in idx2vals))
 
