@@ -128,47 +128,14 @@ class AIGBV:
     def unroll(self, horizon, *, init=True, omit_latches=True,
                only_last_outputs=False):
         aig = self.aig.unroll(
-            horizon, init=init,
-            omit_latches=omit_latches,
+            horizon, init=init, omit_latches=omit_latches,
             only_last_outputs=only_last_outputs
         )
+        for key in ['inputs', 'outputs', 'latches']:
+            relabels = {k: shuffle_id_time(k) for k in getattr(aig, key)}
+            aig = aig[key[0], relabels]
 
-        # TODO: generalize and apply to all maps.
-
-        def extract_map(name_map, names):
-            lookup_root = fn.merge(*(
-                {v: k for v in vals} for k, vals in name_map)
-            )
-            mapping = fn.group_by(
-                lambda x: lookup_root[x.split('##time_')[0]],
-                names
-            )
-            mapping = fn.walk_values(tuple, mapping)  # Make hashable.
-            return frozenset(mapping.items())
-
-        circ = AIGBV(
-            aig=aig,
-            imap=extract_map(self.imap.items(), aig.inputs),
-            omap=extract_map(self.omap.items(), aig.outputs),
-            lmap=extract_map(self.lmap.items(), aig.latches),
-        )
-        # PROBLEM: aigbv.unroll currently doesn't preserve variable
-        #          order.
-        # WORK AROUND: Sort input and output maps
-        # TODO: Remove when fixed!
-
-        def _fix_order(names):
-            def to_key(x):
-                name, time = x.split('##time_')
-                return int(time), name
-
-            return tuple(sorted(names, key=to_key))
-
-        def fix_order(mapping):
-            return frozenset(fn.walk_values(_fix_order, dict(mapping)).items())
-
-        imap, omap = fix_order(circ.imap.items()), fix_order(circ.omap.items())
-        return attr.evolve(circ, imap=imap, omap=omap)
+        return rebundle_aig(aig)
 
 
 ######### Lifting AIGs to AIGBVs
@@ -222,3 +189,12 @@ def rebundle_aig(aig):
         omap=rebundle_names(aig.outputs),
         lmap=rebundle_names(aig.latches),
     )
+
+
+# For relabeling time unrolling
+BV_NAME_TIME = re.compile(r"(.*)\[(\d+)\]##time_(\d+)$")
+
+
+def shuffle_id_time(name):
+    name, idx, time = BV_NAME_TIME.match(name).groups()
+    return f"{name}##time_{time}[{idx}]"

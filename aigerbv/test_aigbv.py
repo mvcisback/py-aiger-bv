@@ -111,3 +111,13 @@ def test_feedback():
     circ = aigbv.rebundle_aig(aiger.identity(['x[0]', 'x[1]', 'y[0]', 'y[1]']))
     circ2 = circ.feedback(inputs=['x'], outputs=['y'])
 
+
+def test_unroll():
+    circ = aigbv.rebundle_aig(aiger.identity(['x[0]', 'x[1]', 'y[0]', 'y[1]']))
+    circ2 = circ.feedback(inputs=['x'], outputs=['y'])
+
+    circ3 = circ2.unroll(3)
+    assert circ3.inputs == {'y##time_0', 'y##time_1', 'y##time_2'}
+    assert circ3.outputs == {'x##time_1', 'x##time_2', 'x##time_3'}
+
+
