@@ -149,7 +149,7 @@ def repeat(wordlen, input, output=None):
     imap, omap = BundleMap({input: 1}), BundleMap({output: wordlen})
     return aigbv.AIGBV(
         imap=imap, omap=omap,
-        aig=aiger.tee({imap[input]: omap[output]}),
+        aig=aiger.tee({imap[input][0]: list(omap[output])}),
     )
 
 
@@ -453,4 +453,5 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
         expr = (expr | atom) if bit else (expr & atom)
 
     aig = expr.aig['o', {expr.output: omap[output][0]}]
+    aig |= aiger.sink(imap[input])
     return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)
