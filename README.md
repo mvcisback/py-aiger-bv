@@ -78,8 +78,8 @@ expr16 = x > y
 expr17 = x >= y
 
 # Atoms can be constants.
-expr18 = x & aiger.atom(16, 3)
-expr19 = x & aiger.atom(16, 0xff_12)
+expr18 = x & aigerbv.atom(16, 3)
+expr19 = x & aigerbv.atom(16, 0xff_12)
 
 # BitVector expressions can be concatenated.
 expr20 = x.concat(y)
@@ -91,8 +91,8 @@ expr21 = x[1]
 expr22 = x[1].repeat(10)
 
 # Switches can be implemented using ITE.
-test = aiger.atom(1, 'test')
-expr23 = aiger.ite(test, x, y)  # x if test else y.
+test = aigerbv.atom(1, 'test')
+expr23 = aigerbv.ite(test, x, y)  # x if test else y.
 
 # And you can inspect the AIGBV if needed.
 circ = x.aigbv
@@ -101,7 +101,7 @@ circ = x.aigbv
 circ = x.aigbv.aig
 
 # And of course, you can get a BoolExpr from a single output aig.
-expr = aiger.UnsignedBVExpr(circ)
+expr = aigerbv.UnsignedBVExpr(circ)
 ```
 
 # Sequential Circuit DSL
