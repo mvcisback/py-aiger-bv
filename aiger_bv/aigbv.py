@@ -62,21 +62,22 @@ class AIGBV:
         assert not self.latches & other.latches
 
         shared_inputs = self.inputs & other.inputs
+        circ = self
         if shared_inputs:
             relabels1 = {n: common._fresh() for n in shared_inputs}
             relabels2 = {n: common._fresh() for n in shared_inputs}
-            self, other = self['i', relabels1], other['i', relabels2]
+            circ, other = circ['i', relabels1], other['i', relabels2]
 
         circ = AIGBV(
-            aig=self.aig | other.aig,
-            imap=self.imap + other.imap,
-            omap=self.omap + other.omap,
-            lmap=self.lmap + other.lmap)
+            aig=circ.aig | other.aig,
+            imap=circ.imap + other.imap,
+            omap=circ.omap + other.omap,
+            lmap=circ.lmap + other.lmap)
 
         if shared_inputs:
             for orig in shared_inputs:
                 new1, new2 = relabels1[orig], relabels2[orig]
-                circ <<= common.tee(len(self.imap[orig]), {orig: [new1, new2]})
+                circ <<= common.tee(self.imap[orig].size, {orig: [new1, new2]})
 
         return circ
 

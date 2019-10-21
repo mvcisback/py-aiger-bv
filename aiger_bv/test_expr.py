@@ -223,3 +223,10 @@ def test_ite(test, a, b):
     expr = ite(_test, _a, _b)
     val = common.decode_int(expr())
     assert val == (a if test else b)
+
+
+def test_ite2():
+    test, a, b = atom(1, 'test', signed=False), atom(2, 'x'), atom(2, 'y')
+    expr = ite(test, a, b)
+    val = expr({'test': (False,), 'x': (False, False), 'y': (True, False),})
+    assert val == (True, False)
