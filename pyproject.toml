@@ -6,7 +6,7 @@ description = "A python library for manipulating sequential and-inverter gates."
 authors = ["Marcell Vazquez-Chanlatte <mvc@linux.com>"]
 license = "MIT"
 packages = [
-    { include = "aigerbv" },
+    { include = "aiger_bv" },
 ]
 
 [tool.poetry.dependencies]

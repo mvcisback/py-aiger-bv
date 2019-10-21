@@ -1,5 +1,5 @@
-from aigerbv.expr import atom, ite
-from aigerbv import common
+from aiger_bv.expr import atom, ite
+from aiger_bv import common
 
 # additional imports for testing frammework
 import hypothesis.strategies as st

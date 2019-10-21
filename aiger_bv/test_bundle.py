@@ -1,6 +1,6 @@
 import pytest
 
-from aigerbv import bundle as bdl
+from aiger_bv import bundle as bdl
 
 
 def test_smoke():

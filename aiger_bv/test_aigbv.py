@@ -3,8 +3,8 @@ import pytest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from aigerbv import aigbv
-from aigerbv import bundle as bdl
+from aiger_bv import aigbv
+from aiger_bv import bundle as bdl
 
 
 def test_AIGBV_smoke():

@@ -4,8 +4,8 @@ from typing import Union
 import attr
 import funcy as fn
 
-from aigerbv import aigbv
-from aigerbv import common as cmn
+from aiger_bv import aigbv
+from aiger_bv import common as cmn
 
 
 def constk(k, size=None):

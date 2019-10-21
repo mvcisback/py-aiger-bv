@@ -32,7 +32,7 @@ an bitvector input, `'x'` with 3 bits becomes inputs `'x[0]', 'x[1]', 'x[3]'`
 
 # Installation
 
-If you just need to use `aigerbv`, you can just run:
+If you just need to use `aiger_bv`, you can just run:
 
 `$ pip install py-aiger-bv`
 
@@ -54,10 +54,10 @@ where the most significant digit is the first element of the tuple
 representing the word. For signed numbers, two's complement is used.
 
 ```python
-import aigerbv
+import aiger_bv
 
 # Create 16 bit variables.
-x, y = aigerbv.atom(16, 'x', signed=True), aigerbv.atom(16, 'y', signed=True)
+x, y = aiger_bv.atom(16, 'x', signed=True), aiger_bv.atom(16, 'y', signed=True)
 
 # bitwise ops.
 expr1 = x & y  # Bitwise and.
@@ -83,8 +83,8 @@ expr16 = x > y
 expr17 = x >= y
 
 # Atoms can be constants.
-expr18 = x & aigerbv.atom(16, 3)
-expr19 = x & aigerbv.atom(16, 0xff_12)
+expr18 = x & aiger_bv.atom(16, 3)
+expr19 = x & aiger_bv.atom(16, 0xff)
 
 # BitVector expressions can be concatenated.
 expr20 = x.concat(y)
@@ -95,10 +95,6 @@ expr21 = x[1]
 # Single bit expressions can be repeated.
 expr22 = x[1].repeat(10)
 
-# Switches can be implemented using ITE.
-test = aigerbv.atom(1, 'test')
-expr23 = aigerbv.ite(test, x, y)  # x if test else y.
-
 # And you can inspect the AIGBV if needed.
 circ = x.aigbv
 
@@ -106,7 +102,7 @@ circ = x.aigbv
 circ = x.aigbv.aig
 
 # And of course, you can get a BoolExpr from a single output aig.
-expr = aigerbv.UnsignedBVExpr(circ)
+expr = aiger_bv.UnsignedBVExpr(circ)
 ```
 
 # Sequential Circuit DSL

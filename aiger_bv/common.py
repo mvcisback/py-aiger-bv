@@ -8,8 +8,8 @@ import attr
 import aiger
 import funcy as fn
 
-from aigerbv import aigbv
-from aigerbv.bundle import BundleMap, Bundle
+from aiger_bv import aigbv
+from aiger_bv.bundle import BundleMap, Bundle
 
 
 def _fresh():

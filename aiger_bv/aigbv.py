@@ -5,8 +5,8 @@ import attr
 import funcy as fn
 from pyrsistent import pmap
 
-from aigerbv import common
-from aigerbv.bundle import BundleMap
+from aiger_bv import common
+from aiger_bv.bundle import BundleMap
 
 
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
