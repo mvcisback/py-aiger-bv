@@ -23,7 +23,12 @@
 This library provides word level abstractions on top of
 [py-aiger](https://github.com/mvcisback/py-aiger). This is done by the
 `AIGBV` which groups inputs, outputs, and latches into named
-**ordered** sequences (tuples).
+**ordered** sequences, e.g. bitvectors.
+
+The resulting objects can be turned into `AIG`s where each input,
+output, or latches name has its index appended to its name. For example,
+an bitvector input, `'x'` with 3 bits becomes inputs `'x[0]', 'x[1]', 'x[3]'`
+
 
 # Installation
 
@@ -182,10 +187,17 @@ circ2 = circ.unroll(steps=10, init=True)
 
 ## aiger.AIG to aiger.AIGBV
 
+There are two main ways to take an object `AIG` from `aiger` and
+convert it into an `AIGBV` object. The first is the `aig2aigbv`
+command which simply makes all inputs words of size 1.
+
+
 ```python
 # Create aigerbv.AIGERBV object from aiger.AIG object.
 circ  = ... # Some aiger.AIG object
 word_circ = aigerbv.aig2aigbv(circ)  # aigerbv.AIGBV object
+
+
 ```
 
 ## Gadget Library
