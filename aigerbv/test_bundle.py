@@ -75,7 +75,7 @@ def test_blast_map():
     imap = bdl.BundleMap({'x': 2, 'y': 3})
     idx2val = {'x': (True, False), 'y': (False, False, False)}
     assert imap.blast(idx2val) == {
-        'x[0]': True, 'x[1]': False, 
+        'x[0]': True, 'x[1]': False,
         'y[0]': False, 'y[1]': False, 'y[2]': False
     }
     assert imap.unblast(imap.blast(idx2val)) == idx2val

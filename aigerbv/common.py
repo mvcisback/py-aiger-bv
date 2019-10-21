@@ -1,7 +1,7 @@
 import operator as op
 from collections import defaultdict
 from functools import reduce
-from itertools import product, starmap
+from itertools import starmap
 from uuid import uuid1
 
 import attr
@@ -122,7 +122,7 @@ def eq_gate(wordlen, left='x', right='y', output='x=y'):
 def source(wordlen, value, name='x', signed=True):
     if isinstance(value, int):
         value = encode_int(wordlen, value, signed)
-    
+
     omap = BundleMap({name: wordlen})
     aig = aiger.source({name: bit for name, bit in zip(omap[name], value)})
     return aigbv.AIGBV(aig=aig, omap=omap)
@@ -189,7 +189,7 @@ def combine_gate(left_wordlen, left, right_wordlen, right, output):
 
 
 def split_gate(input, left_wordlen, left, right_wordlen, right):
-    omap=BundleMap({left: left_wordlen, right: right_wordlen})
+    omap = BundleMap({left: left_wordlen, right: right_wordlen})
 
     circ = identity_gate(left_wordlen + right_wordlen, input, input)
     relabels = fn.merge(
@@ -241,12 +241,11 @@ def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):
     assert left != carry_name and right != carry_name
 
     adder_aig = aiger.source({carry_name: False})
-    
+
     imap = BundleMap({left: wordlen, right: wordlen})
     omap = BundleMap(
         {output: wordlen, has_carry: 1} if has_carry else {output: wordlen}
     )
-    outputs = named_indexes(wordlen, output)
 
     for lname, rname, oname in zip(imap[left], imap[right], omap[output]):
         adder_aig >>= _full_adder(
@@ -291,7 +290,7 @@ def index_gate(wordlen, idx, input, output=None):
         output = input
 
     imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
-    inputs, outputs= imap[input], (imap[input][idx],)
+    inputs, outputs = imap[input], (imap[input][idx],)
 
     aig = aiger.sink(set(inputs) - set(outputs)) | aiger.identity(outputs)
     relabels = {outputs[0]: omap[output][0]}
@@ -299,7 +298,8 @@ def index_gate(wordlen, idx, input, output=None):
 
 
 def unsigned_lt_gate(wordlen, left, right, output):
-    imap, omap = BundleMap({left: wordlen, right: wordlen}), BundleMap({output: 1})
+    omap = BundleMap({output: 1})
+    imap = BundleMap({left: wordlen, right: wordlen})
 
     lefts = map(aiger.atom, imap[left])
     rights = map(aiger.atom, imap[right])

@@ -88,4 +88,4 @@ class BundleMap:
         return BundleMap(bmap2.persistent())
 
     def get(self, val, default=None):
-        return self[val] if val in self else default            
+        return self[val] if val in self else default

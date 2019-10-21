@@ -1,14 +1,12 @@
 import re
-from typing import Tuple, FrozenSet
 
 import aiger
 import attr
 import funcy as fn
 from pyrsistent import pmap
-from pyrsistent.typing import PMap
 
 from aigerbv import common
-from aigerbv.bundle import BundleMap, Bundle
+from aigerbv.bundle import BundleMap
 
 
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
@@ -21,7 +19,7 @@ class AIGBV:
     simulate = aiger.AIG.simulate
     simulator = aiger.AIG.simulator
 
-    def write(self, path): 
+    def write(self, path):
         self.aig.write(path)
 
     @property
@@ -115,7 +113,7 @@ class AIGBV:
             inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
             latches=blast(lmap, latches), keep_outputs=keep_outputs,
         ))
-        
+
         if initials is not None:
             l2init = dict(aig.latch2init).update(
                 {l: v for l, v in zip(latches, initials) if v is not None}
@@ -123,7 +121,6 @@ class AIGBV:
             initials = fn.lcat(l2init[l] for l in latches)
 
         return aig
-
 
     def unroll(self, horizon, *, init=True, omit_latches=True,
                only_last_outputs=False):
@@ -138,8 +135,7 @@ class AIGBV:
         return rebundle_aig(aig)
 
 
-######### Lifting AIGs to AIGBVs
-
+# Lifting AIGs to AIGBVs
 
 def _diagonal_map(keys):
     return BundleMap({k: 1 for k in keys})
@@ -147,7 +143,7 @@ def _diagonal_map(keys):
 
 def append_index(aig):
     for key in ['inputs', 'outputs', 'latches']:
-        relabels = {name: f"{name}[0]" for name in  getattr(aig, key)}
+        relabels = {name: f"{name}[0]" for name in getattr(aig, key)}
         aig = aig[key[0], relabels]
     return aig
 
