@@ -228,5 +228,5 @@ def test_ite(test, a, b):
 def test_ite2():
     test, a, b = atom(1, 'test', signed=False), atom(2, 'x'), atom(2, 'y')
     expr = ite(test, a, b)
-    val = expr({'test': (False,), 'x': (False, False), 'y': (True, False),})
+    val = expr({'test': (False,), 'x': (False, False), 'y': (True, False)})
     assert val == (True, False)

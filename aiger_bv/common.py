@@ -219,7 +219,7 @@ def dot_mod2_gate(wordlen, left='x', right='y', output='x@y'):
 
 
 def __full_adder():
-    x, y, cin = map(aiger.atom, ('x', 'y', 'ci'))
+    x, y, cin = aiger.atoms('x', 'y', 'ci')
     tmp = x ^ y
     res = (tmp ^ cin)
     cout = ((tmp & cin) | (x & y))
