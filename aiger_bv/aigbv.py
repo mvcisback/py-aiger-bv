@@ -110,17 +110,20 @@ class AIGBV:
         lmap = BundleMap(
             {l: self.imap[i].size for i, l in zip(inputs, latches)}
         )
-        aig = rebundle_aig(self.aig.feedback(
-            inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
-            latches=blast(lmap, latches), keep_outputs=keep_outputs,
-        ))
 
         if initials is not None:
-            l2init = dict(aig.latch2init)
+            l2init = dict(self.aig.latch2init)
             l2init.update(
                 {l: v for l, v in zip(latches, initials) if v is not None}
             )
             initials = fn.lcat(l2init[l] for l in latches)
+            initials = blast(lmap, initials)
+
+        aig = rebundle_aig(self.aig.feedback(
+            inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
+            latches=blast(lmap, latches), keep_outputs=keep_outputs,
+            initials=initials,
+        ))
 
         return aig
 
