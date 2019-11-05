@@ -116,7 +116,8 @@ class AIGBV:
         ))
 
         if initials is not None:
-            l2init = dict(aig.latch2init).update(
+            l2init = dict(aig.latch2init)
+            l2init.update(
                 {l: v for l, v in zip(latches, initials) if v is not None}
             )
             initials = fn.lcat(l2init[l] for l in latches)
