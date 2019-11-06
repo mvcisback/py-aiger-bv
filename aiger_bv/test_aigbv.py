@@ -113,7 +113,9 @@ def test_feedback():
     assert circ2.inputs == {'y'}
 
     circ = aigbv.rebundle_aig(aiger.identity(['x[0]', 'x[1]', 'y[0]', 'y[1]']))
-    circ2 = circ.feedback(inputs=['x'], outputs=['y'], initials=[(True, False)])
+    circ2 = circ.feedback(
+        inputs=['x'], outputs=['y'], initials=[(True, False)]
+    )
     assert circ2.latch2init['x'] == (True, False)
 
 
