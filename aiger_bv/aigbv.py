@@ -117,7 +117,6 @@ class AIGBV:
                 {l: v for l, v in zip(latches, initials) if v is not None}
             )
             initials = fn.lcat(l2init[l] for l in latches)
-            initials = blast(lmap, initials)
 
         aig = rebundle_aig(self.aig.feedback(
             inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
