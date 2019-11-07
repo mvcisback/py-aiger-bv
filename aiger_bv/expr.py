@@ -133,17 +133,11 @@ class UnsignedBVExpr:
     def __abs__(self):
         return self
 
+    def with_output(self, val):
+        return attr.evolve(self, aigbv=self.aigbv['o', {self.output: val}])
+
     def _fresh_output(self):
-        # Change bit level names.
-        outputs = dict(self.aigbv.output_map)
-        relabels = {n: cmn._fresh() for n in outputs[self.output]}
-        aig = self.aigbv.aig['o', relabels]
-        circ = attr.evolve(
-            self.aigbv, aig=aig,
-            output_map=frozenset([(self.output, aig.outputs)])
-        )
-        # Change word level name.
-        return type(self)(circ['o', {self.output: cmn._fresh()}])
+        return self.with_output(cmn._fresh())
 
 
 class SignedBVExpr(UnsignedBVExpr):

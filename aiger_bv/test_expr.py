@@ -230,3 +230,9 @@ def test_ite2():
     expr = ite(test, a, b)
     val = expr({'test': (False,), 'x': (False, False), 'y': (True, False)})
     assert val == (True, False)
+
+
+def test_set_output():
+    x, y = atom(2, 'x'), atom(2, 'y')
+    f = (x < y).with_output('z')
+    assert f.output == 'z'
