@@ -242,4 +242,4 @@ def test_bundle_inputs():
     x, y = atom(2, 'x'), atom(2, 'y')
     f = x.concat(y).bundle_inputs('xy')
     assert f.inputs == {'xy'}
-    assert f.imap['xy'].size == 4
+    assert f.aigbv.imap['xy'].size == 4

@@ -61,7 +61,8 @@ class UnsignedBVExpr:
         inputs = fn.lconcat(*(self.aigbv.imap[i] for i in self.inputs))
 
         relabels = {old: new for old, new in zip(inputs, bdl)}
-        return aigbv.rebundle_aig(self.aig['i', relabels])
+        circ = aigbv.rebundle_aig(self.aig['i', relabels])
+        return attr.evolve(self, aigbv=circ)
 
     def concat(self, other):
         combiner = cmn.combine_gate(
