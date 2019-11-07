@@ -236,3 +236,10 @@ def test_set_output():
     x, y = atom(2, 'x'), atom(2, 'y')
     f = (x < y).with_output('z')
     assert f.output == 'z'
+
+
+def test_bundle_inputs():
+    x, y = atom(2, 'x'), atom(2, 'y')
+    f = x.concat(y).bundle_inputs('xy')
+    assert f.inputs == {'xy'}
+    assert f.imap['xy'].size == 4

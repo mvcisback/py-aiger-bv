@@ -4,8 +4,9 @@ from typing import Union
 import attr
 import funcy as fn
 
-from aiger_bv import aigbv
 from aiger_bv import common as cmn
+from aiger_bv import aigbv
+from aiger_bv.bundle import Bundle
 
 
 def constk(k, size=None):
@@ -50,6 +51,17 @@ class UnsignedBVExpr:
         indexers = map(_indexer, indicies)
         indexer = reduce(lambda x, y: x | y, indexers)
         return UnsignedBVExpr(self.aigbv >> indexer)
+
+    def bundle_inputs(self, name=None):
+        if name is None:
+            name = cmn._fresh()
+
+        size = sum(self.aigbv.imap.values())
+        bdl = Bundle(name=name, size=size)
+        inputs = fn.lconcat(*(self.aigbv.imap[i] for i in self.inputs))
+
+        relabels = {old: new for old, new in zip(inputs, bdl)}
+        return aigbv.rebundle_aig(self.aig['i', relabels])
 
     def concat(self, other):
         combiner = cmn.combine_gate(
