@@ -147,6 +147,8 @@ class UnsignedBVExpr:
         return self
 
     def with_output(self, val):
+        if val == self.output:
+            return self
         return attr.evolve(self, aigbv=self.aigbv['o', {self.output: val}])
 
     def _fresh_output(self):
