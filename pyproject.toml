@@ -13,7 +13,7 @@ packages = [
 python = "^3.6"
 attrs = "^19.1"
 funcy = "^1.12"
-py-aiger = "^3.5"
+py-aiger = "^3.6"
 pyrsistent = "^0.15.4"
 
 [tool.poetry.dev-dependencies]
