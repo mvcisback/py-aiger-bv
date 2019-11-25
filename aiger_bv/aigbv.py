@@ -138,6 +138,20 @@ class AIGBV:
 
         return rebundle_aig(aig)
 
+    def cutlatches(self, latches=None, renamer=None):
+        if renamer is None:
+            def renamer(_):
+                return common._fresh()
+
+        def renamer_bv(name):
+            root, idx = unpack_name(name)
+            return f"{renamer(root)}[{idx}]"
+
+        aig, lmap = self.aig.cutlatches(latches, renamer=renamer_bv)
+        circ = rebundle_aig(aig)
+        lmap = circ.lmap.unblast(lmap)
+        return circ, lmap
+
 
 # Lifting AIGs to AIGBVs
 

@@ -126,3 +126,12 @@ def test_unroll():
     circ3 = circ2.unroll(3)
     assert circ3.inputs == {'y##time_0', 'y##time_1', 'y##time_2'}
     assert circ3.outputs == {'x##time_1', 'x##time_2', 'x##time_3'}
+
+
+def test_cutlatches():
+    circ = aigbv.rebundle_aig(aiger.identity(['x[0]', 'x[1]', 'y[0]', 'y[1]']))
+    circ2 = circ.feedback(inputs=['x'], outputs=['y'])
+    circ3, lmap = circ2.cutlatches(renamer=lambda x: f"{x}##time_0")
+
+    assert circ3.inputs >= circ2.inputs
+    assert circ3.outputs >= circ2.outputs
