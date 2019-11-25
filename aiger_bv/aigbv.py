@@ -153,7 +153,8 @@ class AIGBV:
 
         def unblast_vals(vals):
             name, _ = vals[0]
-            bdl = Bundle(size=len(vals), name=unpack_name(name)[0])
+            name = unpack_name(name)[0]
+            bdl = Bundle(size=len(vals), name=name)
             return (name, bdl.unblast(dict(vals)))
 
         lmap = fn.walk_values(unblast_vals, lmap)
