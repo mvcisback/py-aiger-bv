@@ -135,3 +135,4 @@ def test_cutlatches():
 
     assert circ3.inputs >= circ2.inputs
     assert circ3.outputs >= circ2.outputs
+    assert len(lmap) == 1

@@ -149,7 +149,7 @@ class AIGBV:
 
         aig, lmap = self.aig.cutlatches(latches, renamer=renamer_bv)
         circ = rebundle_aig(aig)
-        lmap = circ.lmap.unblast(lmap)
+        lmap = self.lmap.unblast(lmap)
         return circ, lmap
 
 
