@@ -6,7 +6,7 @@ import funcy as fn
 from pyrsistent import pmap
 
 from aiger_bv import common
-from aiger_bv.bundle import BundleMap
+from aiger_bv.bundle import Bundle, BundleMap
 
 
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
@@ -150,6 +150,13 @@ class AIGBV:
         aig, lmap = self.aig.cutlatches(latches, renamer=renamer_bv)
         circ = rebundle_aig(aig)
         lmap = self.lmap.unblast(lmap)
+
+        def unblast_vals(vals):
+            name, _ = vals[0]
+            bdl = Bundle(size=len(vals), name=unpack_name(name)[0])
+            return (name, bdl.unblast(dict(vals)))
+
+        lmap = fn.walk_values(unblast_vals, lmap)
         return circ, lmap
 
 
