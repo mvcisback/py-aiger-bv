@@ -140,6 +140,7 @@ class AIGBV:
 
     def cutlatches(self, latches=None, renamer=None):
         if renamer is None:
+            @fn.memoize
             def renamer(_):
                 return common._fresh()
 
