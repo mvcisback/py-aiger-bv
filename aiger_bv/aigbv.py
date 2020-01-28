@@ -1,4 +1,5 @@
 import re
+from functools import reduce
 
 import aiger
 import attr
@@ -99,8 +100,34 @@ class AIGBV:
         ))
         return attr.evolve(circ, aig=circ.aig[kind, relabels_aig])
 
-    def feedback(self, inputs, outputs, initials=None, latches=None,
-                 keep_outputs=False):
+    def loopback(self, *wirings):
+        def wire(circ, wiring):
+            return circ._wire(**wiring)
+
+        return reduce(wire, wirings, self)
+
+    def _wire(self, input, output, latch=None, init=None, keep_output=True):
+        if latch is None:
+            latch = input
+        inits = [init] if init is not None else None
+
+        return self._feedback(
+            [input], [output], inits, [latch], keep_outputs=keep_output
+        )
+
+    def feedback(
+        self, inputs, outputs, initials=None, latches=None, keep_outputs=False
+    ):
+        import warnings
+        warnings.warn("deprecated", DeprecationWarning)
+        return self._feedback(
+            inputs, outputs, initials=initials, latches=latches,
+            keep_outputs=keep_outputs
+        )
+
+    def _feedback(self, inputs, outputs, initials=None, latches=None,
+                  keep_outputs=False):
+        # TODO: remove in next version bump and put into wire.
         if latches is None:
             latches = inputs
 
