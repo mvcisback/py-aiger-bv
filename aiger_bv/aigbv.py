@@ -20,6 +20,10 @@ class AIGBV:
     simulate = aiger.AIG.simulate
     simulator = aiger.AIG.simulator
 
+    @property
+    def aigbv(self):
+        return self
+
     def write(self, path):
         self.aig.write(path)
 
