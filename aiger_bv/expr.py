@@ -33,6 +33,8 @@ class UnsignedBVExpr:
         def _indexer(idx):
             return cmn.index_gate(self.size, idx, self.output, cmn._fresh())
 
+        if isinstance(idx, int) and idx < 0:
+            idx = idx % self.size
         if not isinstance(idx, slice):
             idx = slice(idx, idx+1)
         if idx.start is None:
@@ -154,6 +156,23 @@ class UnsignedBVExpr:
     def _fresh_output(self):
         return self.with_output(cmn._fresh())
 
+    def __mul__(self, other):
+        if isinstance(other, SignedBVExpr) != isinstance(self, SignedBVExpr):
+            raise ValueError('Cannot multiply signed with unsigned integers.')
+
+        # Determine the smaller circuit to minimize worst-case depth.
+        smaller, larger = sorted([self, other], key=lambda x: x.size)
+        result = atom(larger.size, 0, signed=isinstance(self, SignedBVExpr))
+        # assert result.inputs == {'a', 'b'}, result.inputs
+        for i in range(smaller.size):
+            mask = smaller[i].repeat(larger.size)
+            if i == smaller.size - 1 and isinstance(self, SignedBVExpr):
+                # For signed multiplication, need to subtract last index.
+                result -= mask & (larger << i)
+            else:
+                result += mask & (larger << i)
+        return result
+
 
 class SignedBVExpr(UnsignedBVExpr):
     def __neg__(self):
@@ -170,6 +189,9 @@ class SignedBVExpr(UnsignedBVExpr):
 
     def __abs__(self):
         return _unary_gate(cmn.abs_gate, self)
+
+    def sign(self):
+        return UnsignedBVExpr(self.aigbv)[-1]
 
 
 Expr = Union[UnsignedBVExpr, SignedBVExpr]

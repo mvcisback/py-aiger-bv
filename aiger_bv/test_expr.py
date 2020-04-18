@@ -182,10 +182,15 @@ def test_expr_neg(a):
     assert common.decode_int(expr()) == -a
 
 
-@given(st.integers(-4, 3))
+@given(st.integers(-7, 7))
 def test_expr_abs(a):
     expr = abs(atom(4, a))
     assert common.decode_int(expr()) == abs(a)
+
+
+def test_expr_abs_max_negative():
+    expr = abs(atom(4, -8))
+    assert common.decode_int(expr()) == -8  # undefined behavior
 
 
 @given(st.integers(-4, 3))
@@ -240,6 +245,54 @@ def test_set_output():
 
 def test_bundle_inputs():
     x, y = atom(2, 'x'), atom(2, 'y')
-    f = x.concat(y).bundle_inputs('xy')
+    f = x.concat(y)
+    assert f.inputs == {'x', 'y'}
+    f = f.bundle_inputs('xy')
     assert f.inputs == {'xy'}
     assert f.aigbv.imap['xy'].size == 4
+
+
+def test_indexing_preserves_inputs():
+    x = atom(2, 'x')
+    assert x[0].inputs == {'x'}
+
+
+def test_and_preserves_inputs():
+    x = atom(2, 'x')
+    y = atom(2, 'y')
+    assert (x & y).inputs == {'x', 'y'}
+
+
+@given(st.integers(0, 15), st.integers(0, 15))
+def test_unsigned_add(x, y):
+    if x + y > 15:
+        return
+    adder = atom(4, 'a', signed=False) + atom(4, 'b', signed=False)
+    x_atom, y_atom = atom(4, x, signed=False), atom(4, y, signed=False)
+    res = adder(inputs={'a': x_atom(), 'b': y_atom()})
+    assert res == atom(4, x + y, signed=False)()
+
+
+@given(st.integers(0, 15), st.integers(0, 15))
+def test_unsigned_multiply(x, y):
+    if x * y > 15:
+        return
+    multiplier = atom(4, 'a', signed=False) * atom(4, 'b', signed=False)
+    assert len(multiplier.inputs) == 2
+    x_atom, y_atom = atom(4, x, signed=False), atom(4, y, signed=False)
+    res = multiplier(inputs={'a': x_atom(), 'b': y_atom()})
+    assert common.decode_int(res, signed=False) == x * y
+
+
+@given(st.integers(-8, 7))
+def test_sign(x):
+    sign_expr = atom(4, x).sign()
+    assert sign_expr() == (x < 0,)
+
+
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_multiply(x, y):
+    multiplier = atom(6, 'a') * atom(6, 'b')
+    x_atom, y_atom = atom(6, x), atom(6, y)
+    res = multiplier(inputs={'a': x_atom(), 'b': y_atom()})
+    assert common.decode_int(res) == x * y
