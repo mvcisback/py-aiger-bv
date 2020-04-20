@@ -154,6 +154,7 @@ def test_expr_le(a, b):
     expr = atom(4, a) <= atom(4, b)
     assert expr()[0] == (a <= b)
 
+
 @settings(max_examples=5, deadline=None)
 @given(st.integers(-4, 3), st.integers(-4, 3))
 def test_expr_lt(a, b):
