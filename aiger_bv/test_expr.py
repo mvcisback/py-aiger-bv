@@ -3,7 +3,7 @@ from aiger_bv import common
 
 # additional imports for testing frammework
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 
 
 @given(st.integers(0, 7), st.integers(0, 3))
@@ -290,6 +290,7 @@ def test_sign(x):
     assert sign_expr() == (x < 0,)
 
 
+@settings(deadline=None)
 @given(st.integers(-4, 3), st.integers(-4, 3))
 def test_multiply(x, y):
     multiplier = atom(6, 'a') * atom(6, 'b')
