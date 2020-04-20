@@ -32,7 +32,7 @@ an bitvector input, `'x'` with 3 bits becomes inputs `'x[0]', 'x[1]', 'x[3]'`
 
 # Installation
 
-If you just need to use `aigerbv`, you can just run:
+If you just need to use `aiger_bv`, you can just run:
 
 `$ pip install py-aiger-bv`
 
