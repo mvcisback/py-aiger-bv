@@ -1,0 +1,1363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>aiger_bv.common API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>aiger_bv.common</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import operator as op
+from collections import defaultdict
+from functools import reduce
+from itertools import starmap
+from uuid import uuid1
+
+import attr
+import aiger
+import funcy as fn
+
+from aiger_bv import aigbv
+from aiger_bv.bundle import BundleMap, Bundle
+
+
+def _fresh():
+    return str(uuid1())
+
+
+def _name_idx(root, i):
+    return f&#34;{root}[{i}]&#34;
+
+
+def named_indexes(wordlen, root):
+    return tuple(_name_idx(root, i) for i in range(wordlen))
+
+
+def encode_int(wordlen, value, signed=True):
+    N = 1 &lt;&lt; wordlen
+    if signed:
+        N2 = 1 &lt;&lt; (wordlen - 1)
+        assert N2 &gt; value &gt;= -N2
+    else:
+        assert N &gt; value &gt;= 0
+
+    if value &lt; 0:
+        value = N + value
+
+    return [bool((value &gt;&gt; i) &amp; 1) for i in range(wordlen)]
+
+
+def decode_int(bits, signed=True):
+    # Interpret result
+    last = bits[-1]*(1 &lt;&lt; (len(bits) - 1))
+    last *= -1 if signed else 1
+    return sum(val &lt;&lt; idx for idx, val in enumerate(bits[:-1])) + last
+
+
+def bitwise_binop(binop, wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    imap = BundleMap({left: wordlen, right: wordlen})
+    omap = BundleMap({output: wordlen})
+
+    names = zip(imap[left], imap[right], omap[output])
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=reduce(op.or_, (binop([l, r], o) for l, r, o in names)),
+    )
+
+
+def bitwise_and(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    return bitwise_binop(aiger.and_gate, wordlen, left, right, output)
+
+
+def bitwise_or(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    return bitwise_binop(aiger.or_gate, wordlen, left, right, output)
+
+
+def bitwise_xor(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    return bitwise_binop(aiger.parity_gate, wordlen, left, right, output)
+
+
+def bitwise_negate(wordlen, input=&#39;x&#39;, output=&#39;not x&#39;):
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: wordlen})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.bit_flipper(inputs=imap[input], outputs=omap[output]),
+    )
+
+
+def _apply_pairwise(func, seq):
+    return list(starmap(func, zip(seq[::2], seq[1::2])))
+
+
+def reduce_binop(wordlen, inputs, output, op):
+    def join(left, right):
+        (o1, *_), (o2, *_) = left.outputs, right.outputs # noqa
+        return (left | right) &gt;&gt; op(wordlen, o1, o2, _fresh())
+
+    inputs = list(inputs)
+    queue = [identity_gate(wordlen, i) for i in inputs]
+    while len(queue) &gt; 1:
+        queue = _apply_pairwise(join, queue)
+
+    circ = queue[0]
+    if len(inputs) &amp; 1:  # Odd number of elements.
+        circ = join(circ, identity_gate(wordlen, inputs[-1]))
+    return circ
+
+
+def is_nonzero_gate(wordlen, input=&#39;x&#39;, output=&#39;is_nonzero&#39;):
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.or_gate(imap[input], omap[output][0]),
+    )
+
+
+def ne_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x!=y&#39;):
+    return bitwise_xor(wordlen, left, right, left+right) &gt;&gt; \
+        is_nonzero_gate(wordlen, left+right, output)
+
+
+def is_zero_gate(wordlen, input=&#39;x&#39;, output=&#39;is_zero&#39;):
+    return is_nonzero_gate(wordlen, input, input+&#39;out&#39;) &gt;&gt; \
+        bitwise_negate(1, input + &#39;out&#39;, output)
+
+
+def eq_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x=y&#39;):
+    return ne_gate(wordlen, left, right, left + right) &gt;&gt; \
+        bitwise_negate(1, left + right, output)
+
+
+def source(wordlen, value, name=&#39;x&#39;, signed=True):
+    if isinstance(value, int):
+        value = encode_int(wordlen, value, signed)
+
+    omap = BundleMap({name: wordlen})
+    aig = aiger.source({name: bit for name, bit in zip(omap[name], value)})
+    return aigbv.AIGBV(aig=aig, omap=omap)
+
+
+def tee(wordlen, iomap):
+    imap = BundleMap({i: wordlen for i in iomap})
+    omap = BundleMap({o: wordlen for o in fn.cat(iomap.values())})
+
+    blasted = defaultdict(list)
+
+    for i, outs in iomap.items():
+        for o in outs:
+            for k, v in zip(imap[i], omap[o]):
+                blasted[k].append(v)
+
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aiger.tee(blasted))
+
+
+def repeat(wordlen, input, output=None):
+    if output is None:
+        output = input
+
+    imap, omap = BundleMap({input: 1}), BundleMap({output: wordlen})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.tee({imap[input][0]: list(omap[output])}),
+    )
+
+
+def identity_gate(wordlen, input=&#39;x&#39;, output=None):
+    if output is None:
+        output = input
+
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: wordlen})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.identity(inputs=imap[input], outputs=omap[output]),
+    )
+
+
+def reverse_gate(wordlen, input=&#39;x&#39;, output=&#39;rev(x)&#39;):
+    circ = identity_gate(wordlen, input, output=output)
+
+    tmp, obdl = Bundle(_fresh(), wordlen), Bundle(output, wordlen)
+
+    aig = circ.aig[&#39;o&#39;, dict(zip(obdl, reversed(tmp)))]
+    aig = aig[&#39;o&#39;, dict(zip(tmp, obdl))]
+
+    return attr.evolve(circ, aig=aig)
+
+
+def combine_gate(left_wordlen, left, right_wordlen, right, output):
+    circ = identity_gate(left_wordlen, left, left) \
+        | identity_gate(right_wordlen, right, right)
+
+    omap1 = circ.omap
+    relabels = {
+        k: f&#34;{left}[{i + left_wordlen}]&#34; for i, k in enumerate(omap1[right])
+    }
+    omap2 = BundleMap({left: left_wordlen + right_wordlen})
+    circ = attr.evolve(circ, omap=omap2, aig=circ.aig[&#39;o&#39;, relabels])
+    return circ if left == output else circ[&#39;o&#39;, {left: output}]
+
+
+def split_gate(input, left_wordlen, left, right_wordlen, right):
+    omap = BundleMap({left: left_wordlen, right: right_wordlen})
+
+    circ = identity_gate(left_wordlen + right_wordlen, input, input)
+    relabels = fn.merge(
+        dict(zip(circ.omap[input][:left_wordlen], omap[left])),
+        dict(zip(circ.omap[input][left_wordlen:], omap[right])),
+    )
+
+    return attr.evolve(circ, omap=omap, aig=circ.aig[&#39;o&#39;, relabels])
+
+
+def sink(wordlen, inputs):
+    imap = BundleMap({i: wordlen for i in inputs})
+    return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, inputs)))
+
+
+def even_popcount_gate(wordlen, input, output):
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.parity_gate(imap[input], omap[output][0]),
+    )
+
+
+def dot_mod2_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x@y&#39;):
+    return bitwise_and(wordlen, left, right, &#39;tmp&#39;) &gt;&gt; \
+        even_popcount_gate(wordlen, &#39;tmp&#39;, output)
+
+
+def __full_adder():
+    x, y, cin = aiger.atoms(&#39;x&#39;, &#39;y&#39;, &#39;ci&#39;)
+    tmp = x ^ y
+    res = (tmp ^ cin)
+    cout = ((tmp &amp; cin) | (x &amp; y))
+    circ = res.aig | cout.aig
+    relabels = {res.output: &#39;res&#39;, cout.output: &#39;co&#39;}
+    return (circ)[&#39;o&#39;, relabels]
+
+
+FULL_ADDER_GADGET = __full_adder()
+
+
+def _full_adder(x, y, carry_in, result, carry_out):
+    relabels = {&#39;x&#39;: x, &#39;y&#39;: y, &#39;ci&#39;: carry_in, &#39;res&#39;: result, &#39;co&#39;: carry_out}
+    return FULL_ADDER_GADGET[&#39;i&#39;, relabels][&#39;o&#39;, relabels]
+
+
+def add_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x+y&#39;, has_carry=False):
+    carry_name = f&#39;{output}_carry&#39;
+    assert left != carry_name and right != carry_name
+
+    adder_aig = aiger.source({carry_name: False})
+
+    imap = BundleMap({left: wordlen, right: wordlen})
+    omap = BundleMap(
+        {output: wordlen, has_carry: 1} if has_carry else {output: wordlen}
+    )
+
+    for lname, rname, oname in zip(imap[left], imap[right], omap[output]):
+        adder_aig &gt;&gt;= _full_adder(
+            x=lname,
+            y=rname,
+            carry_in=carry_name,
+            result=oname,
+            carry_out=carry_name)
+
+    if not has_carry:
+        adder_aig &gt;&gt;= aiger.sink([output + &#39;_carry&#39;])
+
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=adder_aig)
+
+
+def inc_gate(wordlen, input=&#39;x&#39;, output=&#39;inc&#39;):
+    tmp = _fresh()
+    return source(wordlen, 1, tmp) &gt;&gt; add_gate(wordlen, tmp, input, output)
+
+
+def negate_gate(wordlen, input=&#39;x&#39;, output=&#39;~x&#39;):
+    &#34;&#34;&#34;Implements two&#39;s complement negation.&#34;&#34;&#34;
+    neg = bitwise_negate(wordlen, input, &#34;tmp&#34;)
+    inc = inc_gate(wordlen, &#34;tmp&#34;, output)
+    return neg &gt;&gt; inc
+
+
+def dec_gate(wordlen, input=&#39;x&#39;, output=&#39;inc&#39;):
+    tmp = _fresh()
+    return source(wordlen, -1, tmp) &gt;&gt; add_gate(wordlen, tmp, input, output)
+
+
+def subtract_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x-y&#39;):
+    tmp = _fresh()
+    return negate_gate(wordlen, right, tmp) \
+        &gt;&gt; add_gate(wordlen, left, tmp, output)
+
+
+def index_gate(wordlen, idx, input, output=None):
+    assert 0 &lt;= idx &lt; wordlen
+    if output is None:
+        output = input
+
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    inputs, outputs = imap[input], (imap[input][idx],)
+
+    aig = aiger.sink(set(inputs) - set(outputs)) | aiger.identity(outputs)
+    relabels = {outputs[0]: omap[output][0]}
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig[&#39;o&#39;, relabels])
+
+
+def unsigned_lt_gate(wordlen, left, right, output):
+    omap = BundleMap({output: 1})
+    imap = BundleMap({left: wordlen, right: wordlen})
+
+    lefts = map(aiger.atom, imap[left])
+    rights = map(aiger.atom, imap[right])
+
+    def test_bit(expr, lr):
+        l, r = lr
+        expr &amp;= ~(l ^ r)  # l == r.
+        expr |= ~l &amp; r  # l &lt; r.
+        return expr
+
+    expr = reduce(test_bit, zip(lefts, rights), aiger.atom(False))
+    aig = expr.aig[&#39;o&#39;, {expr.output: omap[output][0]}]
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)
+
+
+def unsigned_le_gate(wordlen, left, right, output):
+    fresh = [_fresh() for _ in range(4)]
+    lt = unsigned_lt_gate(wordlen, fresh[0], fresh[2], &#39;lt&#39;)
+    eq = eq_gate(wordlen, fresh[1], fresh[3], &#39;eq&#39;)
+    return tee(wordlen, {left: fresh[:2], right: fresh[2:]}) \
+        &gt;&gt; (lt | eq) \
+        &gt;&gt; aigbv.aig2aigbv(aiger.or_gate([&#39;lt&#39;, &#39;eq&#39;], output))
+
+
+def unsigned_gt_gate(wordlen, left, right, output):
+    return unsigned_le_gate(wordlen, left, right, &#39;le&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;le&#39;, output)
+
+
+def unsigned_ge_gate(wordlen, left, right, output):
+    return unsigned_lt_gate(wordlen, left, right, &#39;ge&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;ge&#39;, output)
+
+
+def signed_lt_gate(wordlen, left, right, output):
+    msb = _fresh()
+    msb2 = _fresh()
+    get_msb = index_gate(wordlen, wordlen-1, msb, msb)
+    get_msb2 = index_gate(wordlen, wordlen-1, msb2, msb2)
+
+    circ1 = get_msb &gt;&gt; combine_gate(wordlen, left, 1, msb, left)
+    circ2 = get_msb2 &gt;&gt; combine_gate(wordlen, right, 1, msb2, right)
+
+    return tee(wordlen, {left: (left, msb), right: (right, msb2)}) \
+        &gt;&gt; (circ1 | circ2) \
+        &gt;&gt; subtract_gate(wordlen+1, left, right, output) \
+        &gt;&gt; index_gate(wordlen+1, wordlen, output)
+
+
+def signed_gt_gate(wordlen, left, right, output):
+    return signed_lt_gate(wordlen, right, left, output)
+
+
+def signed_ge_gate(wordlen, left, right, output):
+    return signed_lt_gate(wordlen, left, right, &#39;tmp&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;tmp&#39;, output)
+
+
+def signed_le_gate(wordlen, left, right, output):
+    return signed_gt_gate(wordlen, left, right, &#39;tmp&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;tmp&#39;, output)
+
+
+def left_shift_gate(wordlen, shift, input=&#39;x&#39;, output=&#39;x&#39;):
+    return reverse_gate(wordlen, input, &#39;tmp&#39;) \
+        &gt;&gt; logical_right_shift_gate(wordlen, shift, &#39;tmp&#39;, &#39;tmp&#39;) \
+        &gt;&gt; reverse_gate(wordlen, &#39;tmp&#39;, output)
+
+
+def _right_shift_gate(wordlen, shift, shiftin, input=&#39;x&#39;, output=&#39;x&#39;):
+    assert 0 &lt;= shift
+    shift = min(shift, wordlen)
+
+    return repeat(shift, shiftin) \
+        &gt;&gt; split_gate(input, shift, &#39;drop&#39;, wordlen - shift, output) \
+        &gt;&gt; sink(shift, [&#39;drop&#39;]) \
+        &gt;&gt; combine_gate(wordlen - shift, output, shift, shiftin, output)
+
+
+def logical_right_shift_gate(wordlen, shift, input=&#39;x&#39;, output=&#39;x&#39;):
+    tmp = _fresh()
+    return source(1, 0, tmp) \
+        &gt;&gt; _right_shift_gate(wordlen, shift, tmp, input, output)
+
+
+def arithmetic_right_shift_gate(wordlen, shift, input, output):
+    shiftin = _fresh()
+    circ = index_gate(wordlen, wordlen - 1, shiftin, shiftin) \
+        | identity_gate(wordlen, input, input)
+    return tee(wordlen, {input: (input, shiftin)}) &gt;&gt; circ \
+        &gt;&gt; _right_shift_gate(wordlen, shift, shiftin, input, output)
+
+
+def abs_gate(wordlen, input, output):
+    tmp, tmp2 = _fresh(), _fresh()
+    return tee(wordlen, {input: (input, tmp)}) \
+        &gt;&gt; arithmetic_right_shift_gate(wordlen, wordlen - 1, tmp, tmp) \
+        &gt;&gt; tee(wordlen, {tmp: (tmp, tmp2)}) \
+        &gt;&gt; add_gate(wordlen, input, tmp, output) \
+        &gt;&gt; bitwise_xor(wordlen, output, tmp2, output)
+
+
+def lookup(inlen, outlen, mapping, input, output, *,
+           in_signed=True, out_signed=True):
+    # [(i = a1) -&gt; b] /\ [(i = a2) -&gt; c] /\ [(i = a3) -&gt; d]
+    def guard(key, val):
+        circ = identity_gate(inlen, _fresh(), &#39;input&#39;) \
+            | source(inlen, key, &#39;key&#39;, in_signed) \
+            | source(outlen, val, &#39;val&#39;, out_signed)
+        circ &gt;&gt;= ne_gate(inlen, &#39;input&#39;, &#39;key&#39;, &#39;neq&#39;)
+        circ &gt;&gt;= repeat(outlen, &#39;neq&#39;, &#39;neq&#39;)
+        circ &gt;&gt;= bitwise_or(outlen, &#39;neq&#39;, &#39;val&#39;, _fresh())
+        return circ
+
+    circ = reduce(op.or_, starmap(guard, mapping.items()))
+    circ = tee(inlen, {input: circ.inputs}) &gt;&gt; circ
+    if len(circ.outputs) &gt; 1:
+        circ &gt;&gt;= reduce_binop(outlen, circ.outputs, output, bitwise_and)
+    out, *_ = circ.outputs
+    return circ[&#39;o&#39;, {out: output}]
+
+
+def kmodels(wordlen: int, k: int, input=None, output=None):
+    &#34;&#34;&#34;Return a circuit taking a wordlen bitvector where only k
+    valuations return True. Uses encoding from [1].
+
+    Note that this is equivalent to (~x &lt; k).
+    - TODO: Add automated simplification so that the circuits
+            are equiv.
+
+    [1]: Chakraborty, Supratik, et al. &#34;From Weighted to Unweighted Model
+    Counting.&#34; IJCAI. 2015.
+    &#34;&#34;&#34;
+
+    assert 0 &lt;= k &lt; 2**wordlen
+    if output is None:
+        output = _fresh()
+
+    if input is None:
+        input = _fresh()
+
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    atoms = map(aiger.atom, imap[input])
+
+    active = False
+    expr = aiger.atom(False)
+    for atom, bit in zip(atoms, encode_int(wordlen, k, signed=False)):
+        active |= bit
+        if not active:  # Skip until first 1.
+            continue
+        expr = (expr | atom) if bit else (expr &amp; atom)
+
+    aig = expr.aig[&#39;o&#39;, {expr.output: omap[output][0]}]
+    aig |= aiger.sink(imap[input])
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="aiger_bv.common.abs_gate"><code class="name flex">
+<span>def <span class="ident">abs_gate</span></span>(<span>wordlen, input, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def abs_gate(wordlen, input, output):
+    tmp, tmp2 = _fresh(), _fresh()
+    return tee(wordlen, {input: (input, tmp)}) \
+        &gt;&gt; arithmetic_right_shift_gate(wordlen, wordlen - 1, tmp, tmp) \
+        &gt;&gt; tee(wordlen, {tmp: (tmp, tmp2)}) \
+        &gt;&gt; add_gate(wordlen, input, tmp, output) \
+        &gt;&gt; bitwise_xor(wordlen, output, tmp2, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.add_gate"><code class="name flex">
+<span>def <span class="ident">add_gate</span></span>(<span>wordlen, left='x', right='y', output='x+y', has_carry=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x+y&#39;, has_carry=False):
+    carry_name = f&#39;{output}_carry&#39;
+    assert left != carry_name and right != carry_name
+
+    adder_aig = aiger.source({carry_name: False})
+
+    imap = BundleMap({left: wordlen, right: wordlen})
+    omap = BundleMap(
+        {output: wordlen, has_carry: 1} if has_carry else {output: wordlen}
+    )
+
+    for lname, rname, oname in zip(imap[left], imap[right], omap[output]):
+        adder_aig &gt;&gt;= _full_adder(
+            x=lname,
+            y=rname,
+            carry_in=carry_name,
+            result=oname,
+            carry_out=carry_name)
+
+    if not has_carry:
+        adder_aig &gt;&gt;= aiger.sink([output + &#39;_carry&#39;])
+
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=adder_aig)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.arithmetic_right_shift_gate"><code class="name flex">
+<span>def <span class="ident">arithmetic_right_shift_gate</span></span>(<span>wordlen, shift, input, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def arithmetic_right_shift_gate(wordlen, shift, input, output):
+    shiftin = _fresh()
+    circ = index_gate(wordlen, wordlen - 1, shiftin, shiftin) \
+        | identity_gate(wordlen, input, input)
+    return tee(wordlen, {input: (input, shiftin)}) &gt;&gt; circ \
+        &gt;&gt; _right_shift_gate(wordlen, shift, shiftin, input, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.bitwise_and"><code class="name flex">
+<span>def <span class="ident">bitwise_and</span></span>(<span>wordlen, left='x', right='y', output='x&y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bitwise_and(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    return bitwise_binop(aiger.and_gate, wordlen, left, right, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.bitwise_binop"><code class="name flex">
+<span>def <span class="ident">bitwise_binop</span></span>(<span>binop, wordlen, left='x', right='y', output='x&y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bitwise_binop(binop, wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    imap = BundleMap({left: wordlen, right: wordlen})
+    omap = BundleMap({output: wordlen})
+
+    names = zip(imap[left], imap[right], omap[output])
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=reduce(op.or_, (binop([l, r], o) for l, r, o in names)),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.bitwise_negate"><code class="name flex">
+<span>def <span class="ident">bitwise_negate</span></span>(<span>wordlen, input='x', output='not x')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bitwise_negate(wordlen, input=&#39;x&#39;, output=&#39;not x&#39;):
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: wordlen})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.bit_flipper(inputs=imap[input], outputs=omap[output]),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.bitwise_or"><code class="name flex">
+<span>def <span class="ident">bitwise_or</span></span>(<span>wordlen, left='x', right='y', output='x&y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bitwise_or(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    return bitwise_binop(aiger.or_gate, wordlen, left, right, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.bitwise_xor"><code class="name flex">
+<span>def <span class="ident">bitwise_xor</span></span>(<span>wordlen, left='x', right='y', output='x&y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bitwise_xor(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x&amp;y&#39;):
+    return bitwise_binop(aiger.parity_gate, wordlen, left, right, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.combine_gate"><code class="name flex">
+<span>def <span class="ident">combine_gate</span></span>(<span>left_wordlen, left, right_wordlen, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def combine_gate(left_wordlen, left, right_wordlen, right, output):
+    circ = identity_gate(left_wordlen, left, left) \
+        | identity_gate(right_wordlen, right, right)
+
+    omap1 = circ.omap
+    relabels = {
+        k: f&#34;{left}[{i + left_wordlen}]&#34; for i, k in enumerate(omap1[right])
+    }
+    omap2 = BundleMap({left: left_wordlen + right_wordlen})
+    circ = attr.evolve(circ, omap=omap2, aig=circ.aig[&#39;o&#39;, relabels])
+    return circ if left == output else circ[&#39;o&#39;, {left: output}]</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.dec_gate"><code class="name flex">
+<span>def <span class="ident">dec_gate</span></span>(<span>wordlen, input='x', output='inc')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dec_gate(wordlen, input=&#39;x&#39;, output=&#39;inc&#39;):
+    tmp = _fresh()
+    return source(wordlen, -1, tmp) &gt;&gt; add_gate(wordlen, tmp, input, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.decode_int"><code class="name flex">
+<span>def <span class="ident">decode_int</span></span>(<span>bits, signed=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def decode_int(bits, signed=True):
+    # Interpret result
+    last = bits[-1]*(1 &lt;&lt; (len(bits) - 1))
+    last *= -1 if signed else 1
+    return sum(val &lt;&lt; idx for idx, val in enumerate(bits[:-1])) + last</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.dot_mod2_gate"><code class="name flex">
+<span>def <span class="ident">dot_mod2_gate</span></span>(<span>wordlen, left='x', right='y', output='x@y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dot_mod2_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x@y&#39;):
+    return bitwise_and(wordlen, left, right, &#39;tmp&#39;) &gt;&gt; \
+        even_popcount_gate(wordlen, &#39;tmp&#39;, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.encode_int"><code class="name flex">
+<span>def <span class="ident">encode_int</span></span>(<span>wordlen, value, signed=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def encode_int(wordlen, value, signed=True):
+    N = 1 &lt;&lt; wordlen
+    if signed:
+        N2 = 1 &lt;&lt; (wordlen - 1)
+        assert N2 &gt; value &gt;= -N2
+    else:
+        assert N &gt; value &gt;= 0
+
+    if value &lt; 0:
+        value = N + value
+
+    return [bool((value &gt;&gt; i) &amp; 1) for i in range(wordlen)]</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.eq_gate"><code class="name flex">
+<span>def <span class="ident">eq_gate</span></span>(<span>wordlen, left='x', right='y', output='x=y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def eq_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x=y&#39;):
+    return ne_gate(wordlen, left, right, left + right) &gt;&gt; \
+        bitwise_negate(1, left + right, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.even_popcount_gate"><code class="name flex">
+<span>def <span class="ident">even_popcount_gate</span></span>(<span>wordlen, input, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def even_popcount_gate(wordlen, input, output):
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.parity_gate(imap[input], omap[output][0]),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.identity_gate"><code class="name flex">
+<span>def <span class="ident">identity_gate</span></span>(<span>wordlen, input='x', output=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def identity_gate(wordlen, input=&#39;x&#39;, output=None):
+    if output is None:
+        output = input
+
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: wordlen})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.identity(inputs=imap[input], outputs=omap[output]),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.inc_gate"><code class="name flex">
+<span>def <span class="ident">inc_gate</span></span>(<span>wordlen, input='x', output='inc')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inc_gate(wordlen, input=&#39;x&#39;, output=&#39;inc&#39;):
+    tmp = _fresh()
+    return source(wordlen, 1, tmp) &gt;&gt; add_gate(wordlen, tmp, input, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.index_gate"><code class="name flex">
+<span>def <span class="ident">index_gate</span></span>(<span>wordlen, idx, input, output=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def index_gate(wordlen, idx, input, output=None):
+    assert 0 &lt;= idx &lt; wordlen
+    if output is None:
+        output = input
+
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    inputs, outputs = imap[input], (imap[input][idx],)
+
+    aig = aiger.sink(set(inputs) - set(outputs)) | aiger.identity(outputs)
+    relabels = {outputs[0]: omap[output][0]}
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig[&#39;o&#39;, relabels])</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.is_nonzero_gate"><code class="name flex">
+<span>def <span class="ident">is_nonzero_gate</span></span>(<span>wordlen, input='x', output='is_nonzero')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_nonzero_gate(wordlen, input=&#39;x&#39;, output=&#39;is_nonzero&#39;):
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.or_gate(imap[input], omap[output][0]),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.is_zero_gate"><code class="name flex">
+<span>def <span class="ident">is_zero_gate</span></span>(<span>wordlen, input='x', output='is_zero')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_zero_gate(wordlen, input=&#39;x&#39;, output=&#39;is_zero&#39;):
+    return is_nonzero_gate(wordlen, input, input+&#39;out&#39;) &gt;&gt; \
+        bitwise_negate(1, input + &#39;out&#39;, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.kmodels"><code class="name flex">
+<span>def <span class="ident">kmodels</span></span>(<span>wordlen: int, k: int, input=None, output=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a circuit taking a wordlen bitvector where only k
+valuations return True. Uses encoding from [1].</p>
+<p>Note that this is equivalent to (~x &lt; k).
+- TODO: Add automated simplification so that the circuits
+are equiv.</p>
+<p>[1]: Chakraborty, Supratik, et al. "From Weighted to Unweighted Model
+Counting." IJCAI. 2015.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def kmodels(wordlen: int, k: int, input=None, output=None):
+    &#34;&#34;&#34;Return a circuit taking a wordlen bitvector where only k
+    valuations return True. Uses encoding from [1].
+
+    Note that this is equivalent to (~x &lt; k).
+    - TODO: Add automated simplification so that the circuits
+            are equiv.
+
+    [1]: Chakraborty, Supratik, et al. &#34;From Weighted to Unweighted Model
+    Counting.&#34; IJCAI. 2015.
+    &#34;&#34;&#34;
+
+    assert 0 &lt;= k &lt; 2**wordlen
+    if output is None:
+        output = _fresh()
+
+    if input is None:
+        input = _fresh()
+
+    imap, omap = BundleMap({input: wordlen}), BundleMap({output: 1})
+    atoms = map(aiger.atom, imap[input])
+
+    active = False
+    expr = aiger.atom(False)
+    for atom, bit in zip(atoms, encode_int(wordlen, k, signed=False)):
+        active |= bit
+        if not active:  # Skip until first 1.
+            continue
+        expr = (expr | atom) if bit else (expr &amp; atom)
+
+    aig = expr.aig[&#39;o&#39;, {expr.output: omap[output][0]}]
+    aig |= aiger.sink(imap[input])
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.left_shift_gate"><code class="name flex">
+<span>def <span class="ident">left_shift_gate</span></span>(<span>wordlen, shift, input='x', output='x')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def left_shift_gate(wordlen, shift, input=&#39;x&#39;, output=&#39;x&#39;):
+    return reverse_gate(wordlen, input, &#39;tmp&#39;) \
+        &gt;&gt; logical_right_shift_gate(wordlen, shift, &#39;tmp&#39;, &#39;tmp&#39;) \
+        &gt;&gt; reverse_gate(wordlen, &#39;tmp&#39;, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.logical_right_shift_gate"><code class="name flex">
+<span>def <span class="ident">logical_right_shift_gate</span></span>(<span>wordlen, shift, input='x', output='x')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def logical_right_shift_gate(wordlen, shift, input=&#39;x&#39;, output=&#39;x&#39;):
+    tmp = _fresh()
+    return source(1, 0, tmp) \
+        &gt;&gt; _right_shift_gate(wordlen, shift, tmp, input, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.lookup"><code class="name flex">
+<span>def <span class="ident">lookup</span></span>(<span>inlen, outlen, mapping, input, output, *, in_signed=True, out_signed=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lookup(inlen, outlen, mapping, input, output, *,
+           in_signed=True, out_signed=True):
+    # [(i = a1) -&gt; b] /\ [(i = a2) -&gt; c] /\ [(i = a3) -&gt; d]
+    def guard(key, val):
+        circ = identity_gate(inlen, _fresh(), &#39;input&#39;) \
+            | source(inlen, key, &#39;key&#39;, in_signed) \
+            | source(outlen, val, &#39;val&#39;, out_signed)
+        circ &gt;&gt;= ne_gate(inlen, &#39;input&#39;, &#39;key&#39;, &#39;neq&#39;)
+        circ &gt;&gt;= repeat(outlen, &#39;neq&#39;, &#39;neq&#39;)
+        circ &gt;&gt;= bitwise_or(outlen, &#39;neq&#39;, &#39;val&#39;, _fresh())
+        return circ
+
+    circ = reduce(op.or_, starmap(guard, mapping.items()))
+    circ = tee(inlen, {input: circ.inputs}) &gt;&gt; circ
+    if len(circ.outputs) &gt; 1:
+        circ &gt;&gt;= reduce_binop(outlen, circ.outputs, output, bitwise_and)
+    out, *_ = circ.outputs
+    return circ[&#39;o&#39;, {out: output}]</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.named_indexes"><code class="name flex">
+<span>def <span class="ident">named_indexes</span></span>(<span>wordlen, root)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def named_indexes(wordlen, root):
+    return tuple(_name_idx(root, i) for i in range(wordlen))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.ne_gate"><code class="name flex">
+<span>def <span class="ident">ne_gate</span></span>(<span>wordlen, left='x', right='y', output='x!=y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ne_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x!=y&#39;):
+    return bitwise_xor(wordlen, left, right, left+right) &gt;&gt; \
+        is_nonzero_gate(wordlen, left+right, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.negate_gate"><code class="name flex">
+<span>def <span class="ident">negate_gate</span></span>(<span>wordlen, input='x', output='~x')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Implements two's complement negation.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def negate_gate(wordlen, input=&#39;x&#39;, output=&#39;~x&#39;):
+    &#34;&#34;&#34;Implements two&#39;s complement negation.&#34;&#34;&#34;
+    neg = bitwise_negate(wordlen, input, &#34;tmp&#34;)
+    inc = inc_gate(wordlen, &#34;tmp&#34;, output)
+    return neg &gt;&gt; inc</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.reduce_binop"><code class="name flex">
+<span>def <span class="ident">reduce_binop</span></span>(<span>wordlen, inputs, output, op)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reduce_binop(wordlen, inputs, output, op):
+    def join(left, right):
+        (o1, *_), (o2, *_) = left.outputs, right.outputs # noqa
+        return (left | right) &gt;&gt; op(wordlen, o1, o2, _fresh())
+
+    inputs = list(inputs)
+    queue = [identity_gate(wordlen, i) for i in inputs]
+    while len(queue) &gt; 1:
+        queue = _apply_pairwise(join, queue)
+
+    circ = queue[0]
+    if len(inputs) &amp; 1:  # Odd number of elements.
+        circ = join(circ, identity_gate(wordlen, inputs[-1]))
+    return circ</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.repeat"><code class="name flex">
+<span>def <span class="ident">repeat</span></span>(<span>wordlen, input, output=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def repeat(wordlen, input, output=None):
+    if output is None:
+        output = input
+
+    imap, omap = BundleMap({input: 1}), BundleMap({output: wordlen})
+    return aigbv.AIGBV(
+        imap=imap, omap=omap,
+        aig=aiger.tee({imap[input][0]: list(omap[output])}),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.reverse_gate"><code class="name flex">
+<span>def <span class="ident">reverse_gate</span></span>(<span>wordlen, input='x', output='rev(x)')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reverse_gate(wordlen, input=&#39;x&#39;, output=&#39;rev(x)&#39;):
+    circ = identity_gate(wordlen, input, output=output)
+
+    tmp, obdl = Bundle(_fresh(), wordlen), Bundle(output, wordlen)
+
+    aig = circ.aig[&#39;o&#39;, dict(zip(obdl, reversed(tmp)))]
+    aig = aig[&#39;o&#39;, dict(zip(tmp, obdl))]
+
+    return attr.evolve(circ, aig=aig)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.signed_ge_gate"><code class="name flex">
+<span>def <span class="ident">signed_ge_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def signed_ge_gate(wordlen, left, right, output):
+    return signed_lt_gate(wordlen, left, right, &#39;tmp&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;tmp&#39;, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.signed_gt_gate"><code class="name flex">
+<span>def <span class="ident">signed_gt_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def signed_gt_gate(wordlen, left, right, output):
+    return signed_lt_gate(wordlen, right, left, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.signed_le_gate"><code class="name flex">
+<span>def <span class="ident">signed_le_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def signed_le_gate(wordlen, left, right, output):
+    return signed_gt_gate(wordlen, left, right, &#39;tmp&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;tmp&#39;, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.signed_lt_gate"><code class="name flex">
+<span>def <span class="ident">signed_lt_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def signed_lt_gate(wordlen, left, right, output):
+    msb = _fresh()
+    msb2 = _fresh()
+    get_msb = index_gate(wordlen, wordlen-1, msb, msb)
+    get_msb2 = index_gate(wordlen, wordlen-1, msb2, msb2)
+
+    circ1 = get_msb &gt;&gt; combine_gate(wordlen, left, 1, msb, left)
+    circ2 = get_msb2 &gt;&gt; combine_gate(wordlen, right, 1, msb2, right)
+
+    return tee(wordlen, {left: (left, msb), right: (right, msb2)}) \
+        &gt;&gt; (circ1 | circ2) \
+        &gt;&gt; subtract_gate(wordlen+1, left, right, output) \
+        &gt;&gt; index_gate(wordlen+1, wordlen, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.sink"><code class="name flex">
+<span>def <span class="ident">sink</span></span>(<span>wordlen, inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sink(wordlen, inputs):
+    imap = BundleMap({i: wordlen for i in inputs})
+    return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, inputs)))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.source"><code class="name flex">
+<span>def <span class="ident">source</span></span>(<span>wordlen, value, name='x', signed=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def source(wordlen, value, name=&#39;x&#39;, signed=True):
+    if isinstance(value, int):
+        value = encode_int(wordlen, value, signed)
+
+    omap = BundleMap({name: wordlen})
+    aig = aiger.source({name: bit for name, bit in zip(omap[name], value)})
+    return aigbv.AIGBV(aig=aig, omap=omap)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.split_gate"><code class="name flex">
+<span>def <span class="ident">split_gate</span></span>(<span>input, left_wordlen, left, right_wordlen, right)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def split_gate(input, left_wordlen, left, right_wordlen, right):
+    omap = BundleMap({left: left_wordlen, right: right_wordlen})
+
+    circ = identity_gate(left_wordlen + right_wordlen, input, input)
+    relabels = fn.merge(
+        dict(zip(circ.omap[input][:left_wordlen], omap[left])),
+        dict(zip(circ.omap[input][left_wordlen:], omap[right])),
+    )
+
+    return attr.evolve(circ, omap=omap, aig=circ.aig[&#39;o&#39;, relabels])</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.subtract_gate"><code class="name flex">
+<span>def <span class="ident">subtract_gate</span></span>(<span>wordlen, left='x', right='y', output='x-y')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def subtract_gate(wordlen, left=&#39;x&#39;, right=&#39;y&#39;, output=&#39;x-y&#39;):
+    tmp = _fresh()
+    return negate_gate(wordlen, right, tmp) \
+        &gt;&gt; add_gate(wordlen, left, tmp, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.tee"><code class="name flex">
+<span>def <span class="ident">tee</span></span>(<span>wordlen, iomap)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tee(wordlen, iomap):
+    imap = BundleMap({i: wordlen for i in iomap})
+    omap = BundleMap({o: wordlen for o in fn.cat(iomap.values())})
+
+    blasted = defaultdict(list)
+
+    for i, outs in iomap.items():
+        for o in outs:
+            for k, v in zip(imap[i], omap[o]):
+                blasted[k].append(v)
+
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aiger.tee(blasted))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.unsigned_ge_gate"><code class="name flex">
+<span>def <span class="ident">unsigned_ge_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unsigned_ge_gate(wordlen, left, right, output):
+    return unsigned_lt_gate(wordlen, left, right, &#39;ge&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;ge&#39;, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.unsigned_gt_gate"><code class="name flex">
+<span>def <span class="ident">unsigned_gt_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unsigned_gt_gate(wordlen, left, right, output):
+    return unsigned_le_gate(wordlen, left, right, &#39;le&#39;) \
+        &gt;&gt; bitwise_negate(1, &#39;le&#39;, output)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.unsigned_le_gate"><code class="name flex">
+<span>def <span class="ident">unsigned_le_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unsigned_le_gate(wordlen, left, right, output):
+    fresh = [_fresh() for _ in range(4)]
+    lt = unsigned_lt_gate(wordlen, fresh[0], fresh[2], &#39;lt&#39;)
+    eq = eq_gate(wordlen, fresh[1], fresh[3], &#39;eq&#39;)
+    return tee(wordlen, {left: fresh[:2], right: fresh[2:]}) \
+        &gt;&gt; (lt | eq) \
+        &gt;&gt; aigbv.aig2aigbv(aiger.or_gate([&#39;lt&#39;, &#39;eq&#39;], output))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.common.unsigned_lt_gate"><code class="name flex">
+<span>def <span class="ident">unsigned_lt_gate</span></span>(<span>wordlen, left, right, output)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unsigned_lt_gate(wordlen, left, right, output):
+    omap = BundleMap({output: 1})
+    imap = BundleMap({left: wordlen, right: wordlen})
+
+    lefts = map(aiger.atom, imap[left])
+    rights = map(aiger.atom, imap[right])
+
+    def test_bit(expr, lr):
+        l, r = lr
+        expr &amp;= ~(l ^ r)  # l == r.
+        expr |= ~l &amp; r  # l &lt; r.
+        return expr
+
+    expr = reduce(test_bit, zip(lefts, rights), aiger.atom(False))
+    aig = expr.aig[&#39;o&#39;, {expr.output: omap[output][0]}]
+    return aigbv.AIGBV(imap=imap, omap=omap, aig=aig)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="aiger_bv" href="index.html">aiger_bv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="aiger_bv.common.abs_gate" href="#aiger_bv.common.abs_gate">abs_gate</a></code></li>
+<li><code><a title="aiger_bv.common.add_gate" href="#aiger_bv.common.add_gate">add_gate</a></code></li>
+<li><code><a title="aiger_bv.common.arithmetic_right_shift_gate" href="#aiger_bv.common.arithmetic_right_shift_gate">arithmetic_right_shift_gate</a></code></li>
+<li><code><a title="aiger_bv.common.bitwise_and" href="#aiger_bv.common.bitwise_and">bitwise_and</a></code></li>
+<li><code><a title="aiger_bv.common.bitwise_binop" href="#aiger_bv.common.bitwise_binop">bitwise_binop</a></code></li>
+<li><code><a title="aiger_bv.common.bitwise_negate" href="#aiger_bv.common.bitwise_negate">bitwise_negate</a></code></li>
+<li><code><a title="aiger_bv.common.bitwise_or" href="#aiger_bv.common.bitwise_or">bitwise_or</a></code></li>
+<li><code><a title="aiger_bv.common.bitwise_xor" href="#aiger_bv.common.bitwise_xor">bitwise_xor</a></code></li>
+<li><code><a title="aiger_bv.common.combine_gate" href="#aiger_bv.common.combine_gate">combine_gate</a></code></li>
+<li><code><a title="aiger_bv.common.dec_gate" href="#aiger_bv.common.dec_gate">dec_gate</a></code></li>
+<li><code><a title="aiger_bv.common.decode_int" href="#aiger_bv.common.decode_int">decode_int</a></code></li>
+<li><code><a title="aiger_bv.common.dot_mod2_gate" href="#aiger_bv.common.dot_mod2_gate">dot_mod2_gate</a></code></li>
+<li><code><a title="aiger_bv.common.encode_int" href="#aiger_bv.common.encode_int">encode_int</a></code></li>
+<li><code><a title="aiger_bv.common.eq_gate" href="#aiger_bv.common.eq_gate">eq_gate</a></code></li>
+<li><code><a title="aiger_bv.common.even_popcount_gate" href="#aiger_bv.common.even_popcount_gate">even_popcount_gate</a></code></li>
+<li><code><a title="aiger_bv.common.identity_gate" href="#aiger_bv.common.identity_gate">identity_gate</a></code></li>
+<li><code><a title="aiger_bv.common.inc_gate" href="#aiger_bv.common.inc_gate">inc_gate</a></code></li>
+<li><code><a title="aiger_bv.common.index_gate" href="#aiger_bv.common.index_gate">index_gate</a></code></li>
+<li><code><a title="aiger_bv.common.is_nonzero_gate" href="#aiger_bv.common.is_nonzero_gate">is_nonzero_gate</a></code></li>
+<li><code><a title="aiger_bv.common.is_zero_gate" href="#aiger_bv.common.is_zero_gate">is_zero_gate</a></code></li>
+<li><code><a title="aiger_bv.common.kmodels" href="#aiger_bv.common.kmodels">kmodels</a></code></li>
+<li><code><a title="aiger_bv.common.left_shift_gate" href="#aiger_bv.common.left_shift_gate">left_shift_gate</a></code></li>
+<li><code><a title="aiger_bv.common.logical_right_shift_gate" href="#aiger_bv.common.logical_right_shift_gate">logical_right_shift_gate</a></code></li>
+<li><code><a title="aiger_bv.common.lookup" href="#aiger_bv.common.lookup">lookup</a></code></li>
+<li><code><a title="aiger_bv.common.named_indexes" href="#aiger_bv.common.named_indexes">named_indexes</a></code></li>
+<li><code><a title="aiger_bv.common.ne_gate" href="#aiger_bv.common.ne_gate">ne_gate</a></code></li>
+<li><code><a title="aiger_bv.common.negate_gate" href="#aiger_bv.common.negate_gate">negate_gate</a></code></li>
+<li><code><a title="aiger_bv.common.reduce_binop" href="#aiger_bv.common.reduce_binop">reduce_binop</a></code></li>
+<li><code><a title="aiger_bv.common.repeat" href="#aiger_bv.common.repeat">repeat</a></code></li>
+<li><code><a title="aiger_bv.common.reverse_gate" href="#aiger_bv.common.reverse_gate">reverse_gate</a></code></li>
+<li><code><a title="aiger_bv.common.signed_ge_gate" href="#aiger_bv.common.signed_ge_gate">signed_ge_gate</a></code></li>
+<li><code><a title="aiger_bv.common.signed_gt_gate" href="#aiger_bv.common.signed_gt_gate">signed_gt_gate</a></code></li>
+<li><code><a title="aiger_bv.common.signed_le_gate" href="#aiger_bv.common.signed_le_gate">signed_le_gate</a></code></li>
+<li><code><a title="aiger_bv.common.signed_lt_gate" href="#aiger_bv.common.signed_lt_gate">signed_lt_gate</a></code></li>
+<li><code><a title="aiger_bv.common.sink" href="#aiger_bv.common.sink">sink</a></code></li>
+<li><code><a title="aiger_bv.common.source" href="#aiger_bv.common.source">source</a></code></li>
+<li><code><a title="aiger_bv.common.split_gate" href="#aiger_bv.common.split_gate">split_gate</a></code></li>
+<li><code><a title="aiger_bv.common.subtract_gate" href="#aiger_bv.common.subtract_gate">subtract_gate</a></code></li>
+<li><code><a title="aiger_bv.common.tee" href="#aiger_bv.common.tee">tee</a></code></li>
+<li><code><a title="aiger_bv.common.unsigned_ge_gate" href="#aiger_bv.common.unsigned_ge_gate">unsigned_ge_gate</a></code></li>
+<li><code><a title="aiger_bv.common.unsigned_gt_gate" href="#aiger_bv.common.unsigned_gt_gate">unsigned_gt_gate</a></code></li>
+<li><code><a title="aiger_bv.common.unsigned_le_gate" href="#aiger_bv.common.unsigned_le_gate">unsigned_le_gate</a></code></li>
+<li><code><a title="aiger_bv.common.unsigned_lt_gate" href="#aiger_bv.common.unsigned_lt_gate">unsigned_lt_gate</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

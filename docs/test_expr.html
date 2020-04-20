@@ -1,0 +1,1211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>aiger_bv.test_expr API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>aiger_bv.test_expr</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from aiger_bv.expr import atom, ite
+from aiger_bv import common
+
+# additional imports for testing frammework
+import hypothesis.strategies as st
+from hypothesis import given, settings
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 3))
+def test_srl_unsigned(a, b):
+    expr = atom(4, a) &gt;&gt; b
+    assert common.decode_int(expr(), signed=False) == a &gt;&gt; b
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-8, 7), st.integers(0, 3))
+def test_srl_signed(a, b):
+    expr = atom(4, a) &gt;&gt; b
+    assert common.decode_int(expr()) == a &gt;&gt; b
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 3))
+def test_sll(a, b):
+    wordlen = 4
+    expr = atom(wordlen, a, signed=False) &lt;&lt; b
+    mask = (1 &lt;&lt; wordlen) - 1
+    assert bin(common.decode_int(expr(), signed=False)) == bin((a &lt;&lt; b) &amp; mask)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_lt_literal(a, b):
+    expr = atom(4, a, signed=False) &lt; b
+    assert expr()[0] == (a &lt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_gt_literal(a, b):
+    expr = atom(4, a, signed=False) &gt; b
+    assert expr()[0] == (a &gt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_ge_literal(a, b):
+    expr = atom(4, a, signed=False) &gt;= b
+    assert expr()[0] == (a &gt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_le_literal(a, b):
+    expr = atom(4, a, signed=False) &lt;= b
+    assert expr()[0] == (a &lt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_lt_literal(a, b):
+    expr = atom(4, a, signed=True) &lt; b
+    assert expr()[0] == (a &lt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_gt_literal(a, b):
+    expr = atom(4, a, signed=True) &gt; b
+    assert expr()[0] == (a &gt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_ge_literal(a, b):
+    expr = atom(4, a, signed=True) &gt;= b
+    assert expr()[0] == (a &gt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_le_literal(a, b):
+    expr = atom(4, a, signed=True) &lt;= b
+    assert expr()[0] == (a &lt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_bitwise_and(a, b):
+    expr = atom(4, a) &amp; atom(4, b)
+    assert common.decode_int(expr()) == a &amp; b
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_bitwise_and2(a):
+    expr = atom(4, a) &amp; atom(4, a)
+    assert common.decode_int(expr()) == a
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_bitwise_or(a, b):
+    expr = atom(4, a) | atom(4, b)
+    assert common.decode_int(expr()) == a | b
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_bitwise_xor(a, b):
+    expr = atom(4, a) ^ atom(4, b)
+    assert common.decode_int(expr()) == a ^ b
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_bitwise_invert(a):
+    expr = ~atom(4, a)
+    assert common.decode_int(expr()) == ~a
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_eq(a, b):
+    expr = atom(4, a) == atom(4, b)
+    assert expr()[0] == (a == b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_ne(a, b):
+    expr = atom(4, a) != atom(4, b)
+    assert expr()[0] == (a != b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_add(a, b):
+    expr = atom(4, a) + atom(4, b)
+    assert common.decode_int(expr()) == a + b
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_sub(a, b):
+    expr = atom(4, a) - atom(4, b)
+    assert common.decode_int(expr()) == a - b
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_le(a, b):
+    expr = atom(4, a) &lt;= atom(4, b)
+    assert expr()[0] == (a &lt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_lt(a, b):
+    expr = atom(4, a) &lt; atom(4, b)
+    assert expr()[0] == (a &lt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_ge(a, b):
+    expr = atom(4, a) &gt;= atom(4, b)
+    assert expr()[0] == (a &gt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_gt(a, b):
+    expr = atom(4, a) &gt; atom(4, b)
+    assert expr()[0] == (a &gt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_le(a, b):
+    expr = atom(4, a, signed=False) &lt;= atom(4, b, signed=False)
+    assert expr()[0] == (a &lt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_lt(a, b):
+    expr = atom(4, a, signed=False) &lt; atom(4, b, signed=False)
+    assert expr()[0] == (a &lt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_gt(a, b):
+    expr = atom(4, a, signed=False) &gt; atom(4, b, signed=False)
+    assert expr()[0] == (a &gt; b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_ge(a, b):
+    expr = atom(4, a, signed=False) &gt;= atom(4, b, signed=False)
+    assert expr()[0] == (a &gt;= b)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_neg(a):
+    expr = -atom(4, a)
+    assert common.decode_int(expr()) == -a
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7))
+def test_expr_abs(a):
+    expr = abs(atom(4, a))
+    assert common.decode_int(expr()) == abs(a)
+
+
+def test_expr_abs_max_negative():
+    expr = abs(atom(4, -8))
+    assert common.decode_int(expr()) == -8  # undefined behavior
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_getitem(a):
+    expr = atom(4, a)
+    for i in range(4):
+        assert common.decode_int(expr[i](), signed=False) == (a &gt;&gt; i) &amp; 1
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_concat(a, b):
+    expr1, expr2 = atom(4, a), atom(4, b)
+    expr3 = expr1.concat(expr2)
+    assert expr3.size == expr1.size + expr2.size
+    assert expr3() == expr1() + expr2()
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.booleans(), st.integers(1, 5))
+def test_expr_repeat(a, b):
+    expr = atom(1, a, signed=False)
+    assert expr.repeat(b)() == b * expr()
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_dotprod_mod2(a, b):
+    expr1, expr2 = atom(4, a), atom(4, b)
+    expr3 = expr1 @ expr2
+    val = sum([x * y for x, y in zip(expr1(), expr2())])
+    assert expr3()[0] == bool(val % 2)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.booleans(), st.integers(-4, 3), st.integers(-4, 3))
+def test_ite(test, a, b):
+    _test, _a, _b = atom(1, test, signed=False), atom(4, a), atom(4, b)
+    expr = ite(_test, _a, _b)
+    val = common.decode_int(expr())
+    assert val == (a if test else b)
+
+
+def test_ite2():
+    test, a, b = atom(1, &#39;test&#39;, signed=False), atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    expr = ite(test, a, b)
+    val = expr({&#39;test&#39;: (False,), &#39;x&#39;: (False, False), &#39;y&#39;: (True, False)})
+    assert val == (True, False)
+
+
+def test_set_output():
+    x, y = atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    f = (x &lt; y).with_output(&#39;z&#39;)
+    assert f.output == &#39;z&#39;
+
+
+def test_bundle_inputs():
+    x, y = atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    f = x.concat(y)
+    assert f.inputs == {&#39;x&#39;, &#39;y&#39;}
+    f = f.bundle_inputs(&#39;xy&#39;)
+    assert f.inputs == {&#39;xy&#39;}
+    assert f.aigbv.imap[&#39;xy&#39;].size == 4
+
+
+def test_indexing_preserves_inputs():
+    x = atom(2, &#39;x&#39;)
+    assert x[0].inputs == {&#39;x&#39;}
+
+
+def test_and_preserves_inputs():
+    x = atom(2, &#39;x&#39;)
+    y = atom(2, &#39;y&#39;)
+    assert (x &amp; y).inputs == {&#39;x&#39;, &#39;y&#39;}
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 15), st.integers(0, 15))
+def test_unsigned_add(x, y):
+    if x + y &gt; 15:
+        return
+    adder = atom(4, &#39;a&#39;, signed=False) + atom(4, &#39;b&#39;, signed=False)
+    x_atom, y_atom = atom(4, x, signed=False), atom(4, y, signed=False)
+    res = adder(inputs={&#39;a&#39;: x_atom(), &#39;b&#39;: y_atom()})
+    assert res == atom(4, x + y, signed=False)()
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 15), st.integers(0, 15))
+def test_unsigned_multiply(x, y):
+    if x * y &gt; 15:
+        return
+    multiplier = atom(4, &#39;a&#39;, signed=False) * atom(4, &#39;b&#39;, signed=False)
+    assert len(multiplier.inputs) == 2
+    x_atom, y_atom = atom(4, x, signed=False), atom(4, y, signed=False)
+    res = multiplier(inputs={&#39;a&#39;: x_atom(), &#39;b&#39;: y_atom()})
+    assert common.decode_int(res, signed=False) == x * y
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-8, 7))
+def test_sign(x):
+    sign_expr = atom(4, x).sign()
+    assert sign_expr() == (x &lt; 0,)
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_multiply(x, y):
+    multiplier = atom(6, &#39;a&#39;) * atom(6, &#39;b&#39;)
+    x_atom, y_atom = atom(6, x), atom(6, y)
+    res = multiplier(inputs={&#39;a&#39;: x_atom(), &#39;b&#39;: y_atom()})
+    assert common.decode_int(res) == x * y
+
+
+@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_multiply_lit(x, y):
+    multiplier = atom(6, &#39;a&#39;) * y
+    x_atom = atom(6, x)
+    res = multiplier(inputs={&#39;a&#39;: x_atom()})
+    assert common.decode_int(res) == x * y</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="aiger_bv.test_expr.test_and_preserves_inputs"><code class="name flex">
+<span>def <span class="ident">test_and_preserves_inputs</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_and_preserves_inputs():
+    x = atom(2, &#39;x&#39;)
+    y = atom(2, &#39;y&#39;)
+    assert (x &amp; y).inputs == {&#39;x&#39;, &#39;y&#39;}</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_bundle_inputs"><code class="name flex">
+<span>def <span class="ident">test_bundle_inputs</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_bundle_inputs():
+    x, y = atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    f = x.concat(y)
+    assert f.inputs == {&#39;x&#39;, &#39;y&#39;}
+    f = f.bundle_inputs(&#39;xy&#39;)
+    assert f.inputs == {&#39;xy&#39;}
+    assert f.aigbv.imap[&#39;xy&#39;].size == 4</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_abs"><code class="name flex">
+<span>def <span class="ident">test_expr_abs</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7))
+def test_expr_abs(a):
+    expr = abs(atom(4, a))
+    assert common.decode_int(expr()) == abs(a)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_abs_max_negative"><code class="name flex">
+<span>def <span class="ident">test_expr_abs_max_negative</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_expr_abs_max_negative():
+    expr = abs(atom(4, -8))
+    assert common.decode_int(expr()) == -8  # undefined behavior</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_add"><code class="name flex">
+<span>def <span class="ident">test_expr_add</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_add(a, b):
+    expr = atom(4, a) + atom(4, b)
+    assert common.decode_int(expr()) == a + b</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_bitwise_and"><code class="name flex">
+<span>def <span class="ident">test_expr_bitwise_and</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_bitwise_and(a, b):
+    expr = atom(4, a) &amp; atom(4, b)
+    assert common.decode_int(expr()) == a &amp; b</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_bitwise_and2"><code class="name flex">
+<span>def <span class="ident">test_expr_bitwise_and2</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_bitwise_and2(a):
+    expr = atom(4, a) &amp; atom(4, a)
+    assert common.decode_int(expr()) == a</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_bitwise_invert"><code class="name flex">
+<span>def <span class="ident">test_expr_bitwise_invert</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_bitwise_invert(a):
+    expr = ~atom(4, a)
+    assert common.decode_int(expr()) == ~a</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_bitwise_or"><code class="name flex">
+<span>def <span class="ident">test_expr_bitwise_or</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_bitwise_or(a, b):
+    expr = atom(4, a) | atom(4, b)
+    assert common.decode_int(expr()) == a | b</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_bitwise_xor"><code class="name flex">
+<span>def <span class="ident">test_expr_bitwise_xor</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_bitwise_xor(a, b):
+    expr = atom(4, a) ^ atom(4, b)
+    assert common.decode_int(expr()) == a ^ b</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_concat"><code class="name flex">
+<span>def <span class="ident">test_expr_concat</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_concat(a, b):
+    expr1, expr2 = atom(4, a), atom(4, b)
+    expr3 = expr1.concat(expr2)
+    assert expr3.size == expr1.size + expr2.size
+    assert expr3() == expr1() + expr2()</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_dotprod_mod2"><code class="name flex">
+<span>def <span class="ident">test_expr_dotprod_mod2</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_dotprod_mod2(a, b):
+    expr1, expr2 = atom(4, a), atom(4, b)
+    expr3 = expr1 @ expr2
+    val = sum([x * y for x, y in zip(expr1(), expr2())])
+    assert expr3()[0] == bool(val % 2)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_eq"><code class="name flex">
+<span>def <span class="ident">test_expr_eq</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_eq(a, b):
+    expr = atom(4, a) == atom(4, b)
+    assert expr()[0] == (a == b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_ge"><code class="name flex">
+<span>def <span class="ident">test_expr_ge</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_ge(a, b):
+    expr = atom(4, a) &gt;= atom(4, b)
+    assert expr()[0] == (a &gt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_getitem"><code class="name flex">
+<span>def <span class="ident">test_expr_getitem</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_getitem(a):
+    expr = atom(4, a)
+    for i in range(4):
+        assert common.decode_int(expr[i](), signed=False) == (a &gt;&gt; i) &amp; 1</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_gt"><code class="name flex">
+<span>def <span class="ident">test_expr_gt</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_gt(a, b):
+    expr = atom(4, a) &gt; atom(4, b)
+    assert expr()[0] == (a &gt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_le"><code class="name flex">
+<span>def <span class="ident">test_expr_le</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_le(a, b):
+    expr = atom(4, a) &lt;= atom(4, b)
+    assert expr()[0] == (a &lt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_lt"><code class="name flex">
+<span>def <span class="ident">test_expr_lt</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_lt(a, b):
+    expr = atom(4, a) &lt; atom(4, b)
+    assert expr()[0] == (a &lt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_ne"><code class="name flex">
+<span>def <span class="ident">test_expr_ne</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_ne(a, b):
+    expr = atom(4, a) != atom(4, b)
+    assert expr()[0] == (a != b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_neg"><code class="name flex">
+<span>def <span class="ident">test_expr_neg</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3))
+def test_expr_neg(a):
+    expr = -atom(4, a)
+    assert common.decode_int(expr()) == -a</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_repeat"><code class="name flex">
+<span>def <span class="ident">test_expr_repeat</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.booleans(), st.integers(1, 5))
+def test_expr_repeat(a, b):
+    expr = atom(1, a, signed=False)
+    assert expr.repeat(b)() == b * expr()</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_signed_ge_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_signed_ge_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_ge_literal(a, b):
+    expr = atom(4, a, signed=True) &gt;= b
+    assert expr()[0] == (a &gt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_signed_gt_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_signed_gt_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_gt_literal(a, b):
+    expr = atom(4, a, signed=True) &gt; b
+    assert expr()[0] == (a &gt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_signed_le_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_signed_le_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_le_literal(a, b):
+    expr = atom(4, a, signed=True) &lt;= b
+    assert expr()[0] == (a &lt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_signed_lt_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_signed_lt_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-7, 7), st.integers(0, 7))
+def test_expr_signed_lt_literal(a, b):
+    expr = atom(4, a, signed=True) &lt; b
+    assert expr()[0] == (a &lt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_sub"><code class="name flex">
+<span>def <span class="ident">test_expr_sub</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_expr_sub(a, b):
+    expr = atom(4, a) - atom(4, b)
+    assert common.decode_int(expr()) == a - b</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_ge"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_ge</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_ge(a, b):
+    expr = atom(4, a, signed=False) &gt;= atom(4, b, signed=False)
+    assert expr()[0] == (a &gt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_ge_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_ge_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_ge_literal(a, b):
+    expr = atom(4, a, signed=False) &gt;= b
+    assert expr()[0] == (a &gt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_gt"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_gt</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_gt(a, b):
+    expr = atom(4, a, signed=False) &gt; atom(4, b, signed=False)
+    assert expr()[0] == (a &gt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_gt_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_gt_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_gt_literal(a, b):
+    expr = atom(4, a, signed=False) &gt; b
+    assert expr()[0] == (a &gt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_le"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_le</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_le(a, b):
+    expr = atom(4, a, signed=False) &lt;= atom(4, b, signed=False)
+    assert expr()[0] == (a &lt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_le_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_le_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_le_literal(a, b):
+    expr = atom(4, a, signed=False) &lt;= b
+    assert expr()[0] == (a &lt;= b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_lt"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_lt</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_lt(a, b):
+    expr = atom(4, a, signed=False) &lt; atom(4, b, signed=False)
+    assert expr()[0] == (a &lt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_expr_unsigned_lt_literal"><code class="name flex">
+<span>def <span class="ident">test_expr_unsigned_lt_literal</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 7))
+def test_expr_unsigned_lt_literal(a, b):
+    expr = atom(4, a, signed=False) &lt; b
+    assert expr()[0] == (a &lt; b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_indexing_preserves_inputs"><code class="name flex">
+<span>def <span class="ident">test_indexing_preserves_inputs</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_indexing_preserves_inputs():
+    x = atom(2, &#39;x&#39;)
+    assert x[0].inputs == {&#39;x&#39;}</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_ite"><code class="name flex">
+<span>def <span class="ident">test_ite</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.booleans(), st.integers(-4, 3), st.integers(-4, 3))
+def test_ite(test, a, b):
+    _test, _a, _b = atom(1, test, signed=False), atom(4, a), atom(4, b)
+    expr = ite(_test, _a, _b)
+    val = common.decode_int(expr())
+    assert val == (a if test else b)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_ite2"><code class="name flex">
+<span>def <span class="ident">test_ite2</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_ite2():
+    test, a, b = atom(1, &#39;test&#39;, signed=False), atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    expr = ite(test, a, b)
+    val = expr({&#39;test&#39;: (False,), &#39;x&#39;: (False, False), &#39;y&#39;: (True, False)})
+    assert val == (True, False)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_multiply"><code class="name flex">
+<span>def <span class="ident">test_multiply</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_multiply(x, y):
+    multiplier = atom(6, &#39;a&#39;) * atom(6, &#39;b&#39;)
+    x_atom, y_atom = atom(6, x), atom(6, y)
+    res = multiplier(inputs={&#39;a&#39;: x_atom(), &#39;b&#39;: y_atom()})
+    assert common.decode_int(res) == x * y</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_multiply_lit"><code class="name flex">
+<span>def <span class="ident">test_multiply_lit</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-4, 3), st.integers(-4, 3))
+def test_multiply_lit(x, y):
+    multiplier = atom(6, &#39;a&#39;) * y
+    x_atom = atom(6, x)
+    res = multiplier(inputs={&#39;a&#39;: x_atom()})
+    assert common.decode_int(res) == x * y</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_set_output"><code class="name flex">
+<span>def <span class="ident">test_set_output</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_set_output():
+    x, y = atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    f = (x &lt; y).with_output(&#39;z&#39;)
+    assert f.output == &#39;z&#39;</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_sign"><code class="name flex">
+<span>def <span class="ident">test_sign</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-8, 7))
+def test_sign(x):
+    sign_expr = atom(4, x).sign()
+    assert sign_expr() == (x &lt; 0,)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_sll"><code class="name flex">
+<span>def <span class="ident">test_sll</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 3))
+def test_sll(a, b):
+    wordlen = 4
+    expr = atom(wordlen, a, signed=False) &lt;&lt; b
+    mask = (1 &lt;&lt; wordlen) - 1
+    assert bin(common.decode_int(expr(), signed=False)) == bin((a &lt;&lt; b) &amp; mask)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_srl_signed"><code class="name flex">
+<span>def <span class="ident">test_srl_signed</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(-8, 7), st.integers(0, 3))
+def test_srl_signed(a, b):
+    expr = atom(4, a) &gt;&gt; b
+    assert common.decode_int(expr()) == a &gt;&gt; b</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_srl_unsigned"><code class="name flex">
+<span>def <span class="ident">test_srl_unsigned</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 7), st.integers(0, 3))
+def test_srl_unsigned(a, b):
+    expr = atom(4, a) &gt;&gt; b
+    assert common.decode_int(expr(), signed=False) == a &gt;&gt; b</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_unsigned_add"><code class="name flex">
+<span>def <span class="ident">test_unsigned_add</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 15), st.integers(0, 15))
+def test_unsigned_add(x, y):
+    if x + y &gt; 15:
+        return
+    adder = atom(4, &#39;a&#39;, signed=False) + atom(4, &#39;b&#39;, signed=False)
+    x_atom, y_atom = atom(4, x, signed=False), atom(4, y, signed=False)
+    res = adder(inputs={&#39;a&#39;: x_atom(), &#39;b&#39;: y_atom()})
+    assert res == atom(4, x + y, signed=False)()</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.test_expr.test_unsigned_multiply"><code class="name flex">
+<span>def <span class="ident">test_unsigned_multiply</span></span>(<span>) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@settings(max_examples=5, deadline=None)
+@given(st.integers(0, 15), st.integers(0, 15))
+def test_unsigned_multiply(x, y):
+    if x * y &gt; 15:
+        return
+    multiplier = atom(4, &#39;a&#39;, signed=False) * atom(4, &#39;b&#39;, signed=False)
+    assert len(multiplier.inputs) == 2
+    x_atom, y_atom = atom(4, x, signed=False), atom(4, y, signed=False)
+    res = multiplier(inputs={&#39;a&#39;: x_atom(), &#39;b&#39;: y_atom()})
+    assert common.decode_int(res, signed=False) == x * y</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="aiger_bv" href="index.html">aiger_bv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="aiger_bv.test_expr.test_and_preserves_inputs" href="#aiger_bv.test_expr.test_and_preserves_inputs">test_and_preserves_inputs</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_bundle_inputs" href="#aiger_bv.test_expr.test_bundle_inputs">test_bundle_inputs</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_abs" href="#aiger_bv.test_expr.test_expr_abs">test_expr_abs</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_abs_max_negative" href="#aiger_bv.test_expr.test_expr_abs_max_negative">test_expr_abs_max_negative</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_add" href="#aiger_bv.test_expr.test_expr_add">test_expr_add</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_bitwise_and" href="#aiger_bv.test_expr.test_expr_bitwise_and">test_expr_bitwise_and</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_bitwise_and2" href="#aiger_bv.test_expr.test_expr_bitwise_and2">test_expr_bitwise_and2</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_bitwise_invert" href="#aiger_bv.test_expr.test_expr_bitwise_invert">test_expr_bitwise_invert</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_bitwise_or" href="#aiger_bv.test_expr.test_expr_bitwise_or">test_expr_bitwise_or</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_bitwise_xor" href="#aiger_bv.test_expr.test_expr_bitwise_xor">test_expr_bitwise_xor</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_concat" href="#aiger_bv.test_expr.test_expr_concat">test_expr_concat</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_dotprod_mod2" href="#aiger_bv.test_expr.test_expr_dotprod_mod2">test_expr_dotprod_mod2</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_eq" href="#aiger_bv.test_expr.test_expr_eq">test_expr_eq</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_ge" href="#aiger_bv.test_expr.test_expr_ge">test_expr_ge</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_getitem" href="#aiger_bv.test_expr.test_expr_getitem">test_expr_getitem</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_gt" href="#aiger_bv.test_expr.test_expr_gt">test_expr_gt</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_le" href="#aiger_bv.test_expr.test_expr_le">test_expr_le</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_lt" href="#aiger_bv.test_expr.test_expr_lt">test_expr_lt</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_ne" href="#aiger_bv.test_expr.test_expr_ne">test_expr_ne</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_neg" href="#aiger_bv.test_expr.test_expr_neg">test_expr_neg</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_repeat" href="#aiger_bv.test_expr.test_expr_repeat">test_expr_repeat</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_signed_ge_literal" href="#aiger_bv.test_expr.test_expr_signed_ge_literal">test_expr_signed_ge_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_signed_gt_literal" href="#aiger_bv.test_expr.test_expr_signed_gt_literal">test_expr_signed_gt_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_signed_le_literal" href="#aiger_bv.test_expr.test_expr_signed_le_literal">test_expr_signed_le_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_signed_lt_literal" href="#aiger_bv.test_expr.test_expr_signed_lt_literal">test_expr_signed_lt_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_sub" href="#aiger_bv.test_expr.test_expr_sub">test_expr_sub</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_ge" href="#aiger_bv.test_expr.test_expr_unsigned_ge">test_expr_unsigned_ge</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_ge_literal" href="#aiger_bv.test_expr.test_expr_unsigned_ge_literal">test_expr_unsigned_ge_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_gt" href="#aiger_bv.test_expr.test_expr_unsigned_gt">test_expr_unsigned_gt</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_gt_literal" href="#aiger_bv.test_expr.test_expr_unsigned_gt_literal">test_expr_unsigned_gt_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_le" href="#aiger_bv.test_expr.test_expr_unsigned_le">test_expr_unsigned_le</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_le_literal" href="#aiger_bv.test_expr.test_expr_unsigned_le_literal">test_expr_unsigned_le_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_lt" href="#aiger_bv.test_expr.test_expr_unsigned_lt">test_expr_unsigned_lt</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_expr_unsigned_lt_literal" href="#aiger_bv.test_expr.test_expr_unsigned_lt_literal">test_expr_unsigned_lt_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_indexing_preserves_inputs" href="#aiger_bv.test_expr.test_indexing_preserves_inputs">test_indexing_preserves_inputs</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_ite" href="#aiger_bv.test_expr.test_ite">test_ite</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_ite2" href="#aiger_bv.test_expr.test_ite2">test_ite2</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_multiply" href="#aiger_bv.test_expr.test_multiply">test_multiply</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_multiply_lit" href="#aiger_bv.test_expr.test_multiply_lit">test_multiply_lit</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_set_output" href="#aiger_bv.test_expr.test_set_output">test_set_output</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_sign" href="#aiger_bv.test_expr.test_sign">test_sign</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_sll" href="#aiger_bv.test_expr.test_sll">test_sll</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_srl_signed" href="#aiger_bv.test_expr.test_srl_signed">test_srl_signed</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_srl_unsigned" href="#aiger_bv.test_expr.test_srl_unsigned">test_srl_unsigned</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_unsigned_add" href="#aiger_bv.test_expr.test_unsigned_add">test_unsigned_add</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_unsigned_multiply" href="#aiger_bv.test_expr.test_unsigned_multiply">test_unsigned_multiply</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

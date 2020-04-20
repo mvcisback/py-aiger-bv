@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>aiger_bv.aigbv API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>aiger_bv.aigbv</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import re
+from functools import reduce
+
+import aiger
+import attr
+import funcy as fn
+from pyrsistent import pmap
+
+from aiger_bv import common
+from aiger_bv.bundle import Bundle, BundleMap
+
+
+@attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
+class AIGBV:
+    aig: aiger.AIG
+    imap: BundleMap = BundleMap()
+    omap: BundleMap = BundleMap()
+    lmap: BundleMap = BundleMap()
+
+    simulate = aiger.AIG.simulate
+    simulator = aiger.AIG.simulator
+
+    @property
+    def aigbv(self):
+        return self
+
+    def write(self, path):
+        self.aig.write(path)
+
+    @property
+    def inputs(self): return set(self.imap.keys())
+
+    @property
+    def outputs(self): return set(self.omap.keys())
+
+    @property
+    def latches(self): return set(self.lmap.keys())
+
+    @property
+    def latch2init(self):
+        return self.lmap.unblast(dict(self.aig.latch2init))
+
+    def __call__(self, inputs, latches=None):
+        out2val, latch2val = self.aig(
+            inputs=self.imap.blast(inputs),
+            latches=None if latches is None else self.lmap.blast(latches)
+        )
+        return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
+
+    def __lshift__(self, other):
+        return other &gt;&gt; self
+
+    def __rshift__(self, other):
+        interface = self.outputs &amp; other.inputs
+        assert not self.latches &amp; other.latches
+        assert not (self.outputs - interface) &amp; other.outputs
+
+        return AIGBV(
+            aig=self.aig &gt;&gt; other.aig,
+            imap=self.imap + other.imap.omit(interface),
+            omap=other.omap + self.omap.omit(interface),
+            lmap=self.lmap + other.lmap,
+        )
+
+    def __or__(self, other):
+        assert not self.outputs &amp; other.outputs
+        assert not self.latches &amp; other.latches
+
+        shared_inputs = self.inputs &amp; other.inputs
+        circ = self
+        if shared_inputs:
+            relabels1 = {n: common._fresh() for n in shared_inputs}
+            relabels2 = {n: common._fresh() for n in shared_inputs}
+            circ, other = circ[&#39;i&#39;, relabels1], other[&#39;i&#39;, relabels2]
+
+        circ = AIGBV(
+            aig=circ.aig | other.aig,
+            imap=circ.imap + other.imap,
+            omap=circ.omap + other.omap,
+            lmap=circ.lmap + other.lmap)
+
+        if shared_inputs:
+            for orig in shared_inputs:
+                new1, new2 = relabels1[orig], relabels2[orig]
+                circ &lt;&lt;= common.tee(self.imap[orig].size, {orig: [new1, new2]})
+
+        return circ
+
+    def __getitem__(self, others):
+        kind, relabels = others
+        if kind not in {&#39;i&#39;, &#39;o&#39;, &#39;l&#39;}:
+            raise NotImplementedError
+
+        attr_name = {&#39;i&#39;: &#39;imap&#39;, &#39;o&#39;: &#39;omap&#39;, &#39;l&#39;: &#39;lmap&#39;}.get(kind)
+        bmap1 = getattr(self, attr_name)
+        assert not set(relabels.values()) &amp; set(bmap1.keys())
+        bmap2 = bmap1.relabel(relabels)
+        circ = attr.evolve(self, **{attr_name: bmap2})
+
+        # Update AIG to match new interface.
+        relabels_aig = fn.merge(*(
+            dict(zip(bmap1[k], bmap2[v])) for k, v in relabels.items()
+            if k in bmap1
+        ))
+        return attr.evolve(circ, aig=circ.aig[kind, relabels_aig])
+
+    def loopback(self, *wirings):
+        def wire(circ, wiring):
+            return circ._wire(**wiring)
+
+        return reduce(wire, wirings, self)
+
+    def _wire(self, input, output, latch=None, init=None, keep_output=True):
+        if latch is None:
+            latch = input
+        inits = [init] if init is not None else None
+
+        return self._feedback(
+            [input], [output], inits, [latch], keep_outputs=keep_output
+        )
+
+    def feedback(
+        self, inputs, outputs, initials=None, latches=None, keep_outputs=False
+    ):
+        import warnings
+        warnings.warn(&#34;deprecated&#34;, DeprecationWarning)
+        return self._feedback(
+            inputs, outputs, initials=initials, latches=latches,
+            keep_outputs=keep_outputs
+        )
+
+    def _feedback(self, inputs, outputs, initials=None, latches=None,
+                  keep_outputs=False):
+        # TODO: remove in next version bump and put into wire.
+        if latches is None:
+            latches = inputs
+
+        def blast(bmap, vals):
+            return fn.lmapcat(bmap.get, vals)
+
+        lmap = BundleMap(
+            {l: self.imap[i].size for i, l in zip(inputs, latches)}
+        )
+
+        if initials is not None:
+            l2init = dict(self.aig.latch2init)
+            l2init.update(
+                {l: v for l, v in zip(latches, initials) if v is not None}
+            )
+            initials = fn.lcat(l2init[l] for l in latches)
+
+        aig = rebundle_aig(self.aig.feedback(
+            inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
+            latches=blast(lmap, latches), keep_outputs=keep_outputs,
+            initials=initials,
+        ))
+
+        return aig
+
+    def unroll(self, horizon, *, init=True, omit_latches=True,
+               only_last_outputs=False):
+        aig = self.aig.unroll(
+            horizon, init=init, omit_latches=omit_latches,
+            only_last_outputs=only_last_outputs
+        )
+        for key in [&#39;inputs&#39;, &#39;outputs&#39;, &#39;latches&#39;]:
+            relabels = {k: shuffle_id_time(k) for k in getattr(aig, key)}
+            aig = aig[key[0], relabels]
+
+        return rebundle_aig(aig)
+
+    def cutlatches(self, latches=None, renamer=None):
+        if renamer is None:
+            @fn.memoize
+            def renamer(_):
+                return common._fresh()
+
+        def renamer_bv(name):
+            root, idx = unpack_name(name)
+            return f&#34;{renamer(root)}[{idx}]&#34;
+
+        aig, lmap = self.aig.cutlatches(latches, renamer=renamer_bv)
+        circ = rebundle_aig(aig)
+        lmap = self.lmap.unblast(lmap)
+
+        def unblast_vals(vals):
+            name, _ = vals[0]
+            name = unpack_name(name)[0]
+            bdl = Bundle(size=len(vals), name=name)
+            return (name, bdl.unblast(dict(vals)))
+
+        lmap = fn.walk_values(unblast_vals, lmap)
+        return circ, lmap
+
+
+# Lifting AIGs to AIGBVs
+
+def _diagonal_map(keys):
+    return BundleMap({k: 1 for k in keys})
+
+
+def append_index(aig):
+    for key in [&#39;inputs&#39;, &#39;outputs&#39;, &#39;latches&#39;]:
+        relabels = {name: f&#34;{name}[0]&#34; for name in getattr(aig, key)}
+        aig = aig[key[0], relabels]
+    return aig
+
+
+def aig2aigbv(aig):
+    return AIGBV(
+        aig=append_index(aig),
+        imap=_diagonal_map(aig.inputs),
+        omap=_diagonal_map(aig.outputs),
+        lmap=_diagonal_map(aig.latches),
+    )
+
+
+BV_NAME = re.compile(r&#34;(.*)\[(\d+)\]$&#34;)
+
+
+def unpack_name(name):
+    root, idx = BV_NAME.match(name).groups()
+    return root, int(idx)
+
+
+def to_size(idxs):
+    idxs2 = set(idxs)
+    assert len(idxs2) == len(idxs)
+    assert min(idxs2) == 0
+    assert max(idxs2) == len(idxs) - 1
+    return len(idxs)
+
+
+def rebundle_names(names):
+    grouped_names = fn.group_values(map(unpack_name, names))
+    return BundleMap(pmap(fn.walk_values(to_size, grouped_names)))
+
+
+def rebundle_aig(aig):
+    return AIGBV(
+        aig=aig,
+        imap=rebundle_names(aig.inputs),
+        omap=rebundle_names(aig.outputs),
+        lmap=rebundle_names(aig.latches),
+    )
+
+
+# For relabeling time unrolling
+BV_NAME_TIME = re.compile(r&#34;(.*)\[(\d+)\]##time_(\d+)$&#34;)
+
+
+def shuffle_id_time(name):
+    name, idx, time = BV_NAME_TIME.match(name).groups()
+    return f&#34;{name}##time_{time}[{idx}]&#34;</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="aiger_bv.aigbv.aig2aigbv"><code class="name flex">
+<span>def <span class="ident">aig2aigbv</span></span>(<span>aig)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def aig2aigbv(aig):
+    return AIGBV(
+        aig=append_index(aig),
+        imap=_diagonal_map(aig.inputs),
+        omap=_diagonal_map(aig.outputs),
+        lmap=_diagonal_map(aig.latches),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.append_index"><code class="name flex">
+<span>def <span class="ident">append_index</span></span>(<span>aig)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append_index(aig):
+    for key in [&#39;inputs&#39;, &#39;outputs&#39;, &#39;latches&#39;]:
+        relabels = {name: f&#34;{name}[0]&#34; for name in getattr(aig, key)}
+        aig = aig[key[0], relabels]
+    return aig</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.rebundle_aig"><code class="name flex">
+<span>def <span class="ident">rebundle_aig</span></span>(<span>aig)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rebundle_aig(aig):
+    return AIGBV(
+        aig=aig,
+        imap=rebundle_names(aig.inputs),
+        omap=rebundle_names(aig.outputs),
+        lmap=rebundle_names(aig.latches),
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.rebundle_names"><code class="name flex">
+<span>def <span class="ident">rebundle_names</span></span>(<span>names)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rebundle_names(names):
+    grouped_names = fn.group_values(map(unpack_name, names))
+    return BundleMap(pmap(fn.walk_values(to_size, grouped_names)))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.shuffle_id_time"><code class="name flex">
+<span>def <span class="ident">shuffle_id_time</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def shuffle_id_time(name):
+    name, idx, time = BV_NAME_TIME.match(name).groups()
+    return f&#34;{name}##time_{time}[{idx}]&#34;</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.to_size"><code class="name flex">
+<span>def <span class="ident">to_size</span></span>(<span>idxs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_size(idxs):
+    idxs2 = set(idxs)
+    assert len(idxs2) == len(idxs)
+    assert min(idxs2) == 0
+    assert max(idxs2) == len(idxs) - 1
+    return len(idxs)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.unpack_name"><code class="name flex">
+<span>def <span class="ident">unpack_name</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unpack_name(name):
+    root, idx = BV_NAME.match(name).groups()
+    return root, int(idx)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="aiger_bv.aigbv.AIGBV"><code class="flex name class">
+<span>class <span class="ident">AIGBV</span></span>
+<span>(</span><span>aig: aiger.aig.AIG, imap: <a title="aiger_bv.bundle.BundleMap" href="bundle.html#aiger_bv.bundle.BundleMap">BundleMap</a> = BundleMap(mapping=pmap({})), omap: <a title="aiger_bv.bundle.BundleMap" href="bundle.html#aiger_bv.bundle.BundleMap">BundleMap</a> = BundleMap(mapping=pmap({})), lmap: <a title="aiger_bv.bundle.BundleMap" href="bundle.html#aiger_bv.bundle.BundleMap">BundleMap</a> = BundleMap(mapping=pmap({})))</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AIGBV:
+    aig: aiger.AIG
+    imap: BundleMap = BundleMap()
+    omap: BundleMap = BundleMap()
+    lmap: BundleMap = BundleMap()
+
+    simulate = aiger.AIG.simulate
+    simulator = aiger.AIG.simulator
+
+    @property
+    def aigbv(self):
+        return self
+
+    def write(self, path):
+        self.aig.write(path)
+
+    @property
+    def inputs(self): return set(self.imap.keys())
+
+    @property
+    def outputs(self): return set(self.omap.keys())
+
+    @property
+    def latches(self): return set(self.lmap.keys())
+
+    @property
+    def latch2init(self):
+        return self.lmap.unblast(dict(self.aig.latch2init))
+
+    def __call__(self, inputs, latches=None):
+        out2val, latch2val = self.aig(
+            inputs=self.imap.blast(inputs),
+            latches=None if latches is None else self.lmap.blast(latches)
+        )
+        return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
+
+    def __lshift__(self, other):
+        return other &gt;&gt; self
+
+    def __rshift__(self, other):
+        interface = self.outputs &amp; other.inputs
+        assert not self.latches &amp; other.latches
+        assert not (self.outputs - interface) &amp; other.outputs
+
+        return AIGBV(
+            aig=self.aig &gt;&gt; other.aig,
+            imap=self.imap + other.imap.omit(interface),
+            omap=other.omap + self.omap.omit(interface),
+            lmap=self.lmap + other.lmap,
+        )
+
+    def __or__(self, other):
+        assert not self.outputs &amp; other.outputs
+        assert not self.latches &amp; other.latches
+
+        shared_inputs = self.inputs &amp; other.inputs
+        circ = self
+        if shared_inputs:
+            relabels1 = {n: common._fresh() for n in shared_inputs}
+            relabels2 = {n: common._fresh() for n in shared_inputs}
+            circ, other = circ[&#39;i&#39;, relabels1], other[&#39;i&#39;, relabels2]
+
+        circ = AIGBV(
+            aig=circ.aig | other.aig,
+            imap=circ.imap + other.imap,
+            omap=circ.omap + other.omap,
+            lmap=circ.lmap + other.lmap)
+
+        if shared_inputs:
+            for orig in shared_inputs:
+                new1, new2 = relabels1[orig], relabels2[orig]
+                circ &lt;&lt;= common.tee(self.imap[orig].size, {orig: [new1, new2]})
+
+        return circ
+
+    def __getitem__(self, others):
+        kind, relabels = others
+        if kind not in {&#39;i&#39;, &#39;o&#39;, &#39;l&#39;}:
+            raise NotImplementedError
+
+        attr_name = {&#39;i&#39;: &#39;imap&#39;, &#39;o&#39;: &#39;omap&#39;, &#39;l&#39;: &#39;lmap&#39;}.get(kind)
+        bmap1 = getattr(self, attr_name)
+        assert not set(relabels.values()) &amp; set(bmap1.keys())
+        bmap2 = bmap1.relabel(relabels)
+        circ = attr.evolve(self, **{attr_name: bmap2})
+
+        # Update AIG to match new interface.
+        relabels_aig = fn.merge(*(
+            dict(zip(bmap1[k], bmap2[v])) for k, v in relabels.items()
+            if k in bmap1
+        ))
+        return attr.evolve(circ, aig=circ.aig[kind, relabels_aig])
+
+    def loopback(self, *wirings):
+        def wire(circ, wiring):
+            return circ._wire(**wiring)
+
+        return reduce(wire, wirings, self)
+
+    def _wire(self, input, output, latch=None, init=None, keep_output=True):
+        if latch is None:
+            latch = input
+        inits = [init] if init is not None else None
+
+        return self._feedback(
+            [input], [output], inits, [latch], keep_outputs=keep_output
+        )
+
+    def feedback(
+        self, inputs, outputs, initials=None, latches=None, keep_outputs=False
+    ):
+        import warnings
+        warnings.warn(&#34;deprecated&#34;, DeprecationWarning)
+        return self._feedback(
+            inputs, outputs, initials=initials, latches=latches,
+            keep_outputs=keep_outputs
+        )
+
+    def _feedback(self, inputs, outputs, initials=None, latches=None,
+                  keep_outputs=False):
+        # TODO: remove in next version bump and put into wire.
+        if latches is None:
+            latches = inputs
+
+        def blast(bmap, vals):
+            return fn.lmapcat(bmap.get, vals)
+
+        lmap = BundleMap(
+            {l: self.imap[i].size for i, l in zip(inputs, latches)}
+        )
+
+        if initials is not None:
+            l2init = dict(self.aig.latch2init)
+            l2init.update(
+                {l: v for l, v in zip(latches, initials) if v is not None}
+            )
+            initials = fn.lcat(l2init[l] for l in latches)
+
+        aig = rebundle_aig(self.aig.feedback(
+            inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
+            latches=blast(lmap, latches), keep_outputs=keep_outputs,
+            initials=initials,
+        ))
+
+        return aig
+
+    def unroll(self, horizon, *, init=True, omit_latches=True,
+               only_last_outputs=False):
+        aig = self.aig.unroll(
+            horizon, init=init, omit_latches=omit_latches,
+            only_last_outputs=only_last_outputs
+        )
+        for key in [&#39;inputs&#39;, &#39;outputs&#39;, &#39;latches&#39;]:
+            relabels = {k: shuffle_id_time(k) for k in getattr(aig, key)}
+            aig = aig[key[0], relabels]
+
+        return rebundle_aig(aig)
+
+    def cutlatches(self, latches=None, renamer=None):
+        if renamer is None:
+            @fn.memoize
+            def renamer(_):
+                return common._fresh()
+
+        def renamer_bv(name):
+            root, idx = unpack_name(name)
+            return f&#34;{renamer(root)}[{idx}]&#34;
+
+        aig, lmap = self.aig.cutlatches(latches, renamer=renamer_bv)
+        circ = rebundle_aig(aig)
+        lmap = self.lmap.unblast(lmap)
+
+        def unblast_vals(vals):
+            name, _ = vals[0]
+            name = unpack_name(name)[0]
+            bdl = Bundle(size=len(vals), name=name)
+            return (name, bdl.unblast(dict(vals)))
+
+        lmap = fn.walk_values(unblast_vals, lmap)
+        return circ, lmap</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="aiger_bv.aigbv.AIGBV.aig"><code class="name">var <span class="ident">aig</span> : aiger.aig.AIG</code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.aigbv"><code class="name">var <span class="ident">aigbv</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def aigbv(self):
+    return self</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.imap"><code class="name">var <span class="ident">imap</span> : <a title="aiger_bv.bundle.BundleMap" href="bundle.html#aiger_bv.bundle.BundleMap">BundleMap</a></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.inputs"><code class="name">var <span class="ident">inputs</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def inputs(self): return set(self.imap.keys())</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.latch2init"><code class="name">var <span class="ident">latch2init</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def latch2init(self):
+    return self.lmap.unblast(dict(self.aig.latch2init))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.latches"><code class="name">var <span class="ident">latches</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def latches(self): return set(self.lmap.keys())</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.lmap"><code class="name">var <span class="ident">lmap</span> : <a title="aiger_bv.bundle.BundleMap" href="bundle.html#aiger_bv.bundle.BundleMap">BundleMap</a></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.omap"><code class="name">var <span class="ident">omap</span> : <a title="aiger_bv.bundle.BundleMap" href="bundle.html#aiger_bv.bundle.BundleMap">BundleMap</a></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.outputs"><code class="name">var <span class="ident">outputs</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def outputs(self): return set(self.omap.keys())</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="aiger_bv.aigbv.AIGBV.cutlatches"><code class="name flex">
+<span>def <span class="ident">cutlatches</span></span>(<span>self, latches=None, renamer=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cutlatches(self, latches=None, renamer=None):
+    if renamer is None:
+        @fn.memoize
+        def renamer(_):
+            return common._fresh()
+
+    def renamer_bv(name):
+        root, idx = unpack_name(name)
+        return f&#34;{renamer(root)}[{idx}]&#34;
+
+    aig, lmap = self.aig.cutlatches(latches, renamer=renamer_bv)
+    circ = rebundle_aig(aig)
+    lmap = self.lmap.unblast(lmap)
+
+    def unblast_vals(vals):
+        name, _ = vals[0]
+        name = unpack_name(name)[0]
+        bdl = Bundle(size=len(vals), name=name)
+        return (name, bdl.unblast(dict(vals)))
+
+    lmap = fn.walk_values(unblast_vals, lmap)
+    return circ, lmap</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.feedback"><code class="name flex">
+<span>def <span class="ident">feedback</span></span>(<span>self, inputs, outputs, initials=None, latches=None, keep_outputs=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def feedback(
+    self, inputs, outputs, initials=None, latches=None, keep_outputs=False
+):
+    import warnings
+    warnings.warn(&#34;deprecated&#34;, DeprecationWarning)
+    return self._feedback(
+        inputs, outputs, initials=initials, latches=latches,
+        keep_outputs=keep_outputs
+    )</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.loopback"><code class="name flex">
+<span>def <span class="ident">loopback</span></span>(<span>self, *wirings)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def loopback(self, *wirings):
+    def wire(circ, wiring):
+        return circ._wire(**wiring)
+
+    return reduce(wire, wirings, self)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.simulate"><code class="name flex">
+<span>def <span class="ident">simulate</span></span>(<span>self, input_seq, latches=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simulate(self, input_seq, latches=None):
+    sim = self.simulator()
+    next(sim)
+    return [sim.send(inputs) for inputs in input_seq]</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.simulator"><code class="name flex">
+<span>def <span class="ident">simulator</span></span>(<span>self, latches=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simulator(self, latches=None):
+    inputs = yield
+    while True:
+        outputs, latches = self(inputs, latches)
+        inputs = yield outputs, latches</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.unroll"><code class="name flex">
+<span>def <span class="ident">unroll</span></span>(<span>self, horizon, *, init=True, omit_latches=True, only_last_outputs=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unroll(self, horizon, *, init=True, omit_latches=True,
+           only_last_outputs=False):
+    aig = self.aig.unroll(
+        horizon, init=init, omit_latches=omit_latches,
+        only_last_outputs=only_last_outputs
+    )
+    for key in [&#39;inputs&#39;, &#39;outputs&#39;, &#39;latches&#39;]:
+        relabels = {k: shuffle_id_time(k) for k in getattr(aig, key)}
+        aig = aig[key[0], relabels]
+
+    return rebundle_aig(aig)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.aigbv.AIGBV.write"><code class="name flex">
+<span>def <span class="ident">write</span></span>(<span>self, path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def write(self, path):
+    self.aig.write(path)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="aiger_bv" href="index.html">aiger_bv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="aiger_bv.aigbv.aig2aigbv" href="#aiger_bv.aigbv.aig2aigbv">aig2aigbv</a></code></li>
+<li><code><a title="aiger_bv.aigbv.append_index" href="#aiger_bv.aigbv.append_index">append_index</a></code></li>
+<li><code><a title="aiger_bv.aigbv.rebundle_aig" href="#aiger_bv.aigbv.rebundle_aig">rebundle_aig</a></code></li>
+<li><code><a title="aiger_bv.aigbv.rebundle_names" href="#aiger_bv.aigbv.rebundle_names">rebundle_names</a></code></li>
+<li><code><a title="aiger_bv.aigbv.shuffle_id_time" href="#aiger_bv.aigbv.shuffle_id_time">shuffle_id_time</a></code></li>
+<li><code><a title="aiger_bv.aigbv.to_size" href="#aiger_bv.aigbv.to_size">to_size</a></code></li>
+<li><code><a title="aiger_bv.aigbv.unpack_name" href="#aiger_bv.aigbv.unpack_name">unpack_name</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="aiger_bv.aigbv.AIGBV" href="#aiger_bv.aigbv.AIGBV">AIGBV</a></code></h4>
+<ul class="two-column">
+<li><code><a title="aiger_bv.aigbv.AIGBV.aig" href="#aiger_bv.aigbv.AIGBV.aig">aig</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.aigbv" href="#aiger_bv.aigbv.AIGBV.aigbv">aigbv</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.cutlatches" href="#aiger_bv.aigbv.AIGBV.cutlatches">cutlatches</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.feedback" href="#aiger_bv.aigbv.AIGBV.feedback">feedback</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.imap" href="#aiger_bv.aigbv.AIGBV.imap">imap</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.inputs" href="#aiger_bv.aigbv.AIGBV.inputs">inputs</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.latch2init" href="#aiger_bv.aigbv.AIGBV.latch2init">latch2init</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.latches" href="#aiger_bv.aigbv.AIGBV.latches">latches</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.lmap" href="#aiger_bv.aigbv.AIGBV.lmap">lmap</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.loopback" href="#aiger_bv.aigbv.AIGBV.loopback">loopback</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.omap" href="#aiger_bv.aigbv.AIGBV.omap">omap</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.outputs" href="#aiger_bv.aigbv.AIGBV.outputs">outputs</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.simulate" href="#aiger_bv.aigbv.AIGBV.simulate">simulate</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.simulator" href="#aiger_bv.aigbv.AIGBV.simulator">simulator</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.unroll" href="#aiger_bv.aigbv.AIGBV.unroll">unroll</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.write" href="#aiger_bv.aigbv.AIGBV.write">write</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

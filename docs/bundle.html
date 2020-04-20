@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>aiger_bv.bundle API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>aiger_bv.bundle</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from itertools import islice
+from functools import reduce
+
+import attr
+import funcy as fn
+from pyrsistent import pmap
+from pyrsistent.typing import PMap
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True, repr=False)
+class Bundle:
+    name: str = attr.ib()
+    size: int = attr.ib()
+
+    @size.validator
+    def _assert_positive(self, _, value):
+        if value &lt; 0:
+            raise ValueError(&#34;size must be a positive number.&#34;)
+
+    def __len__(self): return self.size
+    def __repr__(self): return f&#34;{self.name}[:{self.size}]&#34;
+    def __iter__(self): return (self[i] for i in range(self.size))
+
+    def __add__(self, other):
+        return Bundle(f&#34;{self.name}#+#{other.name}&#34;, len(self) + len(other))
+
+    def __getitem__(self, idx):
+        if isinstance(idx, int):
+            assert idx in range(self.size)
+            return f&#34;{self.name}[{idx}]&#34;
+
+        start = 0 if idx.start is None else idx.start
+        stop = self.size if idx.stop is None else idx.stop
+        step = 1 if idx.step is None else idx.step
+        return tuple(islice(self, start, stop, step))
+
+    def blast(self, val):
+        assert len(val) == self.size
+        return dict(zip(self, val))
+
+    def unblast(self, idx2val):
+        return tuple(idx2val[idx] for idx in self)
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class BundleMap:
+    mapping: PMap[str, int] = attr.ib(default=pmap(), converter=pmap)
+
+    def __getitem__(self, idx):
+        return Bundle(name=idx, size=self.mapping[idx])
+
+    def keys(self): return self.mapping.keys()
+    def values(self): return self.mapping.values()
+    def items(self): return self.mapping.items()
+    def __iter__(self): return iter(self.mapping)
+    def __contains__(self, elem): return elem in self.mapping
+
+    def __add__(self, other):
+        assert not (set(self.keys()) &amp; set(other.keys()))
+        mapping2 = other.mapping if isinstance(other, BundleMap) else other
+        return BundleMap(self.mapping + mapping2)
+
+    def blast(self, idx2vals):
+        if len(idx2vals) == 0:
+            return idx2vals
+
+        idx2vals = idx2vals.items()
+        return fn.merge(*(self[idx].blast(val) for idx, val in idx2vals))
+
+    def unblast(self, idx2val):
+        return {k: self[k].unblast(idx2val) for k in self.keys()}
+
+    def omit(self, keys):
+        mapping = reduce(lambda x, k: x.discard(k), keys, self.mapping)
+        return BundleMap(mapping)
+
+    def project(self, keys):
+        return self.omit(set(self.keys()) - set(keys))
+
+    def relabel(self, old2new):
+        assert not (set(old2new.keys()) &amp; set(old2new.values()))
+        bmap2 = self.mapping.evolver()
+        for k, v in old2new.items():
+            if k not in self.mapping:
+                continue
+            del bmap2[k]
+            bmap2[v] = self.mapping[k]
+        return BundleMap(bmap2.persistent())
+
+    def get(self, val, default=None):
+        return self[val] if val in self else default</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="aiger_bv.bundle.Bundle"><code class="flex name class">
+<span>class <span class="ident">Bundle</span></span>
+<span>(</span><span>name: str, size: int)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Bundle:
+    name: str = attr.ib()
+    size: int = attr.ib()
+
+    @size.validator
+    def _assert_positive(self, _, value):
+        if value &lt; 0:
+            raise ValueError(&#34;size must be a positive number.&#34;)
+
+    def __len__(self): return self.size
+    def __repr__(self): return f&#34;{self.name}[:{self.size}]&#34;
+    def __iter__(self): return (self[i] for i in range(self.size))
+
+    def __add__(self, other):
+        return Bundle(f&#34;{self.name}#+#{other.name}&#34;, len(self) + len(other))
+
+    def __getitem__(self, idx):
+        if isinstance(idx, int):
+            assert idx in range(self.size)
+            return f&#34;{self.name}[{idx}]&#34;
+
+        start = 0 if idx.start is None else idx.start
+        stop = self.size if idx.stop is None else idx.stop
+        step = 1 if idx.step is None else idx.step
+        return tuple(islice(self, start, stop, step))
+
+    def blast(self, val):
+        assert len(val) == self.size
+        return dict(zip(self, val))
+
+    def unblast(self, idx2val):
+        return tuple(idx2val[idx] for idx in self)</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="aiger_bv.bundle.Bundle.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="aiger_bv.bundle.Bundle.size"><code class="name">var <span class="ident">size</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="aiger_bv.bundle.Bundle.blast"><code class="name flex">
+<span>def <span class="ident">blast</span></span>(<span>self, val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def blast(self, val):
+    assert len(val) == self.size
+    return dict(zip(self, val))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.Bundle.unblast"><code class="name flex">
+<span>def <span class="ident">unblast</span></span>(<span>self, idx2val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unblast(self, idx2val):
+    return tuple(idx2val[idx] for idx in self)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap"><code class="flex name class">
+<span>class <span class="ident">BundleMap</span></span>
+<span>(</span><span>mapping=pmap({}))</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BundleMap:
+    mapping: PMap[str, int] = attr.ib(default=pmap(), converter=pmap)
+
+    def __getitem__(self, idx):
+        return Bundle(name=idx, size=self.mapping[idx])
+
+    def keys(self): return self.mapping.keys()
+    def values(self): return self.mapping.values()
+    def items(self): return self.mapping.items()
+    def __iter__(self): return iter(self.mapping)
+    def __contains__(self, elem): return elem in self.mapping
+
+    def __add__(self, other):
+        assert not (set(self.keys()) &amp; set(other.keys()))
+        mapping2 = other.mapping if isinstance(other, BundleMap) else other
+        return BundleMap(self.mapping + mapping2)
+
+    def blast(self, idx2vals):
+        if len(idx2vals) == 0:
+            return idx2vals
+
+        idx2vals = idx2vals.items()
+        return fn.merge(*(self[idx].blast(val) for idx, val in idx2vals))
+
+    def unblast(self, idx2val):
+        return {k: self[k].unblast(idx2val) for k in self.keys()}
+
+    def omit(self, keys):
+        mapping = reduce(lambda x, k: x.discard(k), keys, self.mapping)
+        return BundleMap(mapping)
+
+    def project(self, keys):
+        return self.omit(set(self.keys()) - set(keys))
+
+    def relabel(self, old2new):
+        assert not (set(old2new.keys()) &amp; set(old2new.values()))
+        bmap2 = self.mapping.evolver()
+        for k, v in old2new.items():
+            if k not in self.mapping:
+                continue
+            del bmap2[k]
+            bmap2[v] = self.mapping[k]
+        return BundleMap(bmap2.persistent())
+
+    def get(self, val, default=None):
+        return self[val] if val in self else default</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="aiger_bv.bundle.BundleMap.mapping"><code class="name">var <span class="ident">mapping</span> : pyrsistent.typing.PMap[str, int]</code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="aiger_bv.bundle.BundleMap.blast"><code class="name flex">
+<span>def <span class="ident">blast</span></span>(<span>self, idx2vals)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def blast(self, idx2vals):
+    if len(idx2vals) == 0:
+        return idx2vals
+
+    idx2vals = idx2vals.items()
+    return fn.merge(*(self[idx].blast(val) for idx, val in idx2vals))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, val, default=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(self, val, default=None):
+    return self[val] if val in self else default</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.items"><code class="name flex">
+<span>def <span class="ident">items</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def items(self): return self.mapping.items()</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.keys"><code class="name flex">
+<span>def <span class="ident">keys</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def keys(self): return self.mapping.keys()</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.omit"><code class="name flex">
+<span>def <span class="ident">omit</span></span>(<span>self, keys)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def omit(self, keys):
+    mapping = reduce(lambda x, k: x.discard(k), keys, self.mapping)
+    return BundleMap(mapping)</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.project"><code class="name flex">
+<span>def <span class="ident">project</span></span>(<span>self, keys)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def project(self, keys):
+    return self.omit(set(self.keys()) - set(keys))</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.relabel"><code class="name flex">
+<span>def <span class="ident">relabel</span></span>(<span>self, old2new)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def relabel(self, old2new):
+    assert not (set(old2new.keys()) &amp; set(old2new.values()))
+    bmap2 = self.mapping.evolver()
+    for k, v in old2new.items():
+        if k not in self.mapping:
+            continue
+        del bmap2[k]
+        bmap2[v] = self.mapping[k]
+    return BundleMap(bmap2.persistent())</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.unblast"><code class="name flex">
+<span>def <span class="ident">unblast</span></span>(<span>self, idx2val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unblast(self, idx2val):
+    return {k: self[k].unblast(idx2val) for k in self.keys()}</code></pre>
+</details>
+</dd>
+<dt id="aiger_bv.bundle.BundleMap.values"><code class="name flex">
+<span>def <span class="ident">values</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def values(self): return self.mapping.values()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="aiger_bv" href="index.html">aiger_bv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="aiger_bv.bundle.Bundle" href="#aiger_bv.bundle.Bundle">Bundle</a></code></h4>
+<ul class="">
+<li><code><a title="aiger_bv.bundle.Bundle.blast" href="#aiger_bv.bundle.Bundle.blast">blast</a></code></li>
+<li><code><a title="aiger_bv.bundle.Bundle.name" href="#aiger_bv.bundle.Bundle.name">name</a></code></li>
+<li><code><a title="aiger_bv.bundle.Bundle.size" href="#aiger_bv.bundle.Bundle.size">size</a></code></li>
+<li><code><a title="aiger_bv.bundle.Bundle.unblast" href="#aiger_bv.bundle.Bundle.unblast">unblast</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="aiger_bv.bundle.BundleMap" href="#aiger_bv.bundle.BundleMap">BundleMap</a></code></h4>
+<ul class="two-column">
+<li><code><a title="aiger_bv.bundle.BundleMap.blast" href="#aiger_bv.bundle.BundleMap.blast">blast</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.get" href="#aiger_bv.bundle.BundleMap.get">get</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.items" href="#aiger_bv.bundle.BundleMap.items">items</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.keys" href="#aiger_bv.bundle.BundleMap.keys">keys</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.mapping" href="#aiger_bv.bundle.BundleMap.mapping">mapping</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.omit" href="#aiger_bv.bundle.BundleMap.omit">omit</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.project" href="#aiger_bv.bundle.BundleMap.project">project</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.relabel" href="#aiger_bv.bundle.BundleMap.relabel">relabel</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.unblast" href="#aiger_bv.bundle.BundleMap.unblast">unblast</a></code></li>
+<li><code><a title="aiger_bv.bundle.BundleMap.values" href="#aiger_bv.bundle.BundleMap.values">values</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
