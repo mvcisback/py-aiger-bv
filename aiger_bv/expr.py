@@ -1,3 +1,4 @@
+import math
 from functools import partial, reduce
 from typing import Union
 
@@ -160,18 +161,30 @@ class UnsignedBVExpr:
         return self.with_output(cmn._fresh())
 
     def __mul__(self, other):
+        if isinstance(other, int):
+            signed = isinstance(self, SignedBVExpr)
+
+            size = math.ceil(math.log2(abs(other) + 1))
+            size += int(signed)  # Signed has double the range.
+
+            other = atom(size, other, signed=signed)
+
         if isinstance(other, SignedBVExpr) != isinstance(self, SignedBVExpr):
             raise ValueError('Cannot multiply signed with unsigned integers.')
+
         # Determine the smaller circuit to minimize worst-case depth.
         smaller, larger = sorted([self, other], key=lambda x: x.size)
         result = atom(larger.size, 0, signed=isinstance(self, SignedBVExpr))
         for i in range(smaller.size):
             mask = smaller[i].repeat(larger.size)
-            if i == smaller.size - 1 and isinstance(self, SignedBVExpr):
-                # For signed multiplication, need to subtract the last index.
-                result -= mask & (larger << i)
+            delta = mask & (larger << i)
+
+            # For signed multiplication, need to subtract the last index.
+            subtract = i == smaller.size - 1 and isinstance(self, SignedBVExpr)
+            if subtract:
+                result -= delta
             else:
-                result += mask & (larger << i)
+                result += delta
         return result
 
 
