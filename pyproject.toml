@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "py-aiger-bv"
 readme="README.md"
-version = "2.1.0"
+version = "2.1.1"
 description = "A python library for manipulating sequential and-inverter gates."
 authors = ["Marcell Vazquez-Chanlatte <mvc@linux.com>"]
 license = "MIT"
@@ -13,7 +13,7 @@ packages = [
 python = "^3.6"
 attrs = "^19.1"
 funcy = "^1.12"
-py-aiger = "^4.0.0"
+py-aiger = "^4.1.1"
 pyrsistent = "^0.15.4"
 
 [tool.poetry.dev-dependencies]
