@@ -232,8 +232,10 @@ FULL_ADDER_GADGET = __full_adder()
 
 
 def _full_adder(x, y, carry_in, result, carry_out):
-    relabels = {'x': x, 'y': y, 'ci': carry_in, 'res': result, 'co': carry_out}
-    return FULL_ADDER_GADGET['i', relabels]['o', relabels]
+    irelabels = {'x': x, 'y': y, 'ci': carry_in}
+    orelabels = {'res': result, 'co': carry_out}
+    return FULL_ADDER_GADGET.relabel('input', irelabels) \
+                            .relabel('output', orelabels)
 
 
 def add_gate(wordlen, left='x', right='y', output='x+y', has_carry=False):

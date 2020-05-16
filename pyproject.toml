@@ -10,10 +10,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 attrs = "^19.1"
 funcy = "^1.12"
-py-aiger = "^5.0.0"
+py-aiger = "^5.1.0"
 pyrsistent = "^0.15.4"
 
 [tool.poetry.dev-dependencies]
