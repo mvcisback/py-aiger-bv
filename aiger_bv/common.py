@@ -52,7 +52,7 @@ def bitwise_binop(binop, wordlen, left='x', right='y', output='x&y'):
     names = zip(imap[left], imap[right], omap[output])
     return aigbv.AIGBV(
         imap=imap, omap=omap,
-        aig=reduce(op.or_, (binop([l, r], o) for l, r, o in names)),
+        aig=reduce(op.or_, (binop([lft, rht], o) for lft, rht, o in names)),
     )
 
 

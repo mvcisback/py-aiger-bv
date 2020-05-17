@@ -145,9 +145,9 @@ class AIGBV:
         if initials is not None:
             l2init = dict(self.aig.latch2init)
             l2init.update(
-                {l: v for l, v in zip(latches, initials) if v is not None}
+                {k: v for k, v in zip(latches, initials) if v is not None}
             )
-            initials = fn.lcat(l2init[l] for l in latches)
+            initials = fn.lcat(l2init[n] for n in latches)
 
         aig = rebundle_aig(self.aig.feedback(
             inputs=blast(self.imap, inputs), outputs=blast(self.omap, outputs),
