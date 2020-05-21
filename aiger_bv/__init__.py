@@ -1,4 +1,6 @@
 # flake8: noqa
+# Note: Modules that import * should explicitlity implement __all__.
+
 from aiger_bv.expr import *
 from aiger_bv.aigbv import AIGBV
 

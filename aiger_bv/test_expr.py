@@ -1,4 +1,4 @@
-from aiger_bv.expr import atom, ite
+from aiger_bv.expr import uatom, atom, ite
 from aiger_bv import common
 
 # additional imports for testing frammework
@@ -9,7 +9,7 @@ from hypothesis import given, settings
 @settings(max_examples=5, deadline=None)
 @given(st.integers(0, 7), st.integers(0, 3))
 def test_srl_unsigned(a, b):
-    expr = atom(4, a) >> b
+    expr = uatom(4, a) >> b
     assert common.decode_int(expr(), signed=False) == a >> b
 
 
@@ -32,7 +32,7 @@ def test_sll(a, b):
 @settings(max_examples=5, deadline=None)
 @given(st.integers(0, 7), st.integers(0, 7))
 def test_expr_unsigned_lt_literal(a, b):
-    expr = atom(4, a, signed=False) < b
+    expr = uatom(4, a) < b
     assert expr()[0] == (a < b)
 
 

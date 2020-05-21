@@ -259,7 +259,6 @@ def atom(wordlen: int, val: Val, signed: bool = True) -> Expr:
     return (SignedBVExpr if signed else UnsignedBVExpr)(aig)
 
 
-
 def uatom(wordlen: int, val: Val) -> Expr:
     return atom(wordlen, val, signed=False)
 
