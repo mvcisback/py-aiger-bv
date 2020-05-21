@@ -57,7 +57,9 @@ representing the word. For signed numbers, two's complement is used.
 import aiger_bv
 
 # Create 16 bit variables.
-x, y = aiger_bv.atom(16, 'x', signed=True), aiger_bv.atom(16, 'y', signed=True)
+x = aiger_bv.atom(16, 'x')
+y = aiger_bv.atom(16, 'y', signed=True)  # Signed by default.
+z = aiger_bv.uatom(16, 'z')              # Equiv to signed=False.
 
 # bitwise ops.
 expr1 = x & y  # Bitwise and.
