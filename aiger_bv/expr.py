@@ -257,3 +257,11 @@ def atom(wordlen: int, val: Val, signed: bool = True) -> Expr:
         aig = cmn.source(wordlen, val, output, signed)
 
     return (SignedBVExpr if signed else UnsignedBVExpr)(aig)
+
+
+
+def uatom(wordlen: int, val: Val) -> Expr:
+    return atom(wordlen, val, signed=False)
+
+
+__all__ = ['atom', 'uatom', 'UnsignedBVExpr', 'SignedBVExpr', 'ite']
