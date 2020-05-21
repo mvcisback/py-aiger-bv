@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from functools import reduce
 
@@ -191,6 +193,11 @@ class AIGBV:
 
         lmap = fn.walk_values(unblast_vals, lmap)
         return circ, lmap
+
+    def reinit(self, latch2init) -> AIGBV:
+        """Update late initial values based on mapping provided."""
+        latch2init = self.lmap.blast(latch2init)
+        return rebundle_aig(self.aig.reinit(latch2init))
 
 
 # Lifting AIGs to AIGBVs

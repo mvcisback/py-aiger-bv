@@ -326,3 +326,18 @@ def test_kmodels():
     _test_kmodels(5)
     _test_kmodels(4)
     _test_kmodels(15)
+
+
+def test_reinit():
+    circ = common.add_gate(4, left='a', right='b', output='out')
+    circ = circ.feedback(
+        inputs=['a'],
+        outputs=['out'],
+        latches=['c'],
+        initials=[(False, False, False, False)],
+        keep_outputs=True
+    )
+
+    latch2init2 = {'c': (True, True, False, False)}
+    circ2 = circ.reinit(latch2init2)
+    assert circ2.latch2init == latch2init2
