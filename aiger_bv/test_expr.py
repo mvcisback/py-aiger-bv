@@ -344,3 +344,9 @@ def test_multiply_lit(x, y):
     x_atom = atom(6, x)
     res = multiplier(inputs={'a': x_atom()})
     assert common.decode_int(res) == x * y
+
+
+def test_encoded_add():
+    adder = uatom(3, 'x') + 2
+    res = adder(inputs={'x': 0b000})
+    assert common.decode_int(res) == 2

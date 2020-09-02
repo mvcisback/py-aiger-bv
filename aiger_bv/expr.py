@@ -20,13 +20,26 @@ def constk(k, size=None):
     return _constk
 
 
+def _encoded_inputs(expr, inputs):
+    if inputs is None:
+        inputs = {}
+
+    signed = isinstance(expr, SignedBVExpr)
+    imap = expr.aigbv.imap
+
+    for key, val in inputs.items():
+        if isinstance(val, int):
+            size = imap[key].size
+            val = cmn.encode_int(size, val, signed=signed)
+        yield key, val
+
+
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class UnsignedBVExpr:
     aigbv: aigbv.AIGBV
 
     def __call__(self, inputs=None):
-        if inputs is None:
-            inputs = {}
+        inputs = dict(_encoded_inputs(self, inputs))
         return self.aigbv(inputs)[0][self.output]
 
     def __getitem__(self, idx: Union[int, slice]):
