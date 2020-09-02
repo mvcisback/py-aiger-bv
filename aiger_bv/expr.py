@@ -28,7 +28,7 @@ def _encoded_inputs(expr, inputs):
     imap = expr.aigbv.imap
 
     for key, val in inputs.items():
-        if isinstance(val, int):
+        if isinstance(val, int) and (key in expr.inputs):
             size = imap[key].size
             val = cmn.encode_int(size, val, signed=signed)
         yield key, val
