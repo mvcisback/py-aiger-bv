@@ -11,18 +11,18 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-attrs = "^19.1"
+attrs = "^20.0.0"
 funcy = "^1.12"
-py-aiger = "^6.1.1"
-pyrsistent = "^0.15.4"
+py-aiger = "^6.1.2"
+pyrsistent = "^0.17"
 
 [tool.poetry.dev-dependencies]
 hypothesis_cfg = {git = "git://github.com/mvcisback/hypothesis-cfg.git"}
-hypothesis = "^4.28"
+hypothesis = "^5.0.0"
 pytest-cov = "^2.7"
 pytest-flake8 = "^1.0"
-pytest-xdist = "^1.29"
-coverage = "^4.5"
+pytest-xdist = "^2.0.0"
+coverage = "^5.0.0"
 codecov = "^2.0"
 pdoc3 = "^0.8.1"
 
