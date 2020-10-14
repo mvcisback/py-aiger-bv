@@ -350,3 +350,12 @@ def test_encoded_add():
     adder = uatom(3, 'x') + 2
     res = adder(inputs={'x': 0b000})
     assert common.decode_int(res) == 2
+
+
+def test_getslice_single_output():
+    expr = atom(4, 'c')
+    expr1 = expr[:2]
+    expr2 = expr[2:]
+
+    assert expr({'c': 3}) == expr1.concat(expr2)({'c': 3})
+    assert expr({'c': 3}) != expr2.concat(expr1)({'c': 3})

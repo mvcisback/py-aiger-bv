@@ -45,7 +45,8 @@ class UnsignedBVExpr:
     def __getitem__(self, idx: Union[int, slice]):
         # TODO: support slice steps.
         def _indexer(idx):
-            return cmn.index_gate(self.size, idx, self.output, cmn._fresh())
+            gate = cmn.index_gate(self.size, idx, self.output, cmn._fresh())
+            return UnsignedBVExpr(self.aigbv >> gate)
 
         if isinstance(idx, int):
             if abs(idx) >= self.size:
@@ -65,11 +66,10 @@ class UnsignedBVExpr:
         indicies = list(range(idx.start, idx.stop))
 
         if len(indicies) == 1:
-            return UnsignedBVExpr(self.aigbv >> _indexer(indicies[0]))
+            return _indexer(indicies[0])
 
         indexers = map(_indexer, indicies)
-        indexer = reduce(lambda x, y: x | y, indexers)
-        return UnsignedBVExpr(self.aigbv >> indexer)
+        return reduce(lambda x, y: x.concat(y), indexers)
 
     def bundle_inputs(self, name=None):
         if name is None:
