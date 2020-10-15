@@ -307,12 +307,21 @@ def test_set_output():
 
 
 def test_bundle_inputs():
-    x, y = atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    x, y = uatom(2, &#39;x&#39;), uatom(2, &#39;y&#39;)
     f = x.concat(y)
     assert f.inputs == {&#39;x&#39;, &#39;y&#39;}
-    f = f.bundle_inputs(&#39;xy&#39;)
-    assert f.inputs == {&#39;xy&#39;}
-    assert f.aigbv.imap[&#39;xy&#39;].size == 4
+
+    xy = f.bundle_inputs(&#39;xy&#39;, order=[&#39;x&#39;, &#39;y&#39;])
+    assert xy.inputs == {&#39;xy&#39;}
+    assert xy.aigbv.imap[&#39;xy&#39;].size == 4
+    assert xy[:2]({&#39;xy&#39;: 0b0110}) == x({&#39;x&#39;: 0b10})
+    assert xy[2:]({&#39;xy&#39;: 0b0110}) == y({&#39;y&#39;: 0b01})
+
+    yx = f.bundle_inputs(&#39;yx&#39;, order=[&#39;y&#39;, &#39;x&#39;])
+    assert yx.inputs == {&#39;yx&#39;}
+    assert yx.aigbv.imap[&#39;yx&#39;].size == 4
+    assert yx[:2]({&#39;yx&#39;: 0b0110}) == x({&#39;x&#39;: 0b01})
+    assert yx[2:]({&#39;yx&#39;: 0b0110}) == y({&#39;y&#39;: 0b10})
 
 
 def test_indexing_preserves_inputs():
@@ -377,7 +386,16 @@ def test_multiply_lit(x, y):
 def test_encoded_add():
     adder = uatom(3, &#39;x&#39;) + 2
     res = adder(inputs={&#39;x&#39;: 0b000})
-    assert common.decode_int(res) == 2</code></pre>
+    assert common.decode_int(res) == 2
+
+
+def test_getslice_single_output():
+    expr = atom(4, &#39;c&#39;)
+    expr1 = expr[:2]
+    expr2 = expr[2:]
+
+    assert expr({&#39;c&#39;: 3}) == expr1.concat(expr2)({&#39;c&#39;: 3})
+    assert expr({&#39;c&#39;: 3}) != expr2.concat(expr1)({&#39;c&#39;: 3})</code></pre>
 </details>
 </section>
 <section>
@@ -412,12 +430,21 @@ def test_encoded_add():
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_bundle_inputs():
-    x, y = atom(2, &#39;x&#39;), atom(2, &#39;y&#39;)
+    x, y = uatom(2, &#39;x&#39;), uatom(2, &#39;y&#39;)
     f = x.concat(y)
     assert f.inputs == {&#39;x&#39;, &#39;y&#39;}
-    f = f.bundle_inputs(&#39;xy&#39;)
-    assert f.inputs == {&#39;xy&#39;}
-    assert f.aigbv.imap[&#39;xy&#39;].size == 4</code></pre>
+
+    xy = f.bundle_inputs(&#39;xy&#39;, order=[&#39;x&#39;, &#39;y&#39;])
+    assert xy.inputs == {&#39;xy&#39;}
+    assert xy.aigbv.imap[&#39;xy&#39;].size == 4
+    assert xy[:2]({&#39;xy&#39;: 0b0110}) == x({&#39;x&#39;: 0b10})
+    assert xy[2:]({&#39;xy&#39;: 0b0110}) == y({&#39;y&#39;: 0b01})
+
+    yx = f.bundle_inputs(&#39;yx&#39;, order=[&#39;y&#39;, &#39;x&#39;])
+    assert yx.inputs == {&#39;yx&#39;}
+    assert yx.aigbv.imap[&#39;yx&#39;].size == 4
+    assert yx[:2]({&#39;yx&#39;: 0b0110}) == x({&#39;x&#39;: 0b01})
+    assert yx[2:]({&#39;yx&#39;: 0b0110}) == y({&#39;y&#39;: 0b10})</code></pre>
 </details>
 </dd>
 <dt id="aiger_bv.test_expr.test_encoded_add"><code class="name flex">
@@ -950,6 +977,24 @@ def test_expr_unsigned_lt_literal(a, b):
     assert expr()[0] == (a &lt; b)</code></pre>
 </details>
 </dd>
+<dt id="aiger_bv.test_expr.test_getslice_single_output"><code class="name flex">
+<span>def <span class="ident">test_getslice_single_output</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_getslice_single_output():
+    expr = atom(4, &#39;c&#39;)
+    expr1 = expr[:2]
+    expr2 = expr[2:]
+
+    assert expr({&#39;c&#39;: 3}) == expr1.concat(expr2)({&#39;c&#39;: 3})
+    assert expr({&#39;c&#39;: 3}) != expr2.concat(expr1)({&#39;c&#39;: 3})</code></pre>
+</details>
+</dd>
 <dt id="aiger_bv.test_expr.test_indexing_preserves_inputs"><code class="name flex">
 <span>def <span class="ident">test_indexing_preserves_inputs</span></span>(<span>)</span>
 </code></dt>
@@ -1209,6 +1254,7 @@ def test_unsigned_multiply(x, y):
 <li><code><a title="aiger_bv.test_expr.test_expr_unsigned_le_literal" href="#aiger_bv.test_expr.test_expr_unsigned_le_literal">test_expr_unsigned_le_literal</a></code></li>
 <li><code><a title="aiger_bv.test_expr.test_expr_unsigned_lt" href="#aiger_bv.test_expr.test_expr_unsigned_lt">test_expr_unsigned_lt</a></code></li>
 <li><code><a title="aiger_bv.test_expr.test_expr_unsigned_lt_literal" href="#aiger_bv.test_expr.test_expr_unsigned_lt_literal">test_expr_unsigned_lt_literal</a></code></li>
+<li><code><a title="aiger_bv.test_expr.test_getslice_single_output" href="#aiger_bv.test_expr.test_getslice_single_output">test_getslice_single_output</a></code></li>
 <li><code><a title="aiger_bv.test_expr.test_indexing_preserves_inputs" href="#aiger_bv.test_expr.test_indexing_preserves_inputs">test_indexing_preserves_inputs</a></code></li>
 <li><code><a title="aiger_bv.test_expr.test_ite" href="#aiger_bv.test_expr.test_ite">test_ite</a></code></li>
 <li><code><a title="aiger_bv.test_expr.test_ite2" href="#aiger_bv.test_expr.test_ite2">test_ite2</a></code></li>

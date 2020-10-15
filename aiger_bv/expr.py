@@ -71,13 +71,15 @@ class UnsignedBVExpr:
         indexers = map(_indexer, indicies)
         return reduce(lambda x, y: x.concat(y), indexers)
 
-    def bundle_inputs(self, name=None):
+    def bundle_inputs(self, name=None, order=None):
         if name is None:
             name = cmn._fresh()
+        if order is None:
+            order = self.inputs
 
         size = sum(self.aigbv.imap.values())
         bdl = Bundle(name=name, size=size)
-        inputs = fn.lconcat(*(self.aigbv.imap[i] for i in self.inputs))
+        inputs = fn.lconcat(*(self.aigbv.imap[i] for i in order))
 
         relabels = {old: new for old, new in zip(inputs, bdl)}
         circ = aigbv.rebundle_aig(self.aig['i', relabels])

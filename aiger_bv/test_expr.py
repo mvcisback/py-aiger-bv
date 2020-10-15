@@ -279,12 +279,21 @@ def test_set_output():
 
 
 def test_bundle_inputs():
-    x, y = atom(2, 'x'), atom(2, 'y')
+    x, y = uatom(2, 'x'), uatom(2, 'y')
     f = x.concat(y)
     assert f.inputs == {'x', 'y'}
-    f = f.bundle_inputs('xy')
-    assert f.inputs == {'xy'}
-    assert f.aigbv.imap['xy'].size == 4
+
+    xy = f.bundle_inputs('xy', order=['x', 'y'])
+    assert xy.inputs == {'xy'}
+    assert xy.aigbv.imap['xy'].size == 4
+    assert xy[:2]({'xy': 0b0110}) == x({'x': 0b10})
+    assert xy[2:]({'xy': 0b0110}) == y({'y': 0b01})
+
+    yx = f.bundle_inputs('yx', order=['y', 'x'])
+    assert yx.inputs == {'yx'}
+    assert yx.aigbv.imap['yx'].size == 4
+    assert yx[:2]({'yx': 0b0110}) == x({'x': 0b01})
+    assert yx[2:]({'yx': 0b0110}) == y({'y': 0b10})
 
 
 def test_indexing_preserves_inputs():

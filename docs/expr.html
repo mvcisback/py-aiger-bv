@@ -99,13 +99,15 @@ class UnsignedBVExpr:
         indexers = map(_indexer, indicies)
         return reduce(lambda x, y: x.concat(y), indexers)
 
-    def bundle_inputs(self, name=None):
+    def bundle_inputs(self, name=None, order=None):
         if name is None:
             name = cmn._fresh()
+        if order is None:
+            order = self.inputs
 
         size = sum(self.aigbv.imap.values())
         bdl = Bundle(name=name, size=size)
-        inputs = fn.lconcat(*(self.aigbv.imap[i] for i in self.inputs))
+        inputs = fn.lconcat(*(self.aigbv.imap[i] for i in order))
 
         relabels = {old: new for old, new in zip(inputs, bdl)}
         circ = aigbv.rebundle_aig(self.aig[&#39;i&#39;, relabels])
@@ -474,13 +476,15 @@ __all__ = [&#39;atom&#39;, &#39;uatom&#39;, &#39;UnsignedBVExpr&#39;, &#39;Signe
         indexers = map(_indexer, indicies)
         return reduce(lambda x, y: x.concat(y), indexers)
 
-    def bundle_inputs(self, name=None):
+    def bundle_inputs(self, name=None, order=None):
         if name is None:
             name = cmn._fresh()
+        if order is None:
+            order = self.inputs
 
         size = sum(self.aigbv.imap.values())
         bdl = Bundle(name=name, size=size)
-        inputs = fn.lconcat(*(self.aigbv.imap[i] for i in self.inputs))
+        inputs = fn.lconcat(*(self.aigbv.imap[i] for i in order))
 
         relabels = {old: new for old, new in zip(inputs, bdl)}
         circ = aigbv.rebundle_aig(self.aig[&#39;i&#39;, relabels])
@@ -665,7 +669,7 @@ def size(self):
 <h3>Methods</h3>
 <dl>
 <dt id="aiger_bv.expr.UnsignedBVExpr.bundle_inputs"><code class="name flex">
-<span>def <span class="ident">bundle_inputs</span></span>(<span>self, name=None)</span>
+<span>def <span class="ident">bundle_inputs</span></span>(<span>self, name=None, order=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -673,13 +677,15 @@ def size(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def bundle_inputs(self, name=None):
+<pre><code class="python">def bundle_inputs(self, name=None, order=None):
     if name is None:
         name = cmn._fresh()
+    if order is None:
+        order = self.inputs
 
     size = sum(self.aigbv.imap.values())
     bdl = Bundle(name=name, size=size)
-    inputs = fn.lconcat(*(self.aigbv.imap[i] for i in self.inputs))
+    inputs = fn.lconcat(*(self.aigbv.imap[i] for i in order))
 
     relabels = {old: new for old, new in zip(inputs, bdl)}
     circ = aigbv.rebundle_aig(self.aig[&#39;i&#39;, relabels])
