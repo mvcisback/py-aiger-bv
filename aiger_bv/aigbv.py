@@ -8,6 +8,7 @@ import attr
 import funcy as fn
 from pyrsistent import pmap
 
+import aiger_bv as BV
 from aiger_bv import common
 from aiger_bv.bundle import Bundle, BundleMap
 
@@ -198,6 +199,16 @@ class AIGBV:
         """Update late initial values based on mapping provided."""
         latch2init = self.lmap.blast(latch2init)
         return rebundle_aig(self.aig.reinit(latch2init))
+
+    def cone(self, output: str) -> AIGBV:
+        """Return cone of influence aigbv output."""
+        circ = self
+        for out in circ.outputs - {output}:
+            size = circ.omap[out].size
+            circ >>= BV.sink(size, [out])
+            assert len(circ.outputs) == 1
+            assert fn.first(circ.outputs) == output
+        return circ
 
 
 # Lifting AIGs to AIGBVs

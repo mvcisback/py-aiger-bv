@@ -148,3 +148,11 @@ def test_cutlatches():
     assert circ3.inputs >= circ2.inputs
     assert circ3.outputs >= circ2.outputs
     assert len(lmap) == 1
+
+
+def test_cone():
+    circ1 = aigbv.aig2aigbv(aiger.and_gate(['x1', 'x2'], output='tmp'))
+    circ2 = aigbv.aig2aigbv(aiger.and_gate(['tmp', 'x3'], output='x4'))
+    circ12 = circ1 | circ2
+
+    assert circ12.cone('x4').outputs == {'x4'}
