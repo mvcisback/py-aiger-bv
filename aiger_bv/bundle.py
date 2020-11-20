@@ -6,6 +6,8 @@ import funcy as fn
 from pyrsistent import pmap
 from pyrsistent.typing import PMap
 
+import aiger_bv as BV
+
 
 @attr.s(frozen=True, slots=True, auto_attribs=True, repr=False)
 class Bundle:
@@ -35,6 +37,8 @@ class Bundle:
         return tuple(islice(self, start, stop, step))
 
     def blast(self, val):
+        if isinstance(val, int):
+            val = BV.encode_int(self.size, val, signed=False)
         assert len(val) == self.size
         return dict(zip(self, val))
 

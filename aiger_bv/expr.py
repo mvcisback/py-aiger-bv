@@ -39,7 +39,7 @@ class UnsignedBVExpr:
     aigbv: aigbv.AIGBV
 
     def __call__(self, inputs=None):
-        inputs = dict(_encoded_inputs(self, inputs))
+        inputs = {} if inputs is None else inputs
         return self.aigbv(inputs)[0][self.output]
 
     def __getitem__(self, idx: Union[int, slice]):

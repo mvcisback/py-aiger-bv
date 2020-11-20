@@ -317,7 +317,7 @@ description = "A python library for manipulating sequential and-inverter gates."
 name = "py-aiger"
 optional = false
 python-versions = ">=3.7,<4.0"
-version = "6.1.7"
+version = "6.1.11"
 
 [package.dependencies]
 attrs = ">=20.0.0,<21.0.0"
@@ -498,7 +498,7 @@ description = "HTTP library with thread-safe connection pooling, file post, and 
 name = "urllib3"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
-version = "1.26.0"
+version = "1.26.1"
 
 [package.extras]
 brotli = ["brotlipy (>=0.6.0)"]
@@ -688,8 +688,8 @@ py = [
     {file = "py-1.9.0.tar.gz", hash = "sha256:9ca6883ce56b4e8da7e79ac18787889fa5206c79dcc67fb065376cd2fe03f342"},
 ]
 py-aiger = [
-    {file = "py-aiger-6.1.7.tar.gz", hash = "sha256:53155c6371c37a848e72f2a6629752a7a11f507bfcec4ad960c68095e75db72c"},
-    {file = "py_aiger-6.1.7-py3-none-any.whl", hash = "sha256:511d7f773bc597cbfa2f6edb94b2b72dc71b85dc602799f45ffe251bab4367f9"},
+    {file = "py-aiger-6.1.11.tar.gz", hash = "sha256:290ed97586d43a536bb9c267878af727b56f0c58b8a4fbc598fb776134d8fa0d"},
+    {file = "py_aiger-6.1.11-py3-none-any.whl", hash = "sha256:1c4000679ec05967d94d00e7f6fd0f673096ceb4fd5fab27ccf0052f65061b5d"},
 ]
 pycodestyle = [
     {file = "pycodestyle-2.6.0-py2.py3-none-any.whl", hash = "sha256:2295e7b2f6b5bd100585ebcb1f616591b652db8a741695b3d8f5d28bdc934367"},
@@ -747,8 +747,8 @@ toposort = [
     {file = "toposort-1.5.tar.gz", hash = "sha256:dba5ae845296e3bf37b042c640870ffebcdeb8cd4df45adaa01d8c5476c557dd"},
 ]
 urllib3 = [
-    {file = "urllib3-1.26.0-py2.py3-none-any.whl", hash = "sha256:bad31cb622ceee0ab46c4c884cf61957def0ff2e644de0a7a093678844c9ccac"},
-    {file = "urllib3-1.26.0.tar.gz", hash = "sha256:4849f132941d68144df0a3785ccc4fe423430ba5db0108d045c8cadbc90f517a"},
+    {file = "urllib3-1.26.1-py2.py3-none-any.whl", hash = "sha256:61ad24434555a42c0439770462df38b47d05d9e8e353d93ec3742900975e3e65"},
+    {file = "urllib3-1.26.1.tar.gz", hash = "sha256:097116a6f16f13482d2a2e56792088b9b2920f4eb6b4f84a2c90555fb673db74"},
 ]
 zipp = [
     {file = "zipp-3.4.0-py3-none-any.whl", hash = "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108"},
