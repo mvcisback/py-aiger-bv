@@ -43,10 +43,11 @@ class AIGBV:
     def latch2init(self):
         return self.lmap.unblast(dict(self.aig.latch2init))
 
-    def __call__(self, inputs, latches=None):
+    def __call__(self, inputs, latches=None, lift=None):
         out2val, latch2val = self.aig(
             inputs=self.imap.blast(inputs),
-            latches=None if latches is None else self.lmap.blast(latches)
+            latches=None if latches is None else self.lmap.blast(latches),
+            lift=lift,
         )
         return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
 
