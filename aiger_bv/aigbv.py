@@ -207,8 +207,8 @@ class AIGBV:
         for out in circ.outputs - {output}:
             size = circ.omap[out].size
             circ >>= BV.sink(size, [out])
-            assert len(circ.outputs) == 1
-            assert fn.first(circ.outputs) == output
+        assert len(circ.outputs) == 1
+        assert fn.first(circ.outputs) == output
         return circ
 
 
