@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 from functools import partial, reduce
 from typing import Union
@@ -99,6 +101,13 @@ class UnsignedBVExpr:
         assert self.size == 1
         repeater = cmn.repeat(times, self.output, cmn._fresh())
         return type(self)(self.aigbv >> repeater)
+
+    def resize(self, size: int) -> UnsignedBVExpr:
+        if size <= 0:
+            raise ValueError('Must resize to positive size.')
+        elif size <= self.size:
+            return self[:size]
+        return self.concat(uatom(size - self.size, 0))
 
     @property
     def output(self):
@@ -221,6 +230,12 @@ class SignedBVExpr(UnsignedBVExpr):
 
     def sign(self):
         return UnsignedBVExpr(self.aigbv)[-1]
+
+    def resize(self, size: int) -> UnsignedBVExpr:
+        if size <= self.size:
+            return UnsignedBVExpr.resize(self, size)
+        padding = self[self.size - 1].repeat(size - self.size)
+        return self.concat(padding)
 
 
 Expr = Union[UnsignedBVExpr, SignedBVExpr]
