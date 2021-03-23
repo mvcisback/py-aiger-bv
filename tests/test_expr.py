@@ -1,3 +1,4 @@
+import aiger_bv as BV
 from aiger_bv.expr import uatom, atom, ite
 from aiger_bv import common
 
@@ -353,6 +354,25 @@ def test_multiply_lit(x, y):
     x_atom = atom(6, x)
     res = multiplier(inputs={'a': x_atom()})
     assert common.decode_int(res) == x * y
+
+
+def test_resize():
+    x = uatom(3, 'x')
+    x2 = x.resize(2)
+    assert BV.decode_int(x({'x': 0b010}), signed=False) == \
+           BV.decode_int(x2({'x': 0b110}), signed=False)
+    x2 = x.resize(4)
+    assert BV.decode_int(x({'x': 0b010}), signed=False) == \
+           BV.decode_int(x2({'x': 0b010}), signed=False)
+
+
+def test_resize_signed():
+    x = atom(3, 'x')
+    x2 = x.resize(4)
+    assert BV.decode_int(x({'x': (True, False, False)}), signed=True) == \
+           BV.decode_int(x2({'x': (True, False, False)}), signed=True)
+    assert BV.decode_int(x({'x': (False, False, True)}), signed=True) == \
+           BV.decode_int(x2({'x': (False, False, True)}), signed=True)
 
 
 def test_encoded_add():
