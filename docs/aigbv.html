@@ -36,6 +36,7 @@ import attr
 import funcy as fn
 from pyrsistent import pmap
 
+import aiger_bv as BV
 from aiger_bv import common
 from aiger_bv.bundle import Bundle, BundleMap
 
@@ -70,10 +71,11 @@ class AIGBV:
     def latch2init(self):
         return self.lmap.unblast(dict(self.aig.latch2init))
 
-    def __call__(self, inputs, latches=None):
+    def __call__(self, inputs, latches=None, lift=None):
         out2val, latch2val = self.aig(
             inputs=self.imap.blast(inputs),
-            latches=None if latches is None else self.lmap.blast(latches)
+            latches=None if latches is None else self.lmap.blast(latches),
+            lift=lift,
         )
         return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
 
@@ -226,6 +228,16 @@ class AIGBV:
         &#34;&#34;&#34;Update late initial values based on mapping provided.&#34;&#34;&#34;
         latch2init = self.lmap.blast(latch2init)
         return rebundle_aig(self.aig.reinit(latch2init))
+
+    def cone(self, output: str) -&gt; AIGBV:
+        &#34;&#34;&#34;Return cone of influence aigbv output.&#34;&#34;&#34;
+        circ = self
+        for out in circ.outputs - {output}:
+            size = circ.omap[out].size
+            circ &gt;&gt;= BV.sink(size, [out])
+        assert len(circ.outputs) == 1
+        assert fn.first(circ.outputs) == output
+        return circ
 
 
 # Lifting AIGs to AIGBVs
@@ -422,7 +434,8 @@ def shuffle_id_time(name):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class AIGBV:
+<pre><code class="python">@attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
+class AIGBV:
     aig: aiger.AIG
     imap: BundleMap = BundleMap()
     omap: BundleMap = BundleMap()
@@ -451,10 +464,11 @@ def shuffle_id_time(name):
     def latch2init(self):
         return self.lmap.unblast(dict(self.aig.latch2init))
 
-    def __call__(self, inputs, latches=None):
+    def __call__(self, inputs, latches=None, lift=None):
         out2val, latch2val = self.aig(
             inputs=self.imap.blast(inputs),
-            latches=None if latches is None else self.lmap.blast(latches)
+            latches=None if latches is None else self.lmap.blast(latches),
+            lift=lift,
         )
         return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
 
@@ -606,7 +620,17 @@ def shuffle_id_time(name):
     def reinit(self, latch2init) -&gt; AIGBV:
         &#34;&#34;&#34;Update late initial values based on mapping provided.&#34;&#34;&#34;
         latch2init = self.lmap.blast(latch2init)
-        return rebundle_aig(self.aig.reinit(latch2init))</code></pre>
+        return rebundle_aig(self.aig.reinit(latch2init))
+
+    def cone(self, output: str) -&gt; AIGBV:
+        &#34;&#34;&#34;Return cone of influence aigbv output.&#34;&#34;&#34;
+        circ = self
+        for out in circ.outputs - {output}:
+            size = circ.omap[out].size
+            circ &gt;&gt;= BV.sink(size, [out])
+        assert len(circ.outputs) == 1
+        assert fn.first(circ.outputs) == output
+        return circ</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -686,6 +710,26 @@ def outputs(self): return set(self.omap.keys())</code></pre>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="aiger_bv.aigbv.AIGBV.cone"><code class="name flex">
+<span>def <span class="ident">cone</span></span>(<span>self, output: str) ‑> <a title="aiger_bv.aigbv.AIGBV" href="#aiger_bv.aigbv.AIGBV">AIGBV</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return cone of influence aigbv output.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cone(self, output: str) -&gt; AIGBV:
+    &#34;&#34;&#34;Return cone of influence aigbv output.&#34;&#34;&#34;
+    circ = self
+    for out in circ.outputs - {output}:
+        size = circ.omap[out].size
+        circ &gt;&gt;= BV.sink(size, [out])
+    assert len(circ.outputs) == 1
+    assert fn.first(circ.outputs) == output
+    return circ</code></pre>
+</details>
+</dd>
 <dt id="aiger_bv.aigbv.AIGBV.cutlatches"><code class="name flex">
 <span>def <span class="ident">cutlatches</span></span>(<span>self, latches=None, renamer=None)</span>
 </code></dt>
@@ -870,6 +914,7 @@ def outputs(self): return set(self.omap.keys())</code></pre>
 <ul class="two-column">
 <li><code><a title="aiger_bv.aigbv.AIGBV.aig" href="#aiger_bv.aigbv.AIGBV.aig">aig</a></code></li>
 <li><code><a title="aiger_bv.aigbv.AIGBV.aigbv" href="#aiger_bv.aigbv.AIGBV.aigbv">aigbv</a></code></li>
+<li><code><a title="aiger_bv.aigbv.AIGBV.cone" href="#aiger_bv.aigbv.AIGBV.cone">cone</a></code></li>
 <li><code><a title="aiger_bv.aigbv.AIGBV.cutlatches" href="#aiger_bv.aigbv.AIGBV.cutlatches">cutlatches</a></code></li>
 <li><code><a title="aiger_bv.aigbv.AIGBV.feedback" href="#aiger_bv.aigbv.AIGBV.feedback">feedback</a></code></li>
 <li><code><a title="aiger_bv.aigbv.AIGBV.imap" href="#aiger_bv.aigbv.AIGBV.imap">imap</a></code></li>

@@ -230,7 +230,7 @@ def split_gate(input, left_wordlen, left, right_wordlen, right):
 
 def sink(wordlen, inputs):
     imap = BundleMap({i: wordlen for i in inputs})
-    return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, inputs)))
+    return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, imap)))
 
 
 def even_popcount_gate(wordlen, input, output):
@@ -1139,7 +1139,7 @@ Counting." IJCAI. 2015.</p></div>
 </summary>
 <pre><code class="python">def sink(wordlen, inputs):
     imap = BundleMap({i: wordlen for i in inputs})
-    return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, inputs)))</code></pre>
+    return aigbv.AIGBV(imap=imap, aig=aiger.sink(fn.lmapcat(imap.get, imap)))</code></pre>
 </details>
 </dd>
 <dt id="aiger_bv.common.source"><code class="name flex">

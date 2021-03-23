@@ -34,6 +34,8 @@ import funcy as fn
 from pyrsistent import pmap
 from pyrsistent.typing import PMap
 
+import aiger_bv as BV
+
 
 @attr.s(frozen=True, slots=True, auto_attribs=True, repr=False)
 class Bundle:
@@ -63,6 +65,8 @@ class Bundle:
         return tuple(islice(self, start, stop, step))
 
     def blast(self, val):
+        if isinstance(val, int):
+            val = BV.encode_int(self.size, val, signed=False)
         assert len(val) == self.size
         return dict(zip(self, val))
 
@@ -138,7 +142,8 @@ class BundleMap:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Bundle:
+<pre><code class="python">@attr.s(frozen=True, slots=True, auto_attribs=True, repr=False)
+class Bundle:
     name: str = attr.ib()
     size: int = attr.ib()
 
@@ -165,6 +170,8 @@ class BundleMap:
         return tuple(islice(self, start, stop, step))
 
     def blast(self, val):
+        if isinstance(val, int):
+            val = BV.encode_int(self.size, val, signed=False)
         assert len(val) == self.size
         return dict(zip(self, val))
 
@@ -194,6 +201,8 @@ class BundleMap:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def blast(self, val):
+    if isinstance(val, int):
+        val = BV.encode_int(self.size, val, signed=False)
     assert len(val) == self.size
     return dict(zip(self, val))</code></pre>
 </details>
@@ -223,7 +232,8 @@ class BundleMap:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class BundleMap:
+<pre><code class="python">@attr.s(frozen=True, slots=True, auto_attribs=True)
+class BundleMap:
     mapping: PMap[str, int] = attr.ib(default=pmap(), converter=pmap)
 
     def __getitem__(self, idx):
@@ -272,7 +282,7 @@ class BundleMap:
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="aiger_bv.bundle.BundleMap.mapping"><code class="name">var <span class="ident">mapping</span> : pyrsistent.typing.PMap[str, int]</code></dt>
+<dt id="aiger_bv.bundle.BundleMap.mapping"><code class="name">var <span class="ident">mapping</span> : pyrsistent.typing.PMap</code></dt>
 <dd>
 <div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
 </dd>
