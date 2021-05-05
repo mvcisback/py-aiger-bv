@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from functools import reduce, wraps
+from functools import reduce
 
 import aiger
 import attr
@@ -11,13 +11,6 @@ from pyrsistent import pmap
 import aiger_bv as BV
 from aiger_bv import common
 from aiger_bv.bundle import Bundle, BundleMap
-
-
-def support_inheritance(func):
-    @wraps(func)
-    def wrapped(*args, **kwargs):
-        return func(*args, **kwargs)
-    return wrapped
 
 
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
@@ -58,11 +51,9 @@ class AIGBV:
         )
         return self.omap.unblast(out2val), self.lmap.unblast(latch2val)
 
-    @support_inheritance
     def __lshift__(self, other):
         return other >> self
 
-    @support_inheritance
     def __rshift__(self, other):
         interface = self.outputs & other.inputs
         assert not self.latches & other.latches
@@ -75,7 +66,6 @@ class AIGBV:
             lmap=self.lmap + other.lmap,
         )
 
-    @support_inheritance
     def __or__(self, other):
         assert not self.outputs & other.outputs
         assert not self.latches & other.latches
