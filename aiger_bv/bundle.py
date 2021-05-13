@@ -93,3 +93,11 @@ class BundleMap:
 
     def get(self, val, default=None):
         return self[val] if val in self else default
+
+    def _flat_keys(self):
+        for key in self.keys():
+            yield from self[key]
+
+    @property
+    def flat_keys(self):
+        return frozenset(self._flat_keys())

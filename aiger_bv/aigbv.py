@@ -13,6 +13,11 @@ from aiger_bv import common
 from aiger_bv.bundle import Bundle, BundleMap
 
 
+IO_CONTRACT_VIOLATED = \
+    """Undelryiung AIG's interace incompatible with""" \
+    """AIGBV word-level interface."""
+
+
 @attr.s(frozen=True, slots=True, eq=False, auto_attribs=True)
 class AIGBV:
     aig: aiger.AIG
@@ -22,6 +27,12 @@ class AIGBV:
 
     simulate = aiger.AIG.simulate
     simulator = aiger.AIG.simulator
+
+    def __attrs_post_init__(self):
+        # Validates io interface.
+        assert self.aig.inputs == self.imap.flat_keys, IO_CONTRACT_VIOLATED
+        assert self.aig.outputs == self.omap.flat_keys, IO_CONTRACT_VIOLATED
+        assert self.aig.latches == self.lmap.flat_keys, IO_CONTRACT_VIOLATED
 
     @property
     def aigbv(self):
@@ -99,14 +110,16 @@ class AIGBV:
         bmap1 = getattr(self, attr_name)
         assert not set(relabels.values()) & set(bmap1.keys())
         bmap2 = bmap1.relabel(relabels)
-        circ = attr.evolve(self, **{attr_name: bmap2})
 
         # Update AIG to match new interface.
         relabels_aig = fn.merge(*(
             dict(zip(bmap1[k], bmap2[v])) for k, v in relabels.items()
             if k in bmap1
         ))
-        return attr.evolve(circ, aig=circ.aig[kind, relabels_aig])
+
+        return attr.evolve(
+            self, aig=self.aig[kind, relabels_aig], **{attr_name: bmap2}
+        )
 
     def loopback(self, *wirings):
         def wire(circ, wiring):
