@@ -294,6 +294,7 @@ def test_abs(a):
     assert common.decode_int(val) == abs(a)
 
 
+@settings(deadline=None)
 @given(st.integers(0, 3))
 def test_lookup(a):
     lookup = {0: 0, 1: 1, 2: 0, 3: -1}
