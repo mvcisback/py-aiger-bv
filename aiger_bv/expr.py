@@ -231,9 +231,9 @@ class SignedBVExpr(UnsignedBVExpr):
     def sign(self):
         return UnsignedBVExpr(self.aigbv)[-1]
 
-    def resize(self, size: int) -> UnsignedBVExpr:
-        if size <= self.size:
-            raise ValueError('Signed resizing must past. Consider slicing.')
+    def resize(self, size: int) -> SignedBVExpr:
+        if size < self.size:
+            raise ValueError('Signed resize cannot shrink. Consider slicing.')
         padding = self[self.size - 1].repeat(size - self.size)
         return self.concat(padding)
 
