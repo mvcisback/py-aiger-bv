@@ -406,22 +406,16 @@ def abs_gate(wordlen, input, output):
 
 def lookup(inlen, outlen, mapping, input, output, *,
            in_signed=True, out_signed=True):
-    # [(i = a1) -> b] /\ [(i = a2) -> c] /\ [(i = a3) -> d]
-    def guard(key, val):
-        circ = identity_gate(inlen, _fresh(), 'input') \
-            | source(inlen, key, 'key', in_signed) \
-            | source(outlen, val, 'val', out_signed)
-        circ >>= ne_gate(inlen, 'input', 'key', 'neq')
-        circ >>= repeat(outlen, 'neq', 'neq')
-        circ >>= bitwise_or(outlen, 'neq', 'val', _fresh())
-        return circ
-
-    circ = reduce(op.or_, starmap(guard, mapping.items()))
-    circ = tee(inlen, {input: circ.inputs}) >> circ
-    if len(circ.outputs) > 1:
-        circ >>= reduce_binop(outlen, circ.outputs, output, bitwise_and)
-    out, *_ = circ.outputs
-    return circ['o', {out: output}]
+    import aiger_bv as BV
+    input = BV.atom(inlen, input, signed=in_signed)
+    expr = BV.atom(outlen, 0, signed=out_signed)
+    for key, val in mapping.items():
+        expr = BV.ite(
+            input == key,
+            BV.atom(outlen, val, signed=out_signed),
+            expr
+        )
+    return expr.with_output(output).aigbv
 
 
 def kmodels(wordlen: int, k: int, input=None, output=None):
