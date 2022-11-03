@@ -17,7 +17,7 @@ py-aiger = "^6.1.16"
 pyrsistent = "^0.19"
 
 [tool.poetry.dev-dependencies]
-hypothesis_cfg = {git = "git@github.com:mvcisback/hypothesis-cfg.git"}
+hypothesis_cfg = {git = "https://github.com/mvcisback/hypothesis-cfg.git"}
 hypothesis = "^6.0.0"
 pytest-xdist = "^3.0.0"
 pdoc3 = "^0.10"

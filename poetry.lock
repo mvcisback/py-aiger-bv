@@ -102,7 +102,7 @@ hypothesis = "*"
 
 [package.source]
 type = "git"
-url = "git@github.com:mvcisback/hypothesis-cfg.git"
+url = "https://github.com/mvcisback/hypothesis-cfg.git"
 reference = "master"
 resolved_reference = "fee01c6d8c36f33501b71ff0e84b342829968ddf"
 
@@ -328,7 +328,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b4fc60b6491812f7bc01209268729c142729058ee1745ffefab3f86eae3c0501"
+content-hash = "603639ad2087ca098decb8a495eb39071b36ad1873e442c13a7a561d4e23c1f1"
 
 [metadata.files]
 attrs = [
