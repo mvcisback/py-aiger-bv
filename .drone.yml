@@ -10,4 +10,4 @@ steps:
   commands:
   - pip install poetry
   - poetry install
-  - poetry run pytest --flake8 --cov=aigerbv -nauto
+  - poetry run pytest -nauto
