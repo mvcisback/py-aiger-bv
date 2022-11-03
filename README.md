@@ -6,7 +6,6 @@
 
 
 [![Build Status](https://cloud.drone.io/api/badges/mvcisback/py-aiger-bv/status.svg)](https://cloud.drone.io/mvcisback/py-aiger-bv)
-[![codecov](https://codecov.io/gh/mvcisback/py-aiger-bv/branch/master/graph/badge.svg)](https://codecov.io/gh/mvcisback/py-aiger-bv)
 [![Docs](https://img.shields.io/badge/API-link-color)](https://mvcisback.github.io/py-aiger-bv)
 [![PyPI version](https://badge.fury.io/py/py-aiger-bv.svg)](https://badge.fury.io/py/py-aiger-bv)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
